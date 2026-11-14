@@ -25,15 +25,26 @@ what you record.
 | 3.7 V, 7.4 V, 1.2 V | `nominal_voltage` | Battery nominal voltage only. Never a USB, output or charging voltage such as 5 V / 9 V / 12 V on a power bank. |
 | 5200 mAh, 5.2 Ah | `capacity` | The labeled cell or pack capacity. |
 | 38.48 Wh | `energy` | Only if a Wh figure is shown. Never work it out. |
-| "Rated capacity", "usable output" on a power bank | `output_capacity` | Recorded, never compared. |
+| "Rated capacity", "usable output" on a power bank | `output_capacity` | Only when the listing labels a figure this way. Never a copy of `capacity`. Recorded, never compared. |
 | Weight | `weight` with `kind` | See below. |
-| L x W x H | `dimensions` with `kind` | For diameter x length, repeat the diameter as length and width. |
+| L x W x H | `dimensions` with `kind` | All three sides must be stated. For diameter x length, repeat the diameter as length and width. See "Partial measurements". |
 | "10-year shelf life" | `shelf_life` | |
 | Codes printed on the product: R6, LR03 | `printed_codes` | See "Images" below. |
-| Wording printed on the product: Heavy Duty | `printed_terms` | Same. |
+| Grade wording printed on a cell: Heavy Duty | `printed_terms` | Grade wording only. See "Images" below. |
 
 `product_type`: `loose_cell` for single cells sold loose, `battery_pack` for assembled
 packs such as hobby LiPo packs, `power_bank` for USB power banks, otherwise `unknown`.
+
+## Partial measurements
+
+A listing often gives one measurement only, such as "just 0.63 inches thick" or "0.39-inch
+slim". That is not `dimensions`. Leave `dimensions` out, and never repeat the one number
+for the other sides: a made-up box gives a made-up result. Record the weight if it is
+stated; the weight check does not need dimensions.
+
+A multipack of separate items (a 2-pack of power banks, a 4-pack of AAA cells) is rated
+per item. Record the capacity, weight and dimensions of one item, and leave `cell_count`
+out or set it to 1. `cell_count` is for cells wired together inside one pack, such as 2S.
 
 ## Units
 
@@ -63,6 +74,8 @@ The listing may arrive as a screenshot of a product page or a photo of the produ
   pack label is evidence: designation codes such as R6, R03, LR6, LR03, FR6, HR6, 6F22
   go in `printed_codes`, one entry per code, and grade wording such as "Heavy Duty" or
   "Super Heavy Duty" goes in `printed_terms`. Use `found_in: "product photo"`.
+- Other print on the product is not a claim: slogans, product-line names, brand words,
+  and words such as "Power Bank", "Ultra", "Max" or "Charge". Do not record it anywhere.
 - Record the chemistry the title or description states in `chemistry`, even if the
   codes on the product suggest another. Do not reconcile them; a check compares them.
 - Do not guess characters you cannot read. Leave the claim out, or record it with low

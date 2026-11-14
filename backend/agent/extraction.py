@@ -133,7 +133,9 @@ class StatedWeight(_Stated):
 
 
 class StatedDimensions(_Stated):
-    """Outer dimensions. For a cylinder given as diameter x length, repeat the diameter."""
+    """Outer dimensions, only when the listing gives all three sides (or a diameter and a length,
+    in which case the diameter is repeated). A single measurement such as a thickness is not
+    dimensions: leave this field out rather than repeating one number."""
 
     length: float = Field(gt=0)
     width: float = Field(gt=0)
@@ -169,17 +171,28 @@ class ListingExtraction(BaseModel):
     capacity: StatedCapacity | None = Field(default=None, description="Labeled cell or pack capacity.")
     energy: StatedEnergy | None = Field(default=None, description="Energy as printed. Only if a Wh figure is shown.")
     output_capacity: StatedCapacity | None = Field(
-        default=None, description="Rated or usable output capacity of a power bank."
+        default=None,
+        description=(
+            "Only a figure the listing labels as rated, usable or output capacity of a power bank. "
+            "Never a copy of the capacity."
+        ),
     )
     weight: StatedWeight | None = None
-    dimensions: StatedDimensions | None = None
+    dimensions: StatedDimensions | None = Field(
+        default=None,
+        description="Leave out unless all three sides are stated. One measurement alone (a thickness) is not dimensions.",
+    )
     shelf_life: StatedShelfLife | None = None
     printed_codes: list[StatedText] = Field(
         default_factory=list,
         description="Designation codes printed on the product itself, e.g. R6, LR6, R03, LR03, FR6, HR6. One entry per code.",
     )
     printed_terms: list[StatedText] = Field(
-        default_factory=list, description="Grade wording printed on the product itself, e.g. Heavy Duty, Super Heavy Duty."
+        default_factory=list,
+        description=(
+            "Grade wording printed on a cell, e.g. Heavy Duty, Super Heavy Duty. Not slogans, "
+            "product-line names, brand words, or words such as Power Bank, Ultra or Max."
+        ),
     )
 
     def to_claims(self) -> Claims:
