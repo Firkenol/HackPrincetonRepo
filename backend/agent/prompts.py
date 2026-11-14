@@ -123,8 +123,12 @@ SUBAGENT_DESCRIPTIONS = {
 }
 
 # What the orchestrator is sent. It names the kind of input and nothing else.
-ORCHESTRATOR_USER_TEXT = "A battery listing was submitted as pasted text. Check it."
-ORCHESTRATOR_USER_IMAGE = "A battery listing was submitted as an image. Check it."
+_START = (
+    " The listing reader already has it; you do not need it and must not ask for it. "
+    "Start now: call the task tool with subagent_type \"listing-reader\"."
+)
+ORCHESTRATOR_USER_TEXT = "A battery listing was submitted as pasted text." + _START
+ORCHESTRATOR_USER_IMAGE = "A battery listing was submitted as an image." + _START
 
 # What the listing reader is sent, straight from the input, after its task message.
 USER_TEMPLATE = """\
