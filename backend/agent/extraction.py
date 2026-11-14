@@ -2,14 +2,15 @@
 
 The model reports each value in the unit the listing or photo shows. to_claims()
 converts to the fixed units of claimcheck.models.Claims in Python, so the model never
-converts a unit. There is no field for a seller, store or brand name.
+converts a unit. There is no field for a seller, store or brand name, and no text
+field may carry the word "verified", which the tool never says about a listing.
 """
 
 from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from agent import units
 from claimcheck.models import (
@@ -23,6 +24,11 @@ from claimcheck.models import (
     TextClaim,
     WeightClaim,
 )
+
+
+# The tool never describes a listing with this word, so it is kept out of the text a
+# report quotes as well.
+NOT_SAID = "verified"
 
 
 class _Stated(BaseModel):
@@ -49,6 +55,14 @@ class _Stated(BaseModel):
             "small, blurred, partly hidden or ambiguous."
         ),
     )
+
+    @model_validator(mode="after")
+    def _no_verified_wording(self):
+        for name in ("found_in", "quote", "value"):
+            text = getattr(self, name, None)
+            if isinstance(text, str) and NOT_SAID in text.lower():
+                raise ValueError(f"Leave the word '{NOT_SAID}' out of {name}. Give only the characters that state the claim.")
+        return self
 
     def _provenance(self) -> dict:
         return {"found_in": self.found_in, "quote": self.quote, "confidence": self.confidence}
