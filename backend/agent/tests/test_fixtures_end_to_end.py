@@ -1,4 +1,4 @@
-"""All nine fixtures through run_listing, from text and from an image. Scripted model, no network.
+"""All fixtures through run_listing, from text and from an image. Scripted model, no network.
 
 The scripted model stands in for the four agents: it makes the tool calls a real
 model is asked to make, with the claims a correct reading of the fixture gives. What
@@ -51,6 +51,18 @@ EXPECTED = {
     7: ("No red flags", "no action needed"),
     8: ("No red flags", "no action needed"),
     9: ("No red flags", "no action needed"),
+    # 10 to 20: real listings added 2026-11-14 (fixtures/README.md)
+    10: ("No checkable claim", "no action needed"),
+    11: ("No checkable claim", "needs human review"),
+    12: ("No checkable claim", "needs human review"),
+    13: ("No checkable claim", "needs human review"),
+    14: ("No checkable claim", "no action needed"),
+    15: ("No checkable claim", "no action needed"),
+    16: ("No red flags", "no action needed"),
+    17: ("No red flags", "no action needed"),
+    18: ("No red flags", "no action needed"),
+    19: ("No red flags", "no action needed"),
+    20: ("No red flags", "no action needed"),
 }
 
 
@@ -73,8 +85,8 @@ def run(fixture_id: int, source: str):
     return model, events, report
 
 
-def test_there_are_nine_fixtures_and_each_has_a_text_version():
-    assert FIXTURE_IDS == list(range(1, 10))
+def test_there_are_twenty_fixtures_and_each_has_a_text_version():
+    assert FIXTURE_IDS == list(range(1, 21))
     assert sorted(LISTING_TEXT) == FIXTURE_IDS
     assert sorted(EXPECTED) == FIXTURE_IDS
 

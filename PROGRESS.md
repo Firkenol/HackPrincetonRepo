@@ -107,8 +107,38 @@ Open:
 6. **Text versions of fixtures 3, 4 and 5** include a line giving the print on the cells, as a person pasting the listing might type it.
 7. **A check tool that raises ends the run with the generic `error` event.** Nothing was changed to make this so; the tests now pin it.
 
+## Fixtures added from real screenshots (2026-11-14)
+
+Twelve listing screenshots supplied by the project owner became fixtures 8, 9 and 10 to 20
+(`fixtures/README.md` has the map). Seller names, store links and the delivery address
+were covered before the files were committed; product brand markings remain. For each:
+hand-entered claims and expected verdict in `backend/tests/fixtures_data.py`, a text
+version in `backend/agent/tests/listings.py` and `fixtures/fixture_NN.txt`, an expected report in
+`fixtures/expected/`. Branch `fixtures-from-screenshots`, based on `console` (the tip of
+phase-3-image and phase-4-subagents); the console tests that assumed nine fixtures now cover twenty.
+All 20 fixtures pass the check tests and the scripted-model agent tests. There is no
+training step: the model is a hosted one and fine-tuning is out of scope; these are the
+acceptance set for Phase 3 image extraction.
+
+Two things to decide:
+
+1. **Honest alkaline listings route to human review because of shelf life.** Fixtures 11,
+   12 and 13 state 7, 10 and 12-year shelf lives. `constants.py` deliberately has no alkaline
+   shelf-life limit, so check 6 is not assessed, and the routing rule for "a numeric claim
+   that could not be tested" sends them to a person. Three of five honest alkaline listings
+   in this batch go that way. Options: treat a shelf-life claim as not counting toward
+   "missing data" when the chemistry has no reference on file (change in `verdict.py`,
+   which is not frozen), or add a cited alkaline shelf-life ceiling. The expected files
+   record the current behaviour; change the fixtures' routing if the policy changes.
+2. (Fixed 2026-11-14) `test_lookup_form_factor_reads_the_constants_file` failed about half
+   the time: it unpacked two parallel tool results in a fixed order. It now matches them by
+   the `known` field.
+
 ## Environment notes
 
+- macOS, Python 3.13.5 (Homebrew) also works. The venv is `backend/.venv` (git-ignored);
+  Pillow was installed into it for the one-off screenshot redaction and is not a project
+  dependency.
 - Python 3.14 works. No 3.12 environment was needed.
 - Windows Smart App Control blocked the native builds of `xxhash` 4.1.0 and `ormsgpack` 1.13.1. `requirements.txt` pins `xxhash` 4.0.2 and `ormsgpack` 1.13.0, which load.
 - boto3 reads the region from `AWS_DEFAULT_REGION`; `langchain-aws` also accepts `AWS_REGION`, which is what `.env.example` uses.

@@ -1,7 +1,9 @@
-"""The nine test fixtures as hand-entered claims, with expected verdicts.
+"""The test fixtures as hand-entered claims, with expected verdicts.
 
-Later phases reuse this list: Phase 2 adds the text version of each listing, and
-Phase 3 the screenshots. Keep ids stable.
+Fixtures 1 to 9 are the nine from SPEC.md. Fixtures 10 to 20 were added on
+2026-11-14 from real listing screenshots stored in fixtures/ (see fixtures/README.md
+for which screenshot belongs to which fixture). Later phases reuse this list: Phase 2
+adds the text version of each listing, and Phase 3 the screenshots. Keep ids stable.
 """
 
 from __future__ import annotations
@@ -15,6 +17,7 @@ from claimcheck.models import (
     DimensionsClaim,
     MeasurementKind,
     NumberClaim,
+    ProductType,
     Routing,
     TextClaim,
     Verdict,
@@ -48,6 +51,20 @@ def _sizes(*codes: str) -> list[TextClaim]:
 
 def _printed(*values: str) -> list[TextClaim]:
     return [TextClaim(value=value, found_in="product photo") for value in values]
+
+
+def _pouch(volts: float, mah: float, wh: float, dims: tuple[float, float, float], grams: float, cells: int | None = None) -> Claims:
+    """A single-cell or multi-cell lithium pouch pack as listed in bullet points, label values from the photo."""
+    return Claims(
+        product_type=ProductType.BATTERY_PACK,
+        chemistry=_chem(Chemistry.LI_ION),
+        cell_count=_num(cells) if cells else None,
+        nominal_voltage_v=_num(volts),
+        capacity_mah=_num(mah),
+        energy_wh=_num(wh, "product photo"),
+        dimensions=DimensionsClaim(length_mm=dims[0], width_mm=dims[1], height_mm=dims[2], kind=PRODUCT, found_in="bullet points"),
+        weight=WeightClaim(value_g=grams, kind=PRODUCT, found_in="bullet points"),
+    )
 
 
 def _lipo(cells: int, volts: float, mah: float, wh: float, dims: tuple[float, float, float] | None, grams: float | None) -> Claims:
@@ -140,6 +157,106 @@ FIXTURES: list[Fixture] = [
         9,
         "2S LiPo, 7.4 V, 5200 mAh, 38.48 Wh, weight and dimensions not visible",
         _lipo(2, 7.4, 5200, 38.48, None, None),
+        Verdict.NO_RED_FLAGS,
+        Routing.NO_ACTION_NEEDED,
+    ),
+    # ---- added 2026-11-14 from screenshots of real listings (fixtures/README.md)
+    Fixture(
+        10,
+        "AAA alkaline 4-pack, 1.5 V, cells printed LR03, no capacity",
+        Claims(
+            chemistry=_chem(Chemistry.ALKALINE),
+            form_factors=_sizes("AAA"),
+            nominal_voltage_v=_num(1.5),
+            printed_codes=_printed("LR03"),
+        ),
+        Verdict.NO_CHECKABLE_CLAIM,
+        Routing.NO_ACTION_NEEDED,
+    ),
+    Fixture(
+        11,
+        "9 V alkaline 4-pack, 6LR61, 7-year shelf life",
+        Claims(
+            chemistry=_chem(Chemistry.ALKALINE),
+            form_factors=_sizes("9V"),
+            nominal_voltage_v=_num(9),
+            shelf_life_years=_num(7, "bullet points"),
+            printed_codes=_printed("6LR61"),
+        ),
+        Verdict.NO_CHECKABLE_CLAIM,
+        Routing.NEEDS_HUMAN_REVIEW,
+    ),
+    Fixture(
+        12,
+        "AAA alkaline 4-pack, 12-year shelf life",
+        Claims(chemistry=_chem(Chemistry.ALKALINE), form_factors=_sizes("AAA"), shelf_life_years=_num(12, "product photo")),
+        Verdict.NO_CHECKABLE_CLAIM,
+        Routing.NEEDS_HUMAN_REVIEW,
+    ),
+    Fixture(
+        13,
+        "AAA alkaline 8-pack, 1.5 V, 10-year shelf life, cells printed LR03",
+        Claims(
+            chemistry=_chem(Chemistry.ALKALINE),
+            form_factors=_sizes("AAA"),
+            nominal_voltage_v=_num(1.5),
+            shelf_life_years=_num(10),
+            printed_codes=_printed("LR03"),
+        ),
+        Verdict.NO_CHECKABLE_CLAIM,
+        Routing.NEEDS_HUMAN_REVIEW,
+    ),
+    Fixture(
+        14,
+        "6 V spring-terminal lantern battery, Super Heavy Duty, no chemistry or capacity stated",
+        Claims(nominal_voltage_v=_num(6), printed_terms=_printed("Super Heavy Duty")),
+        Verdict.NO_CHECKABLE_CLAIM,
+        Routing.NO_ACTION_NEEDED,
+    ),
+    Fixture(
+        15,
+        "AAA carbon-zinc 4-pack, 1.5 V, packaging printed Super Heavy Duty",
+        Claims(
+            chemistry=ChemistryClaim(value=Chemistry.ZINC_CARBON, found_in="product photo"),
+            form_factors=_sizes("AAA"),
+            nominal_voltage_v=_num(1.5, "spec table"),
+            printed_terms=_printed("Super Heavy Duty"),
+        ),
+        Verdict.NO_CHECKABLE_CLAIM,
+        Routing.NO_ACTION_NEEDED,
+    ),
+    Fixture(
+        16,
+        "1S LiPo pouch, 3.7 V, 2000 mAh, 7.4 Wh, 34 x 10 x 50 mm, 35 g",
+        _pouch(3.7, 2000, 7.4, (34, 10, 50), 35, cells=1),
+        Verdict.NO_RED_FLAGS,
+        Routing.NO_ACTION_NEEDED,
+    ),
+    Fixture(
+        17,
+        "3S LiPo, 11.1 V, 1300 mAh, 14.4 Wh, 72 x 36 x 23 mm, 119 g",
+        _pouch(11.1, 1300, 14.4, (72, 36, 23), 119, cells=3),
+        Verdict.NO_RED_FLAGS,
+        Routing.NO_ACTION_NEEDED,
+    ),
+    Fixture(
+        18,
+        "LiPo pouch, 3.7 V, 3000 mAh, 11.1 Wh, 36 x 10 x 65 mm, 49 g",
+        _pouch(3.7, 3000, 11.1, (36, 10, 65), 49),
+        Verdict.NO_RED_FLAGS,
+        Routing.NO_ACTION_NEEDED,
+    ),
+    Fixture(
+        19,
+        "LiPo pouch 4-pack, 3.7 V, 1000 mAh, 3.7 Wh, 30 x 8 x 42 mm, 18 g each",
+        _pouch(3.7, 1000, 3.7, (30, 8, 42), 18),
+        Verdict.NO_RED_FLAGS,
+        Routing.NO_ACTION_NEEDED,
+    ),
+    Fixture(
+        20,
+        "LiPo pouch, 3.7 V, 1100 mAh typical, 4.1 Wh, 34.5 x 51 x 6.3 mm, 22 g",
+        _pouch(3.7, 1100, 4.1, (34.5, 51, 6.3), 22),
         Verdict.NO_RED_FLAGS,
         Routing.NO_ACTION_NEEDED,
     ),

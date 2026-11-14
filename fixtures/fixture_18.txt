@@ -1,0 +1,8 @@
+3.7V Lipo Battery 3000mAh Rechargeable Lithium Polymer Batteries Pack with Wire JST1.25mm Connector Integrated Protection Circuit for Arduino ESP32 Development Board
+
+About this item
+- Battery Specifications: Dimensions: 36*10*65mm/ 1.42*0.39*2.56inch; Battery Weight(Single): 49g; Capacity: 3000mAh; Plug: JST1.25; Discharge Rate: 1C.
+- Reliable Performance: Our 3.7 volt rechargeable lithium polymer battery provides reliable performance with long life. Each lipo battery comes equipped with a built-in protection board.
+- Storage & Usage: When storing lithium polymer batteries for a long time, please keep the battery in a state of 40%-60%.
+
+Printed on the pack: LP103665; 3000mAh; 3.7V; 11.1Wh; Rechargeable Lipo Battery

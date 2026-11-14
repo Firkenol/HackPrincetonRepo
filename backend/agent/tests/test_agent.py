@@ -34,6 +34,7 @@ from tests.fixtures_data import BY_ID
 
 EXPECTED_DIR = Path(__file__).resolve().parents[3] / "fixtures" / "expected"
 PHASE_2_FIXTURES = [1, 2, 6, 7, 8, 9]
+TEXT_FIXTURES = [*PHASE_2_FIXTURES, *range(10, 21)]  # every fixture that has a text version
 
 
 def drain(generator):
@@ -54,7 +55,7 @@ def run(fixture_id: int, script=None):
 # ------------------------------------------------------------------ acceptance
 
 
-@pytest.mark.parametrize("fixture_id", PHASE_2_FIXTURES)
+@pytest.mark.parametrize("fixture_id", TEXT_FIXTURES)
 def test_fixture_text_gives_expected_verdict_and_routing(fixture_id):
     fixture = BY_ID[fixture_id]
     _, events, report = run(fixture_id)
@@ -221,7 +222,9 @@ def test_lookup_form_factor_reads_the_constants_file():
         say(),
     ]
     _, events, _ = run(1, script)
-    found, missing = [e.result for e in events if e.type == "tool_result" and e.tool == LOOKUP_FORM_FACTOR]
+    # the two lookups run in parallel, so their results may arrive in either order
+    by_known = {e.result["known"]: e.result for e in events if e.type == "tool_result" and e.tool == LOOKUP_FORM_FACTOR}
+    found, missing = by_known[True], by_known[False]
     assert found["known"] is True and found["max_diameter_mm"] == 18.5 and found["max_height_mm"] == 65.3
     assert missing["known"] is False
 
