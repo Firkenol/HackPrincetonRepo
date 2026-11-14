@@ -5,7 +5,7 @@ Read this first. Update it before stopping. Phases are the build order in SPEC.m
 ## Phases
 
 - [x] **1. Check functions and constants file with unit tests.** Done in commit `02da030` (contract frozen in `64ae171`).
-- [ ] **2. deepagents agent with tools, text input from the command line.** Built and tested with a scripted fake model on branch `phase-2-agent`. Still open: the live run and the `claimcheck.run_listing` hook (see below).
+- [x] **2. deepagents agent with tools, text input from the command line.** Merged to main on 2026-11-14 (branch `phase-2-agent`). Passes with a scripted fake model; the live run on a real model is still open (see below).
 - [ ] **3. Image input.**
 - [ ] **4. Subagents, skills, evidence report.**
 - [ ] **5. Web UI and batch mode.**
@@ -24,12 +24,12 @@ Done:
 
 Open:
 
-1. **`claimcheck.run_listing` still raises `NotImplementedError`.** The API imports that one. Wiring it to `agent.run_listing` means editing `backend/claimcheck/pipeline.py` and removing `test_run_listing_is_reserved_for_phase_2` from `backend/tests/test_contract.py`. Both are outside the Phase 2 scope, so they wait for the owner's decision.
-2. **Live acceptance not run.** No model key is set. SPEC's Phase 2 acceptance (fixtures 1, 2, 6 to 9 end to end on a real model, Bedrock for the Amazon track) is covered by `agent/tests/test_live.py`, which skips until `MODEL_PROVIDER` and `MODEL_ID` are set. The prompt and skills have not been tried on a real model yet.
-3. **Agent folder.** CONTRACT.md says `backend/claimcheck/agent/`; the agent is in `backend/agent/` as instructed for this phase. CONTRACT.md needs a one-line update.
-4. **Events are all labelled `orchestrator`.** The three subagent names arrive in Phase 4.
-5. **`error-event-replay` branch** (commit `0cda500`) is local only: not merged, not pushed. The agent follows the same convention (error event, then `None`).
-6. `backend/pyproject.toml` `testpaths` now includes `agent/tests`. `packs-docs` edits the same line, so expect a small merge conflict.
+1. **Live acceptance not run.** SPEC's Phase 2 acceptance (fixtures 1, 2, 6 to 9 end to end on a real model, Bedrock for the Amazon track) is covered by `agent/tests/test_live.py`, which skips until `MODEL_PROVIDER` and `MODEL_ID` are set. A local `.env` (git-ignored) holds an AWS access key id, but the secret access key, region and model id are still missing, and `langchain-aws` is not installed or pinned yet. The prompt and skills have not been tried on a real model.
+2. **Return type on failure.** `claimcheck.run_listing` now runs the agent (the import is inside the function so `import claimcheck` stays light). When a run ends in `error` it returns `None`, but the frozen signature still says `EvidenceReport`. Changing the annotation to `EvidenceReport | None` needs the owner's approval.
+3. **Events are all labelled `orchestrator`.** The three subagent names arrive in Phase 4.
+4. **`error-event-replay` branch** (commit `0cda500`) is local only: not merged, not pushed, waiting for the owner's answer. It makes `replay_claims` end with an `error` event and return `None` when a check raises, and adds a test. It edits `pipeline.py` and `test_contract.py`, which main has since changed, so merging it will need a small conflict fix.
+5. `backend/pyproject.toml` `testpaths` now includes `agent/tests`. `packs-docs` edits the same line, so expect a small merge conflict.
+6. The `api` and `web` branches are not merged; nothing on main depends on them.
 
 ## Environment notes
 

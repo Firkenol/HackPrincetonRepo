@@ -269,3 +269,27 @@ def test_load_model_requires_both_variables(monkeypatch):
     assert not model_module.is_configured()
     with pytest.raises(model_module.ModelNotConfigured):
         model_module.load_model()
+
+
+# ------------------------------------------------------------- contract entry point
+
+
+def test_claimcheck_run_listing_runs_the_agent(monkeypatch):
+    import agent.runner as runner
+    import claimcheck
+
+    model = ScriptedChatModel(script=full_script(BY_ID[1].claims))
+    monkeypatch.setattr(runner, "load_model", lambda: model)
+
+    events, report = drain(claimcheck.run_listing(LISTING_TEXT[1]))
+    assert isinstance(events[-1], FinalReportEvent) and events[-1].report == report
+    assert report.verdict is BY_ID[1].verdict and report.routing is BY_ID[1].routing
+
+
+def test_claimcheck_run_listing_ends_with_an_error_event_when_no_model_is_set(monkeypatch):
+    import claimcheck
+
+    monkeypatch.delenv("MODEL_PROVIDER", raising=False)
+    monkeypatch.delenv("MODEL_ID", raising=False)
+    events, report = drain(claimcheck.run_listing(LISTING_TEXT[1]))
+    _only_error(events, report, MSG_NO_MODEL)

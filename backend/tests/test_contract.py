@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from claimcheck import evaluate, replay_claims, run_listing
+from claimcheck import evaluate, replay_claims
 from claimcheck.events import STREAM_EVENT_ADAPTER, ErrorEvent, FinalReportEvent, to_sse
 from claimcheck.models import EvidenceReport
 from tests.fixtures_data import BY_ID, FIXTURES
@@ -60,7 +60,3 @@ def test_sse_framing():
     frame = to_sse(event)
     assert frame.startswith("event: error\ndata: {") and frame.endswith("}\n\n")
 
-
-def test_run_listing_is_reserved_for_phase_2():
-    with pytest.raises(NotImplementedError):
-        run_listing("18650 12000mAh 3.7V")
