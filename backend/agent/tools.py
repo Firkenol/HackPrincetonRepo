@@ -1,12 +1,19 @@
 """The agent's tools. Every number in a report comes from here, never from the model.
 
-The model's only job is to read the listing, text or image, into a ListingExtraction
-and pass it to record_claims, which converts units in Python and stores the contract's
-Claims object. The check tools take no arguments: they run the Phase 1 check
-functions on the recorded claims, so the model cannot alter a value between
-extraction and arithmetic.
+Each subagent gets only its own tools:
 
-Tools are built per run around a RunState, which holds what that run recorded.
+- listing-reader   record_claims. It reads the listing, text or image, into a
+                   ListingExtraction; the tool converts units in Python and stores
+                   the contract's Claims object.
+- physics-checker  lookup_form_factor and the six check tools. The checks take no
+                   arguments: they run the Phase 1 check functions on the recorded
+                   claims, so no model can alter a value between extraction and
+                   arithmetic.
+- report-writer    assemble_report, which builds the report in Python.
+
+Tools are built per run around a RunState, which holds what that run recorded. The
+three subagents share one RunState; that is how claims pass from one to the next
+without any model copying them.
 """
 
 from __future__ import annotations
@@ -17,6 +24,7 @@ from dataclasses import dataclass, field
 from langchain_core.tools import BaseTool, StructuredTool, ToolException
 
 from agent.extraction import ListingExtraction
+from agent.prompts import LISTING_READER, PHYSICS_CHECKER, REPORT_WRITER
 from claimcheck import constants
 from claimcheck.checks import ALL_CHECKS
 from claimcheck.models import CheckResult, Claims, EvidenceReport
@@ -27,6 +35,13 @@ LOOKUP_FORM_FACTOR = "lookup_form_factor"
 ASSEMBLE_REPORT = "assemble_report"
 CHECK_TOOL_NAMES = tuple(check.__name__ for check in ALL_CHECKS)
 TOOL_NAMES = (RECORD_CLAIMS, LOOKUP_FORM_FACTOR, *CHECK_TOOL_NAMES, ASSEMBLE_REPORT)
+
+# Which subagent owns which tools. No tool belongs to two subagents.
+TOOLS_BY_AGENT = {
+    LISTING_READER: (RECORD_CLAIMS,),
+    PHYSICS_CHECKER: (LOOKUP_FORM_FACTOR, *CHECK_TOOL_NAMES),
+    REPORT_WRITER: (ASSEMBLE_REPORT,),
+}
 
 _CHECK_DESCRIPTIONS = {
     "check_label_consistency": "Check 1. Tests whether the stated Wh equals stated V x Ah.",
@@ -108,7 +123,7 @@ def build_tools(state: RunState) -> list[BaseTool]:
             record_claims,
             name=RECORD_CLAIMS,
             description=(
-                "Save what the listing text or image states. Call this once, before any check. Give each value "
+                "Save what the listing text or image states. Call this once. Give each value "
                 "in the unit shown; conversion happens inside the tool. Leave out every field the listing does "
                 "not state. Never include a seller, store or brand name. Calling it again replaces the saved "
                 "claims. Returns the claims as stored, in standard units."
@@ -127,8 +142,14 @@ def build_tools(state: RunState) -> list[BaseTool]:
             name=ASSEMBLE_REPORT,
             description=(
                 "Build the evidence report from the saved claims: verdict, routing and all six checks. "
-                "Takes no arguments. Call it last."
+                "Takes no arguments. Call it once."
             ),
             handle_tool_error=True,
         ),
     ]
+
+
+def build_toolsets(state: RunState) -> dict[str, list[BaseTool]]:
+    """The tools of one run, grouped by the subagent that may call them."""
+    by_name = {tool.name: tool for tool in build_tools(state)}
+    return {agent: [by_name[name] for name in names] for agent, names in TOOLS_BY_AGENT.items()}

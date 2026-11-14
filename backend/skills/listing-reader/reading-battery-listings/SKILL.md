@@ -1,6 +1,6 @@
 ---
 name: reading-battery-listings
-description: Use when turning a battery listing, pasted text or an image (screenshot or product photo), into the claims for record_claims. Covers which field each stated value belongs in, units, codes printed on the product, confidence, package versus product measurements, and what to leave out.
+description: Use when reading a battery listing, pasted text or an image (screenshot or product photo), into the claims for record_claims. Covers which field each stated value belongs in, units, codes printed on the product, confidence, package versus product measurements, and what to leave out.
 ---
 
 # Reading a battery listing into claims

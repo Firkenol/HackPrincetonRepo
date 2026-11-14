@@ -11,7 +11,17 @@ import pytest
 from agent import run_listing, units
 from agent.extraction import ListingExtraction
 from agent.images import MAX_IMAGE_BYTES
-from agent.tests.fake_model import ScriptedChatModel, as_extraction, calls, full_script
+from agent.tests.fake_model import (
+    ScriptedChatModel,
+    as_extraction,
+    calls,
+    checker_turns,
+    full_script,
+    reader_turns,
+    record,
+    say,
+    writer_turns,
+)
 from agent.tools import RECORD_CLAIMS
 from claimcheck.events import ErrorEvent, FinalReportEvent
 from claimcheck.models import Claims
@@ -40,10 +50,13 @@ def run_image(image, claims: Claims | None = None, script=None):
     return model, events, report
 
 
-def script_for(extraction: dict):
-    script = full_script(Claims())
-    script[0] = calls((RECORD_CLAIMS, {"claims": extraction}))
-    return script
+def script_for(*reader_calls):
+    """A full run in which the listing reader makes the given calls, in order."""
+    return [*reader_turns(*reader_calls), *checker_turns(), *writer_turns(), say()]
+
+
+def recording(extraction: dict):
+    return calls((RECORD_CLAIMS, {"claims": extraction}))
 
 
 # ------------------------------------------------------------- image goes to the model
@@ -77,8 +90,12 @@ def test_photo_dependent_fixtures_give_expected_verdict_and_routing(fixture_id):
 def test_model_receives_the_image_as_a_standard_image_block(data, mime_type):
     model, events, _ = run_image(data, BY_ID[3].claims)
 
-    user_message = model.prompts[0][-1]
+    # the listing reader gets the picture; the orchestrator is only told an image arrived
+    user_message = model.reader_prompts()[0][2]
     assert user_message.type == "human"
+    for prompt in model.orchestrator_prompts():
+        assert all(isinstance(m.content, str) for m in prompt if m.type == "human")
+        assert "image" in prompt[1].content
     text_block, image = user_message.content
     assert text_block["type"] == "text" and "image" in text_block["text"]
     assert image["type"] == "image" and image["mime_type"] == mime_type
@@ -90,7 +107,7 @@ def test_a_path_is_read_from_disk_and_typed_by_content_not_by_name(tmp_path):
     path = tmp_path / "screenshot.png"  # a JPEG behind a .png name
     path.write_bytes(JPEG)
     model, _, report = run_image(path, BY_ID[5].claims)
-    assert model.prompts[0][-1].content[1]["mime_type"] == "image/jpeg"
+    assert model.reader_prompts()[0][2].content[1]["mime_type"] == "image/jpeg"
     assert report.verdict is BY_ID[5].verdict
 
 
@@ -123,7 +140,7 @@ def test_low_confidence_on_a_violated_bound_is_not_auto_resolved():
 
 def test_confidence_and_found_in_are_required_for_every_claim():
     missing = {"capacity": {"value": 700, "unit": "mAh"}}
-    _, events, report = run_image(PNG, script=[calls((RECORD_CLAIMS, {"claims": missing})), *full_script(BY_ID[2].claims)])
+    _, events, report = run_image(PNG, script=script_for(recording(missing), record(BY_ID[2].claims)))
     first = next(e for e in events if e.type == "tool_result")
     assert first.ok is False
     assert report.claims == BY_ID[2].claims
@@ -145,7 +162,7 @@ STATED = {
 
 
 def test_values_are_converted_by_the_tool_not_by_the_model():
-    _, events, report = run_image(PNG, script=script_for(STATED))
+    _, events, report = run_image(PNG, script=script_for(recording(STATED)))
     claims = report.claims
 
     assert claims.nominal_voltage_v.value == 3.7
@@ -183,7 +200,7 @@ def test_conversion_factors():
 
 def test_an_unknown_unit_is_rejected_rather_than_guessed():
     bad = {"capacity": {"value": 12, "unit": "kWh", "found_in": "title", "confidence": 1}}
-    _, events, _ = run_image(PNG, script=[calls((RECORD_CLAIMS, {"claims": bad})), *full_script(BY_ID[2].claims)])
+    _, events, _ = run_image(PNG, script=script_for(recording(bad), record(BY_ID[2].claims)))
     assert next(e for e in events if e.type == "tool_result").ok is False
 
 
