@@ -1,0 +1,226 @@
+{
+  "schema_version": "1.0",
+  "claims": {
+    "product_type": "unknown",
+    "chemistry": {
+      "found_in": "title",
+      "quote": null,
+      "confidence": 1.0,
+      "value": "alkaline"
+    },
+    "form_factors": [
+      {
+        "found_in": "title",
+        "quote": null,
+        "confidence": 1.0,
+        "value": "AA"
+      },
+      {
+        "found_in": "title",
+        "quote": null,
+        "confidence": 1.0,
+        "value": "AAA"
+      }
+    ],
+    "cell_count": null,
+    "nominal_voltage_v": null,
+    "capacity_mah": null,
+    "energy_wh": null,
+    "output_capacity_mah": null,
+    "weight": null,
+    "dimensions": null,
+    "shelf_life_years": null,
+    "printed_codes": [
+      {
+        "found_in": "product photo",
+        "quote": null,
+        "confidence": 1.0,
+        "value": "R6"
+      },
+      {
+        "found_in": "product photo",
+        "quote": null,
+        "confidence": 1.0,
+        "value": "R03"
+      }
+    ],
+    "printed_terms": [
+      {
+        "found_in": "product photo",
+        "quote": null,
+        "confidence": 1.0,
+        "value": "Heavy Duty"
+      }
+    ]
+  },
+  "checks": [
+    {
+      "check_id": "label_consistency",
+      "title": "Label consistency (Wh = V × Ah)",
+      "status": "not_assessed",
+      "summary": "Not assessed. Needs Wh and capacity both stated; not stated: Wh, capacity.",
+      "inputs": [],
+      "formula": null,
+      "steps": [],
+      "constants": [],
+      "assumptions": [],
+      "notes": [],
+      "not_assessed_reason": "Needs Wh and capacity both stated; not stated: Wh, capacity."
+    },
+    {
+      "check_id": "form_factor_bound",
+      "title": "Form-factor bound",
+      "status": "not_assessed",
+      "summary": "Not assessed. No capacity or energy claim is stated.",
+      "inputs": [],
+      "formula": null,
+      "steps": [],
+      "constants": [],
+      "assumptions": [],
+      "notes": [],
+      "not_assessed_reason": "No capacity or energy claim is stated."
+    },
+    {
+      "check_id": "dimension_bound",
+      "title": "Dimension bound (Wh/L)",
+      "status": "not_assessed",
+      "summary": "Not assessed. Dimensions are not stated.",
+      "inputs": [],
+      "formula": null,
+      "steps": [],
+      "constants": [],
+      "assumptions": [],
+      "notes": [],
+      "not_assessed_reason": "Dimensions are not stated."
+    },
+    {
+      "check_id": "weight_bound",
+      "title": "Weight bound (Wh/kg)",
+      "status": "not_assessed",
+      "summary": "Not assessed. Weight is not stated.",
+      "inputs": [],
+      "formula": null,
+      "steps": [],
+      "constants": [],
+      "assumptions": [],
+      "notes": [],
+      "not_assessed_reason": "Weight is not stated."
+    },
+    {
+      "check_id": "label_contradiction",
+      "title": "Label contradiction",
+      "status": "flag",
+      "summary": "The listing states alkaline, but the product is marked R6 (IEC designation for zinc-carbon) and R03 (IEC designation for zinc-carbon) and 'Heavy Duty' (a carbon-zinc grade name). The listing text and the product markings disagree.",
+      "inputs": [
+        {
+          "name": "Stated chemistry",
+          "value": "alkaline",
+          "unit": "",
+          "origin": "claim",
+          "found_in": "title",
+          "confidence": 1.0
+        },
+        {
+          "name": "Printed code",
+          "value": "R6",
+          "unit": "",
+          "origin": "claim",
+          "found_in": "product photo",
+          "confidence": 1.0
+        },
+        {
+          "name": "Printed code",
+          "value": "R03",
+          "unit": "",
+          "origin": "claim",
+          "found_in": "product photo",
+          "confidence": 1.0
+        },
+        {
+          "name": "Printed wording",
+          "value": "Heavy Duty",
+          "unit": "",
+          "origin": "claim",
+          "found_in": "product photo",
+          "confidence": 1.0
+        }
+      ],
+      "formula": null,
+      "steps": [],
+      "constants": [
+        {
+          "key": "iec_r6_example",
+          "value": 6.0,
+          "unit": "IEC size",
+          "description": "R6 designates a zinc-carbon AA cell",
+          "source_title": "Eveready 1215 product datasheet, form no. 1215NA0218",
+          "source_publisher": "Energizer Brands, LLC",
+          "source_url": "https://data.energizer.com/pdfs/1215.pdf",
+          "locator": "Specifications block",
+          "quote": "AA SUPER HEAVY DUTY; Chemical System: Zinc-Manganese Dioxide (Zn/MnO2); Designation: ANSI-15D, IEC-R6; Battery Voltage: 1.5 Volts",
+          "accessed": "2026-11-13",
+          "note": "",
+          "hard_bound": true
+        },
+        {
+          "key": "iec_lr03_example",
+          "value": 3.0,
+          "unit": "IEC size",
+          "description": "LR03 designates an alkaline AAA cell",
+          "source_title": "Energizer EN92 product datasheet, form no. EN92EU0126",
+          "source_publisher": "Energizer Brands, LLC",
+          "source_url": "https://data.energizer.com/pdfs/EN92EU0126.pdf",
+          "locator": "Specifications block and industry standard dimensions drawing",
+          "quote": "Classification: Alkaline; Designation: ANSI-24A, IEC-LR03; Nominal Voltage: 1.5 volts; Shelf Life: 10 years at 21°C; 10.50 / 44.50 mm maximum",
+          "accessed": "2026-11-13",
+          "note": "",
+          "hard_bound": true
+        },
+        {
+          "key": "carbon_zinc_grades",
+          "value": 3.0,
+          "unit": "grades",
+          "description": "Grade names used for carbon-zinc cells",
+          "source_title": "Eveready Carbon Zinc Battery Handbook and Application Manual",
+          "source_publisher": "Energizer Brands, LLC, 2018",
+          "source_url": "https://data.energizer.com/pdfs/carbonzinc_appman.pdf",
+          "locator": "Page 1, introduction",
+          "quote": "Eveready Carbon Zinc batteries are marketed in three basic grades—General Purpose, Heavy Duty and Super Heavy Duty.",
+          "accessed": "2026-11-13",
+          "note": "",
+          "hard_bound": true
+        }
+      ],
+      "assumptions": [],
+      "notes": [
+        "IEC designations: no letter before R means zinc-carbon (R6, R03); L means alkaline (LR6, LR03); H means NiMH (HR6, HR03). Source: IEC 60086-1 letter codes."
+      ],
+      "not_assessed_reason": null
+    },
+    {
+      "check_id": "chemistry_mismatch",
+      "title": "Chemistry mismatch",
+      "status": "not_assessed",
+      "summary": "Not assessed. No shelf-life claim is stated.",
+      "inputs": [],
+      "formula": null,
+      "steps": [],
+      "constants": [],
+      "assumptions": [],
+      "notes": [],
+      "not_assessed_reason": "No shelf-life claim is stated."
+    }
+  ],
+  "verdict": "Flag",
+  "verdict_reason": "The listing states alkaline, but the product is marked R6 (IEC designation for zinc-carbon) and R03 (IEC designation for zinc-carbon) and 'Heavy Duty' (a carbon-zinc grade name). The listing text and the product markings disagree.",
+  "routing": "needs human review",
+  "routing_reason": "A contradiction or unusual claim needs a person's judgment.",
+  "assumptions": [],
+  "not_assessed": [
+    "Label consistency (Wh = V × Ah): Needs Wh and capacity both stated; not stated: Wh, capacity.",
+    "Form-factor bound: No capacity or energy claim is stated.",
+    "Dimension bound (Wh/L): Dimensions are not stated.",
+    "Weight bound (Wh/kg): Weight is not stated.",
+    "Chemistry mismatch: No shelf-life claim is stated."
+  ]
+}

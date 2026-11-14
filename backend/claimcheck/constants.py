@@ -36,6 +36,9 @@ class Constant:
     description: str
     source: Source
     note: str = ""
+    # False for a ceiling that lacks a primary source with comfortable headroom.
+    # Exceeding such a ceiling is a soft "Flag", never "Impossible".
+    hard_bound: bool = True
 
 
 # --------------------------------------------------------------------------- sources
@@ -169,6 +172,8 @@ _WIKI_LIION = Source(
 # ------------------------------------------------------------------- energy ceilings
 # Keys are Chemistry values from models.py. A chemistry with no entry has no vetted
 # best-case ceiling, and the bound checks report "not assessed" for it.
+# NiMH ceilings are soft (hard_bound=False) until a primary source with comfortable
+# headroom is found: honest products must never get a hard result.
 # Alkaline and zinc-carbon are deliberately absent: published figures for them are
 # delivered energy at about 1.2 V average, which is not comparable with label math
 # (1.5 V x mAh), so no published value is a safe ceiling.
@@ -189,9 +194,10 @@ MAX_WH_PER_L: dict[str, Constant] = {
         description="Top of the published volumetric energy density range for NiMH cells",
         source=_SNL_NIMH,
         note=(
-            "Secondary source. Headroom is thin: the highest AA rating from an established "
-            "brand (2850 mAh) uses about 98% of this ceiling."
+            "Secondary source with thin headroom over the highest AA ratings on sale, so "
+            "exceeding it is a soft flag, not a hard result."
         ),
+        hard_bound=False,
     ),
 }
 
@@ -210,7 +216,8 @@ MAX_WH_PER_KG: dict[str, Constant] = {
         unit="Wh/kg",
         description="Highest reported specific energy for a NiMH cell (research cells)",
         source=_WIKI_NIMH,
-        note="Secondary source. Commercial AA cells reach roughly 110 Wh/kg.",
+        note="Secondary source, so exceeding it is a soft flag, not a hard result.",
+        hard_bound=False,
     ),
 }
 

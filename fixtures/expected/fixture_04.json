@@ -1,0 +1,205 @@
+{
+  "schema_version": "1.0",
+  "claims": {
+    "product_type": "unknown",
+    "chemistry": {
+      "found_in": "title",
+      "quote": null,
+      "confidence": 1.0,
+      "value": "zinc-carbon"
+    },
+    "form_factors": [
+      {
+        "found_in": "title",
+        "quote": null,
+        "confidence": 1.0,
+        "value": "AA"
+      },
+      {
+        "found_in": "title",
+        "quote": null,
+        "confidence": 1.0,
+        "value": "AAA"
+      }
+    ],
+    "cell_count": null,
+    "nominal_voltage_v": null,
+    "capacity_mah": null,
+    "energy_wh": null,
+    "output_capacity_mah": null,
+    "weight": null,
+    "dimensions": null,
+    "shelf_life_years": {
+      "found_in": "title",
+      "quote": null,
+      "confidence": 1.0,
+      "value": 10.0
+    },
+    "printed_codes": [],
+    "printed_terms": []
+  },
+  "checks": [
+    {
+      "check_id": "label_consistency",
+      "title": "Label consistency (Wh = V × Ah)",
+      "status": "not_assessed",
+      "summary": "Not assessed. Needs Wh and capacity both stated; not stated: Wh, capacity.",
+      "inputs": [],
+      "formula": null,
+      "steps": [],
+      "constants": [],
+      "assumptions": [],
+      "notes": [],
+      "not_assessed_reason": "Needs Wh and capacity both stated; not stated: Wh, capacity."
+    },
+    {
+      "check_id": "form_factor_bound",
+      "title": "Form-factor bound",
+      "status": "not_assessed",
+      "summary": "Not assessed. No capacity or energy claim is stated.",
+      "inputs": [],
+      "formula": null,
+      "steps": [],
+      "constants": [],
+      "assumptions": [],
+      "notes": [],
+      "not_assessed_reason": "No capacity or energy claim is stated."
+    },
+    {
+      "check_id": "dimension_bound",
+      "title": "Dimension bound (Wh/L)",
+      "status": "not_assessed",
+      "summary": "Not assessed. Dimensions are not stated.",
+      "inputs": [],
+      "formula": null,
+      "steps": [],
+      "constants": [],
+      "assumptions": [],
+      "notes": [],
+      "not_assessed_reason": "Dimensions are not stated."
+    },
+    {
+      "check_id": "weight_bound",
+      "title": "Weight bound (Wh/kg)",
+      "status": "not_assessed",
+      "summary": "Not assessed. Weight is not stated.",
+      "inputs": [],
+      "formula": null,
+      "steps": [],
+      "constants": [],
+      "assumptions": [],
+      "notes": [],
+      "not_assessed_reason": "Weight is not stated."
+    },
+    {
+      "check_id": "label_contradiction",
+      "title": "Label contradiction",
+      "status": "not_assessed",
+      "summary": "Not assessed. No designation code or grade wording was read from the product itself.",
+      "inputs": [
+        {
+          "name": "Stated chemistry",
+          "value": "zinc-carbon",
+          "unit": "",
+          "origin": "claim",
+          "found_in": "title",
+          "confidence": 1.0
+        }
+      ],
+      "formula": null,
+      "steps": [],
+      "constants": [],
+      "assumptions": [],
+      "notes": [],
+      "not_assessed_reason": "No designation code or grade wording was read from the product itself."
+    },
+    {
+      "check_id": "chemistry_mismatch",
+      "title": "Chemistry mismatch",
+      "status": "flag",
+      "summary": "The listing claims a 10-year shelf life for a zinc-carbon product. Published storage data for this chemistry runs to 4 years (at 4 years the handbook reports 65-80% of fresh service retained). A shelf life of 10 years is what alkaline datasheets state. The claim is unusual for the stated chemistry.",
+      "inputs": [
+        {
+          "name": "Shelf life",
+          "value": 10.0,
+          "unit": "years",
+          "origin": "claim",
+          "found_in": "title",
+          "confidence": 1.0
+        },
+        {
+          "name": "Stated chemistry",
+          "value": "zinc-carbon",
+          "unit": "",
+          "origin": "claim",
+          "found_in": "title",
+          "confidence": 1.0
+        },
+        {
+          "name": "Longest storage period with published service retention for carbon-zinc cells",
+          "value": 4.0,
+          "unit": "years",
+          "origin": "constant",
+          "found_in": null,
+          "confidence": null
+        }
+      ],
+      "formula": null,
+      "steps": [
+        {
+          "label": "Comparison",
+          "formula": "claimed shelf life ≤ longest published storage period",
+          "substitution": "10 years > 4 years",
+          "result": 2.5,
+          "unit": "× the published period",
+          "text": "Comparison: 10 years > 4 years"
+        }
+      ],
+      "constants": [
+        {
+          "key": "zinc_carbon_max_published_storage_years",
+          "value": 4.0,
+          "unit": "years",
+          "description": "Longest storage period with published service retention for carbon-zinc cells",
+          "source_title": "Eveready Carbon Zinc Battery Handbook and Application Manual",
+          "source_publisher": "Energizer Brands, LLC, 2018",
+          "source_url": "https://data.energizer.com/pdfs/carbonzinc_appman.pdf",
+          "locator": "Page 8, table 'Service Maintenance (storage at 21°C)'",
+          "quote": "1 year 90-100%; 2 years 80-90%; 3 years 75-85%; 4 years 65-80%",
+          "accessed": "2026-11-13",
+          "note": "At 4 years the handbook reports 65-80% of fresh service retained.",
+          "hard_bound": true
+        },
+        {
+          "key": "alkaline_shelf_life_reference_years",
+          "value": 10.0,
+          "unit": "years",
+          "description": "Shelf life stated on an alkaline cell datasheet, for comparison",
+          "source_title": "Energizer EN92 product datasheet, form no. EN92EU0126",
+          "source_publisher": "Energizer Brands, LLC",
+          "source_url": "https://data.energizer.com/pdfs/EN92EU0126.pdf",
+          "locator": "Specifications block and industry standard dimensions drawing",
+          "quote": "Classification: Alkaline; Designation: ANSI-24A, IEC-LR03; Nominal Voltage: 1.5 volts; Shelf Life: 10 years at 21°C; 10.50 / 44.50 mm maximum",
+          "accessed": "2026-11-13",
+          "note": "",
+          "hard_bound": true
+        }
+      ],
+      "assumptions": [],
+      "notes": [],
+      "not_assessed_reason": null
+    }
+  ],
+  "verdict": "Flag",
+  "verdict_reason": "The listing claims a 10-year shelf life for a zinc-carbon product. Published storage data for this chemistry runs to 4 years (at 4 years the handbook reports 65-80% of fresh service retained). A shelf life of 10 years is what alkaline datasheets state. The claim is unusual for the stated chemistry.",
+  "routing": "needs human review",
+  "routing_reason": "A contradiction or unusual claim needs a person's judgment.",
+  "assumptions": [],
+  "not_assessed": [
+    "Label consistency (Wh = V × Ah): Needs Wh and capacity both stated; not stated: Wh, capacity.",
+    "Form-factor bound: No capacity or energy claim is stated.",
+    "Dimension bound (Wh/L): Dimensions are not stated.",
+    "Weight bound (Wh/kg): Weight is not stated.",
+    "Label contradiction: No designation code or grade wording was read from the product itself."
+  ]
+}

@@ -46,6 +46,10 @@ def test_ceilings_sit_above_real_products_quoted_in_the_same_sources():
 
 def test_verdict_and_routing_strings_are_exact():
     assert [v.value for v in Verdict] == ["Impossible", "Flag", "No red flags", "No checkable claim"]
-    assert [r.value for r in Routing] == ["auto-resolvable", "needs human review"]
-    assert policy.ROUTING_WHEN_NO_RED_FLAGS in {r.value for r in Routing}
-    assert policy.ROUTING_WHEN_NO_CHECKABLE_CLAIM in {r.value for r in Routing}
+    assert [r.value for r in Routing] == ["auto-resolvable", "needs human review", "no action needed"]
+    assert 0 < policy.MIN_CONFIDENCE <= 1
+
+
+def test_only_ceilings_with_a_primary_source_are_hard_bounds():
+    assert K.MAX_WH_PER_L["li-ion"].hard_bound and K.MAX_WH_PER_KG["li-ion"].hard_bound
+    assert not K.MAX_WH_PER_L["nimh"].hard_bound and not K.MAX_WH_PER_KG["nimh"].hard_bound

@@ -1,0 +1,278 @@
+{
+  "schema_version": "1.0",
+  "claims": {
+    "product_type": "unknown",
+    "chemistry": {
+      "found_in": "title",
+      "quote": null,
+      "confidence": 1.0,
+      "value": "nimh"
+    },
+    "form_factors": [
+      {
+        "found_in": "title",
+        "quote": null,
+        "confidence": 1.0,
+        "value": "AA"
+      }
+    ],
+    "cell_count": null,
+    "nominal_voltage_v": {
+      "found_in": "title",
+      "quote": null,
+      "confidence": 1.0,
+      "value": 1.2
+    },
+    "capacity_mah": {
+      "found_in": "title",
+      "quote": null,
+      "confidence": 1.0,
+      "value": 700.0
+    },
+    "energy_wh": null,
+    "output_capacity_mah": null,
+    "weight": null,
+    "dimensions": null,
+    "shelf_life_years": null,
+    "printed_codes": [],
+    "printed_terms": []
+  },
+  "checks": [
+    {
+      "check_id": "label_consistency",
+      "title": "Label consistency (Wh = V × Ah)",
+      "status": "not_assessed",
+      "summary": "Not assessed. Needs Wh and capacity both stated; not stated: Wh.",
+      "inputs": [],
+      "formula": null,
+      "steps": [],
+      "constants": [],
+      "assumptions": [],
+      "notes": [],
+      "not_assessed_reason": "Needs Wh and capacity both stated; not stated: Wh."
+    },
+    {
+      "check_id": "form_factor_bound",
+      "title": "Form-factor bound",
+      "status": "pass",
+      "summary": "The claim amounts to 0.84 Wh, within the 3.502 Wh that the envelope of one AA-size cell can hold at the best-case NiMH ceiling of 420 Wh/L.",
+      "inputs": [
+        {
+          "name": "Size code",
+          "value": "AA",
+          "unit": "",
+          "origin": "claim",
+          "found_in": "title",
+          "confidence": 1.0
+        },
+        {
+          "name": "Nominal voltage",
+          "value": 1.2,
+          "unit": "V",
+          "origin": "claim",
+          "found_in": "title",
+          "confidence": 1.0
+        },
+        {
+          "name": "Capacity",
+          "value": 700.0,
+          "unit": "mAh",
+          "origin": "claim",
+          "found_in": "title",
+          "confidence": 1.0
+        },
+        {
+          "name": "AA maximum diameter",
+          "value": 14.5,
+          "unit": "mm",
+          "origin": "constant",
+          "found_in": null,
+          "confidence": null
+        },
+        {
+          "name": "AA maximum length",
+          "value": 50.5,
+          "unit": "mm",
+          "origin": "constant",
+          "found_in": null,
+          "confidence": null
+        },
+        {
+          "name": "Top of the published volumetric energy density range for NiMH cells",
+          "value": 420.0,
+          "unit": "Wh/L",
+          "origin": "constant",
+          "found_in": null,
+          "confidence": null
+        }
+      ],
+      "formula": "E ≤ ceiling (Wh/L) × π × (d ÷ 2)² × h",
+      "steps": [
+        {
+          "label": "Capacity in Ah",
+          "formula": "Q = mAh ÷ 1000",
+          "substitution": "700 mAh ÷ 1000",
+          "result": 0.7,
+          "unit": "Ah",
+          "text": "Capacity in Ah: 700 mAh ÷ 1000 = 0.7 Ah"
+        },
+        {
+          "label": "Energy implied by the stated capacity",
+          "formula": "E = V × Q",
+          "substitution": "1.2 V × 0.7 Ah",
+          "result": 0.84,
+          "unit": "Wh",
+          "text": "Energy implied by the stated capacity: 1.2 V × 0.7 Ah = 0.84 Wh"
+        },
+        {
+          "label": "AA envelope volume",
+          "formula": "V = π × (d ÷ 2)² × h",
+          "substitution": "π × (14.5 mm ÷ 2)² × 50.5 mm = 8,339 mm³",
+          "result": 0.008339063174642832,
+          "unit": "L",
+          "text": "AA envelope volume: π × (14.5 mm ÷ 2)² × 50.5 mm = 8,339 mm³ = 0.008339 L"
+        },
+        {
+          "label": "Most energy that volume can hold",
+          "formula": "E_max = ceiling × V",
+          "substitution": "420 Wh/L × 0.008339 L",
+          "result": 3.5024065333499896,
+          "unit": "Wh",
+          "text": "Most energy that volume can hold: 420 Wh/L × 0.008339 L = 3.502 Wh"
+        },
+        {
+          "label": "Comparison",
+          "formula": "value ≤ cap",
+          "substitution": "0.84 Wh ≤ 3.502 Wh",
+          "result": 0.23983509395654162,
+          "unit": "× the cap",
+          "text": "Comparison: 0.84 Wh ≤ 3.502 Wh (0.2398× the cap)"
+        }
+      ],
+      "constants": [
+        {
+          "key": "ff_aa_diameter",
+          "value": 14.5,
+          "unit": "mm",
+          "description": "AA maximum diameter",
+          "source_title": "AA battery",
+          "source_publisher": "Wikipedia, citing IEC 60086-2:2021 (Primary batteries, Part 2)",
+          "source_url": "https://en.wikipedia.org/wiki/AA_battery",
+          "locator": "Dimensions section",
+          "quote": "An AA cell measures 49.5–50.5 mm (1.95–1.99 in) in length, including the button terminal—and 13.7–14.5 mm (0.54–0.57 in) in diameter.",
+          "accessed": "2026-11-13",
+          "note": "",
+          "hard_bound": true
+        },
+        {
+          "key": "ff_aa_height",
+          "value": 50.5,
+          "unit": "mm",
+          "description": "AA maximum length",
+          "source_title": "AA battery",
+          "source_publisher": "Wikipedia, citing IEC 60086-2:2021 (Primary batteries, Part 2)",
+          "source_url": "https://en.wikipedia.org/wiki/AA_battery",
+          "locator": "Dimensions section",
+          "quote": "An AA cell measures 49.5–50.5 mm (1.95–1.99 in) in length, including the button terminal—and 13.7–14.5 mm (0.54–0.57 in) in diameter.",
+          "accessed": "2026-11-13",
+          "note": "",
+          "hard_bound": true
+        },
+        {
+          "key": "nimh_max_wh_per_l",
+          "value": 420.0,
+          "unit": "Wh/L",
+          "description": "Top of the published volumetric energy density range for NiMH cells",
+          "source_title": "nikkel-metallhydridbatteri",
+          "source_publisher": "Store norske leksikon (author Knut Hofstad, updated 3 October 2024)",
+          "source_url": "https://snl.no/nikkel-metallhydridbatteri",
+          "locator": "Fact box",
+          "quote": "energitettheten kan variere fra 170 til 420 Wh/L",
+          "accessed": "2026-11-13",
+          "note": "Secondary source with thin headroom over the highest AA ratings on sale, so exceeding it is a soft flag, not a hard result.",
+          "hard_bound": false
+        }
+      ],
+      "assumptions": [
+        "Cell count not stated; the capacity claim is taken as covering one cell."
+      ],
+      "notes": [],
+      "not_assessed_reason": null
+    },
+    {
+      "check_id": "dimension_bound",
+      "title": "Dimension bound (Wh/L)",
+      "status": "not_assessed",
+      "summary": "Not assessed. Dimensions are not stated.",
+      "inputs": [],
+      "formula": null,
+      "steps": [],
+      "constants": [],
+      "assumptions": [],
+      "notes": [],
+      "not_assessed_reason": "Dimensions are not stated."
+    },
+    {
+      "check_id": "weight_bound",
+      "title": "Weight bound (Wh/kg)",
+      "status": "not_assessed",
+      "summary": "Not assessed. Weight is not stated.",
+      "inputs": [],
+      "formula": null,
+      "steps": [],
+      "constants": [],
+      "assumptions": [],
+      "notes": [],
+      "not_assessed_reason": "Weight is not stated."
+    },
+    {
+      "check_id": "label_contradiction",
+      "title": "Label contradiction",
+      "status": "not_assessed",
+      "summary": "Not assessed. No designation code or grade wording was read from the product itself.",
+      "inputs": [
+        {
+          "name": "Stated chemistry",
+          "value": "NiMH",
+          "unit": "",
+          "origin": "claim",
+          "found_in": "title",
+          "confidence": 1.0
+        }
+      ],
+      "formula": null,
+      "steps": [],
+      "constants": [],
+      "assumptions": [],
+      "notes": [],
+      "not_assessed_reason": "No designation code or grade wording was read from the product itself."
+    },
+    {
+      "check_id": "chemistry_mismatch",
+      "title": "Chemistry mismatch",
+      "status": "not_assessed",
+      "summary": "Not assessed. No shelf-life claim is stated.",
+      "inputs": [],
+      "formula": null,
+      "steps": [],
+      "constants": [],
+      "assumptions": [],
+      "notes": [],
+      "not_assessed_reason": "No shelf-life claim is stated."
+    }
+  ],
+  "verdict": "No red flags",
+  "verdict_reason": "The claims that could be tested are physically plausible (Form-factor bound). This does not confirm that the claims are true.",
+  "routing": "no action needed",
+  "routing_reason": "The claims that could be tested are plausible and were read with high confidence.",
+  "assumptions": [
+    "Cell count not stated; the capacity claim is taken as covering one cell."
+  ],
+  "not_assessed": [
+    "Label consistency (Wh = V × Ah): Needs Wh and capacity both stated; not stated: Wh.",
+    "Dimension bound (Wh/L): Dimensions are not stated.",
+    "Weight bound (Wh/kg): Weight is not stated.",
+    "Label contradiction: No designation code or grade wording was read from the product itself.",
+    "Chemistry mismatch: No shelf-life claim is stated."
+  ]
+}

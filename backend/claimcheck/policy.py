@@ -20,10 +20,6 @@ MAX_SERIES_CELLS = 14
 # from the standard size envelope by more than this factor in either direction.
 FORM_FACTOR_MISMATCH_RATIO = 2.0
 
-# An "Impossible" verdict is auto-resolvable only if every extracted input of the
-# violated check has at least this confidence. Calibrate in Phase 3.
-MIN_CONFIDENCE_FOR_AUTO_RESOLVE = 0.8
-
-# OPEN DECISION (raised in the Phase 1 report): routing for listings that pass.
-ROUTING_WHEN_NO_RED_FLAGS = "needs human review"
-ROUTING_WHEN_NO_CHECKABLE_CLAIM = "needs human review"
+# Extraction confidence at or above this counts as high. Below it, a result is
+# routed to a person whatever the verdict. Calibrate in Phase 3.
+MIN_CONFIDENCE = 0.8

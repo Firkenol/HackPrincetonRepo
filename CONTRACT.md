@@ -1,0 +1,225 @@
+# ClaimCheck contract
+
+This is the interface between the four parts of the project: the checks, the agent, the API and the web frontend. **It is frozen. Any change to the items listed under "What is frozen" needs the project owner's approval.**
+
+The source of truth is the code. If this document and the code disagree, the code wins and this document has a bug.
+
+## What is frozen
+
+| Item | File |
+|---|---|
+| Data models: `Claims`, `CheckResult`, `EvidenceReport` and their parts | `backend/claimcheck/models.py` |
+| Stream events | `backend/claimcheck/events.py` |
+| Entry point signature `run_listing(image_or_text)` | `backend/claimcheck/pipeline.py` |
+| The verdict strings, routing strings and check ids below | `backend/claimcheck/models.py`, `backend/claimcheck/checks.py` |
+| HTTP transport: one streaming endpoint | this document |
+
+Not frozen: constants, policy thresholds, check wording, anything inside the agent, `replay_claims`.
+
+`backend/tests/test_contract.py` fails if the expected reports in `fixtures/expected/` drift from what the code produces, so a contract change shows up as a failing test.
+
+## Where things live
+
+| Part | Folder |
+|---|---|
+| Checks, constants, models (done) | `backend/claimcheck/` |
+| Agent: deepagents setup, tools, subagents, `run_listing` implementation | `backend/claimcheck/agent/` |
+| Skills, one folder per skill with a `SKILL.md` | `backend/skills/` |
+| API (FastAPI) | `backend/api/` |
+| Web frontend (Next.js) | `frontend/` |
+| Extra check packs | `backend/claimcheck/packs/` |
+| Screenshots for the fixtures | `fixtures/` |
+| Expected report per fixture | `fixtures/expected/fixture_NN.json` |
+
+Rules that keep the parts independent:
+
+- The API imports only `run_listing`, the event models and `to_sse`. It does not import checks or the agent.
+- The frontend depends only on the event JSON and the report JSON described here.
+- The agent calls the check functions as tools. It never does arithmetic itself.
+- A check pack is a module that exposes `CHECKS`, a tuple of functions `Claims -> CheckResult`. Any physical constant it needs goes in `backend/claimcheck/constants.py` with a citation, not in the pack.
+
+## Fixed strings
+
+**Verdict** (exactly these four):
+
+| Value | Meaning |
+|---|---|
+| `Impossible` | A hard physical bound is violated. |
+| `Flag` | A contradiction or unusual claim. |
+| `No red flags` | Claims were tested and are plausible. This is not a confirmation. |
+| `No checkable claim` | Nothing numeric or testable was stated. |
+
+**Routing** (exactly these three):
+
+| Value | When |
+|---|---|
+| `auto-resolvable` | Verdict is `Impossible` and the inputs of the violated check were read with high confidence. |
+| `needs human review` | Any `Flag`; an `Impossible` with a low-confidence input; a passing result with a low-confidence claim; a numeric claim that could not be tested. |
+| `no action needed` | `No red flags` or `No checkable claim` with every claim read at high confidence. |
+
+High confidence means 0.8 or more.
+
+**Check ids**, always all six, always in this order in `EvidenceReport.checks`:
+
+`label_consistency`, `form_factor_bound`, `dimension_bound`, `weight_bound`, `label_contradiction`, `chemistry_mismatch`
+
+**Check status**: `pass`, `violated` (hard bound exceeded), `flag` (soft), `not_assessed`.
+
+## Entry point
+
+```python
+from claimcheck import run_listing
+
+def run_listing(image_or_text: str | bytes | Path) -> Generator[StreamEvent, None, EvidenceReport]
+```
+
+| Input type | Meaning |
+|---|---|
+| `str` | Pasted listing text |
+| `bytes` | The bytes of a screenshot (PNG, JPEG or WebP) |
+| `pathlib.Path` | A screenshot file on disk |
+
+It yields stream events as the run proceeds and returns the evidence report when it finishes. The last event yielded is always either `final_report`, carrying the same report that is returned, or `error`. A caller that only streams can ignore the return value.
+
+`run_listing` raises `NotImplementedError` until Phase 2. Until then, `replay_claims(claims)` yields the same event types for claims that are already extracted, without calling a model. Use it to build the API and the UI now:
+
+```python
+from claimcheck import replay_claims
+from tests.fixtures_data import BY_ID
+
+for event in replay_claims(BY_ID[1].claims):
+    print(event.type, event.model_dump_json())
+```
+
+## Stream events
+
+Every event is a JSON object with these common fields:
+
+| Field | Type | Meaning |
+|---|---|---|
+| `type` | string | Which event this is. Use it to tell events apart. |
+| `run_id` | string | Same for every event of one run. |
+| `seq` | integer | Position in the stream. Starts at 0 and increases by 1. |
+| `agent` | string | `orchestrator`, `listing-reader`, `physics-checker` or `report-writer`. |
+
+| `type` | Extra fields | Sent when |
+|---|---|---|
+| `agent_step` | `message` (string) | An agent starts a step. One line for the live trace. |
+| `tool_call` | `call_id`, `tool` (strings), `args` (object) | An agent calls a tool. |
+| `tool_result` | `call_id`, `tool`, `ok` (boolean), `summary` (string), `result` (any JSON) | A tool returns. `call_id` matches the `tool_call`. For a check tool, `result` is a `CheckResult`. |
+| `final_report` | `report` (`EvidenceReport`) | Once, as the last event of a successful run. |
+| `error` | `message` (string, safe to display) | Once, as the last event of a failed run. |
+
+Example:
+
+```json
+{"type": "tool_call", "run_id": "9f2c", "seq": 3, "agent": "physics-checker", "call_id": "9f2c-1", "tool": "check_form_factor_bound", "args": {}}
+```
+
+No event ever carries a seller or store name.
+
+## HTTP transport
+
+One endpoint, served by the API:
+
+```
+POST /api/check
+Content-Type: multipart/form-data
+  image   a screenshot file          (send exactly one of image or text)
+  text    pasted listing text
+Response: text/event-stream
+```
+
+Each stream event is one Server-Sent Events message, with the SSE `event` name equal to the event's `type` and the JSON object as `data`. `claimcheck.events.to_sse(event)` produces the frame:
+
+```
+event: tool_call
+data: {"type":"tool_call","run_id":"9f2c","seq":3,...}
+
+```
+
+Batch mode is the frontend calling this endpoint once per file. There is no separate batch endpoint.
+
+## Data models
+
+All models are pydantic v2. For a machine-readable schema run `EvidenceReport.model_json_schema()`.
+
+### Claims: what the listing itself states
+
+A field that is absent means the listing does not state it. There is no field for a seller, store or brand name, and none may be added.
+
+Every individual claim carries three provenance fields:
+
+| Field | Type | Meaning |
+|---|---|---|
+| `found_in` | string | Where the claim appears: title, bullet points, spec table, product photo, description. |
+| `quote` | string or null | The claim as shown, such as `12000mAh`. Never a seller, store or brand name. |
+| `confidence` | number 0 to 1 | How sure the extractor is. Defaults to 1. |
+
+Claim types:
+
+| Type | Value fields |
+|---|---|
+| `NumberClaim` | `value` (number above 0) |
+| `TextClaim` | `value` (string) |
+| `ChemistryClaim` | `value`: `li-ion`, `nimh`, `alkaline`, `zinc-carbon`, `nicd`, `lithium-primary`, `other` |
+| `WeightClaim` | `value_g`, `kind`: `product` or `package` |
+| `DimensionsClaim` | `length_mm`, `width_mm`, `height_mm`, `kind`: `product` or `package` |
+
+`li-ion` covers every rechargeable lithium chemistry, including LiPo and LiFePO4. For a cylinder given as diameter by length, repeat the diameter as both `length_mm` and `width_mm`. `kind` is `package` when the listing says package, shipping or box; such measurements are never used as a bound.
+
+`Claims` fields:
+
+| Field | Type | Meaning |
+|---|---|---|
+| `product_type` | `loose_cell`, `battery_pack`, `power_bank`, `unknown` | What the listing is for. Default `unknown`. |
+| `chemistry` | `ChemistryClaim` or null | Chemistry as stated in the title or description. |
+| `form_factors` | list of `TextClaim` | Size codes such as `18650`, `21700`, `AA`, `AAA`. |
+| `cell_count` | `NumberClaim` or null | Number of cells the stated capacity covers: 1 for loose cells rated individually, N for an assembled pack. |
+| `nominal_voltage_v` | `NumberClaim` or null | Nominal voltage of the cell or pack. Not a USB or output voltage. |
+| `capacity_mah` | `NumberClaim` or null | Labeled cell or pack capacity. |
+| `energy_wh` | `NumberClaim` or null | Energy as printed on the label. |
+| `output_capacity_mah` | `NumberClaim` or null | Rated or usable output capacity of a power bank. Recorded, never compared. |
+| `weight` | `WeightClaim` or null | |
+| `dimensions` | `DimensionsClaim` or null | |
+| `shelf_life_years` | `NumberClaim` or null | |
+| `printed_codes` | list of `TextClaim` | Designation codes read off the product itself, such as `R6` or `LR03`. |
+| `printed_terms` | list of `TextClaim` | Grade wording read off the product itself, such as `Heavy Duty`. |
+
+### CheckResult: one check, reproducible by hand
+
+| Field | Type | Meaning |
+|---|---|---|
+| `check_id` | string | One of the six check ids. |
+| `title` | string | Display name. |
+| `status` | `pass`, `violated`, `flag`, `not_assessed` | |
+| `summary` | string | One or two neutral sentences. |
+| `inputs` | list of `Quantity` | Every value the check used. |
+| `formula` | string or null | The formula in symbols. |
+| `steps` | list of `Step` | The arithmetic, one line per step, in order. |
+| `constants` | list of `Citation` | Each constant used, with its source. |
+| `assumptions` | list of strings | Anything assumed rather than stated. |
+| `notes` | list of strings | Remarks, such as a package weight being set aside. |
+| `not_assessed_reason` | string or null | Set when `status` is `not_assessed`. |
+
+`Quantity`: `name`, `value` (number or string), `unit`, `origin` (`claim`, `constant`, `derived` or `assumption`), and for claims `found_in` and `confidence`.
+
+`Step`: `label`, `formula`, `substitution` (the formula with numbers in it), `result` (number or null), `unit`, and `text`, which is the whole line ready to display, for example `Energy implied by the stated capacity: 3.7 V × 12 Ah = 44.4 Wh`. The frontend reveals `steps` one at a time and can show `text` as is.
+
+`Citation`: `key`, `value`, `unit`, `description`, `source_title`, `source_publisher`, `source_url`, `locator`, `quote`, `accessed`, `note`, `hard_bound`. When `hard_bound` is false, exceeding the value gives `flag`, never `violated`.
+
+### EvidenceReport: the main output
+
+| Field | Type | Meaning |
+|---|---|---|
+| `schema_version` | `"1.0"` | |
+| `claims` | `Claims` | What was extracted and where each claim was found. |
+| `checks` | list of six `CheckResult` | In the fixed order above. |
+| `verdict` | verdict string | |
+| `verdict_reason` | string | |
+| `routing` | routing string | |
+| `routing_reason` | string | |
+| `assumptions` | list of strings | All assumptions across checks, without duplicates. |
+| `not_assessed` | list of strings | One line per check that did not run, with the reason. |
+
+Real examples: `fixtures/expected/fixture_01.json` (Impossible), `fixture_03.json` (Flag), `fixture_05.json` (No checkable claim), `fixture_06.json` (No red flags). Regenerate them with `python scripts/write_expected_reports.py` from `backend/`.

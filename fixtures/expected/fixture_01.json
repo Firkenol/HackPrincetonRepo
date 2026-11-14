@@ -1,0 +1,317 @@
+{
+  "schema_version": "1.0",
+  "claims": {
+    "product_type": "unknown",
+    "chemistry": {
+      "found_in": "title",
+      "quote": null,
+      "confidence": 1.0,
+      "value": "li-ion"
+    },
+    "form_factors": [
+      {
+        "found_in": "title",
+        "quote": null,
+        "confidence": 1.0,
+        "value": "18650"
+      }
+    ],
+    "cell_count": null,
+    "nominal_voltage_v": {
+      "found_in": "title",
+      "quote": null,
+      "confidence": 1.0,
+      "value": 3.7
+    },
+    "capacity_mah": {
+      "found_in": "title",
+      "quote": null,
+      "confidence": 1.0,
+      "value": 12000.0
+    },
+    "energy_wh": null,
+    "output_capacity_mah": null,
+    "weight": {
+      "found_in": "spec table",
+      "quote": null,
+      "confidence": 1.0,
+      "value_g": 600.0,
+      "kind": "package"
+    },
+    "dimensions": {
+      "found_in": "spec table",
+      "quote": null,
+      "confidence": 1.0,
+      "length_mm": 150.0,
+      "width_mm": 150.0,
+      "height_mm": 150.0,
+      "kind": "package"
+    },
+    "shelf_life_years": null,
+    "printed_codes": [],
+    "printed_terms": []
+  },
+  "checks": [
+    {
+      "check_id": "label_consistency",
+      "title": "Label consistency (Wh = V × Ah)",
+      "status": "not_assessed",
+      "summary": "Not assessed. Needs Wh and capacity both stated; not stated: Wh.",
+      "inputs": [],
+      "formula": null,
+      "steps": [],
+      "constants": [],
+      "assumptions": [],
+      "notes": [],
+      "not_assessed_reason": "Needs Wh and capacity both stated; not stated: Wh."
+    },
+    {
+      "check_id": "form_factor_bound",
+      "title": "Form-factor bound",
+      "status": "violated",
+      "summary": "The claim amounts to 44.4 Wh. The envelope of one 18650-size cell is at most 0.01755 L, which holds no more than 23.19 Wh at the best-case lithium-ion ceiling of 1,321 Wh/L. The claim is 1.915× that cap.",
+      "inputs": [
+        {
+          "name": "Size code",
+          "value": "18650",
+          "unit": "",
+          "origin": "claim",
+          "found_in": "title",
+          "confidence": 1.0
+        },
+        {
+          "name": "Nominal voltage",
+          "value": 3.7,
+          "unit": "V",
+          "origin": "claim",
+          "found_in": "title",
+          "confidence": 1.0
+        },
+        {
+          "name": "Capacity",
+          "value": 12000.0,
+          "unit": "mAh",
+          "origin": "claim",
+          "found_in": "title",
+          "confidence": 1.0
+        },
+        {
+          "name": "18650 maximum diameter",
+          "value": 18.5,
+          "unit": "mm",
+          "origin": "constant",
+          "found_in": null,
+          "confidence": null
+        },
+        {
+          "name": "18650 maximum height",
+          "value": 65.3,
+          "unit": "mm",
+          "origin": "constant",
+          "found_in": null,
+          "confidence": null
+        },
+        {
+          "name": "Highest volumetric energy density measured by a third-party lab for a lithium-ion cell",
+          "value": 1321.0,
+          "unit": "Wh/L",
+          "origin": "constant",
+          "found_in": null,
+          "confidence": null
+        }
+      ],
+      "formula": "E ≤ ceiling (Wh/L) × π × (d ÷ 2)² × h",
+      "steps": [
+        {
+          "label": "Capacity in Ah",
+          "formula": "Q = mAh ÷ 1000",
+          "substitution": "12,000 mAh ÷ 1000",
+          "result": 12.0,
+          "unit": "Ah",
+          "text": "Capacity in Ah: 12,000 mAh ÷ 1000 = 12 Ah"
+        },
+        {
+          "label": "Energy implied by the stated capacity",
+          "formula": "E = V × Q",
+          "substitution": "3.7 V × 12 Ah",
+          "result": 44.400000000000006,
+          "unit": "Wh",
+          "text": "Energy implied by the stated capacity: 3.7 V × 12 Ah = 44.4 Wh"
+        },
+        {
+          "label": "18650 envelope volume",
+          "formula": "V = π × (d ÷ 2)² × h",
+          "substitution": "π × (18.5 mm ÷ 2)² × 65.3 mm = 17,553 mm³",
+          "result": 0.017552804648907315,
+          "unit": "L",
+          "text": "18650 envelope volume: π × (18.5 mm ÷ 2)² × 65.3 mm = 17,553 mm³ = 0.01755 L"
+        },
+        {
+          "label": "Most energy that volume can hold",
+          "formula": "E_max = ceiling × V",
+          "substitution": "1,321 Wh/L × 0.01755 L",
+          "result": 23.187254941206564,
+          "unit": "Wh",
+          "text": "Most energy that volume can hold: 1,321 Wh/L × 0.01755 L = 23.19 Wh"
+        },
+        {
+          "label": "Comparison",
+          "formula": "value ≤ cap",
+          "substitution": "44.4 Wh > 23.19 Wh",
+          "result": 1.9148450350237802,
+          "unit": "× the cap",
+          "text": "Comparison: 44.4 Wh > 23.19 Wh (1.915× the cap)"
+        }
+      ],
+      "constants": [
+        {
+          "key": "ff_18650_diameter",
+          "value": 18.5,
+          "unit": "mm",
+          "description": "18650 maximum diameter",
+          "source_title": "Panasonic NCR18650B lithium-ion cell datasheet, version 13.11 R1",
+          "source_publisher": "SANYO Energy (U.S.A.) Corporation / Panasonic, 2012",
+          "source_url": "https://e2e.ti.com/cfs-file/__key/communityserver-discussions-components-files/196/Panasonic-NCR18650B-datasheet.pdf",
+          "locator": "Specifications table and dimension drawing",
+          "quote": "Nominal voltage 3.6V; Weight (max.) 48.5 g; Max. 18.5 mm; Max. 65.3 mm",
+          "accessed": "2026-11-13",
+          "note": "",
+          "hard_bound": true
+        },
+        {
+          "key": "ff_18650_height",
+          "value": 65.3,
+          "unit": "mm",
+          "description": "18650 maximum height",
+          "source_title": "Panasonic NCR18650B lithium-ion cell datasheet, version 13.11 R1",
+          "source_publisher": "SANYO Energy (U.S.A.) Corporation / Panasonic, 2012",
+          "source_url": "https://e2e.ti.com/cfs-file/__key/communityserver-discussions-components-files/196/Panasonic-NCR18650B-datasheet.pdf",
+          "locator": "Specifications table and dimension drawing",
+          "quote": "Nominal voltage 3.6V; Weight (max.) 48.5 g; Max. 18.5 mm; Max. 65.3 mm",
+          "accessed": "2026-11-13",
+          "note": "",
+          "hard_bound": true
+        },
+        {
+          "key": "li_ion_max_wh_per_l",
+          "value": 1321.0,
+          "unit": "Wh/L",
+          "description": "Highest volumetric energy density measured by a third-party lab for a lithium-ion cell",
+          "source_title": "The All-New Amprius 500 Wh/kg Battery Platform is Here",
+          "source_publisher": "Amprius Technologies press release, 23 March 2023",
+          "source_url": "https://amprius.com/the-all-new-amprius-500-wh-kg-battery-platform-is-here/",
+          "locator": "Paragraph on third-party testing by Mobile Power Solutions",
+          "quote": "The results indicate that this cell model provides >504 Wh/kg and >1321 Wh/l at 25°C.",
+          "accessed": "2026-11-13",
+          "note": "About twice the 676 Wh/L of a leading commercial 18650 (Panasonic NCR18650B datasheet).",
+          "hard_bound": true
+        }
+      ],
+      "assumptions": [
+        "Cell count not stated; the capacity claim is taken as covering one cell."
+      ],
+      "notes": [],
+      "not_assessed_reason": null
+    },
+    {
+      "check_id": "dimension_bound",
+      "title": "Dimension bound (Wh/L)",
+      "status": "not_assessed",
+      "summary": "Not assessed. The listed dimensions describe the package, not the product.",
+      "inputs": [
+        {
+          "name": "Dimensions (package)",
+          "value": "150 × 150 × 150 mm",
+          "unit": "",
+          "origin": "claim",
+          "found_in": "spec table",
+          "confidence": 1.0
+        }
+      ],
+      "formula": null,
+      "steps": [],
+      "constants": [],
+      "assumptions": [],
+      "notes": [
+        "The listed dimensions (150 × 150 × 150 mm) are package dimensions. Package figures often describe the shipping box or are placeholders, so they are not used as a bound.",
+        "All three dimensions are equal, a common placeholder pattern.",
+        "The listed volume is 192.3× the 18650 envelope, so it does not describe the cell."
+      ],
+      "not_assessed_reason": "The listed dimensions describe the package, not the product."
+    },
+    {
+      "check_id": "weight_bound",
+      "title": "Weight bound (Wh/kg)",
+      "status": "not_assessed",
+      "summary": "Not assessed. The listed weight describes the package, not the product.",
+      "inputs": [
+        {
+          "name": "Weight (package)",
+          "value": 600.0,
+          "unit": "g",
+          "origin": "claim",
+          "found_in": "spec table",
+          "confidence": 1.0
+        }
+      ],
+      "formula": null,
+      "steps": [],
+      "constants": [],
+      "assumptions": [],
+      "notes": [
+        "The listed weight (600 g) is a package weight. Package figures often include packaging or are placeholders, so they are not used as a bound.",
+        "It is 12.37× the maximum mass of one 18650 cell (48.5 g), so it describes the package or is a placeholder, not the cell."
+      ],
+      "not_assessed_reason": "The listed weight describes the package, not the product."
+    },
+    {
+      "check_id": "label_contradiction",
+      "title": "Label contradiction",
+      "status": "not_assessed",
+      "summary": "Not assessed. No designation code or grade wording was read from the product itself.",
+      "inputs": [
+        {
+          "name": "Stated chemistry",
+          "value": "lithium-ion",
+          "unit": "",
+          "origin": "claim",
+          "found_in": "title",
+          "confidence": 1.0
+        }
+      ],
+      "formula": null,
+      "steps": [],
+      "constants": [],
+      "assumptions": [],
+      "notes": [],
+      "not_assessed_reason": "No designation code or grade wording was read from the product itself."
+    },
+    {
+      "check_id": "chemistry_mismatch",
+      "title": "Chemistry mismatch",
+      "status": "not_assessed",
+      "summary": "Not assessed. No shelf-life claim is stated.",
+      "inputs": [],
+      "formula": null,
+      "steps": [],
+      "constants": [],
+      "assumptions": [],
+      "notes": [],
+      "not_assessed_reason": "No shelf-life claim is stated."
+    }
+  ],
+  "verdict": "Impossible",
+  "verdict_reason": "The claim amounts to 44.4 Wh. The envelope of one 18650-size cell is at most 0.01755 L, which holds no more than 23.19 Wh at the best-case lithium-ion ceiling of 1,321 Wh/L. The claim is 1.915× that cap.",
+  "routing": "auto-resolvable",
+  "routing_reason": "A hard physical bound is violated and the calculation is reproducible.",
+  "assumptions": [
+    "Cell count not stated; the capacity claim is taken as covering one cell."
+  ],
+  "not_assessed": [
+    "Label consistency (Wh = V × Ah): Needs Wh and capacity both stated; not stated: Wh.",
+    "Dimension bound (Wh/L): The listed dimensions describe the package, not the product.",
+    "Weight bound (Wh/kg): The listed weight describes the package, not the product.",
+    "Label contradiction: No designation code or grade wording was read from the product itself.",
+    "Chemistry mismatch: No shelf-life claim is stated."
+  ]
+}

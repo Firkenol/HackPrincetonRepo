@@ -26,6 +26,7 @@ from claimcheck.models import (
     DimensionsClaim,
     MeasurementKind,
     NumberClaim,
+    ProductType,
     Routing,
     TextClaim,
     Verdict,
@@ -95,12 +96,36 @@ def test_label_rounding_and_nominal_convention_pass():
     assert check_label_consistency(claims).status is CheckStatus.PASS
 
 
-def test_label_consistency_skips_output_voltage():
-    # 5 V is a USB output, not a nominal lithium-ion voltage: must not be flagged
+def test_label_consistency_ignores_output_voltage():
+    # 5 V is a USB output, not a nominal lithium-ion voltage: 5 V x 20 Ah = 100 Wh must not be compared
     claims = Claims(chemistry=chem(Chemistry.LI_ION), nominal_voltage_v=num(5), capacity_mah=num(20000), energy_wh=num(74))
     result = check_label_consistency(claims)
-    assert result.status is CheckStatus.NOT_ASSESSED
-    assert "not a nominal battery voltage" in result.not_assessed_reason
+    assert result.status is CheckStatus.PASS  # falls back to the implied voltage, 74 Wh / 20 Ah = 3.7 V
+    assert any("not a nominal battery voltage" in note for note in result.notes)
+
+
+def test_implied_voltage_passes_for_an_honest_power_bank():
+    claims = Claims(product_type=ProductType.POWER_BANK, capacity_mah=num(20000), energy_wh=num(74))
+    result = check_label_consistency(claims)
+    assert result.status is CheckStatus.PASS
+    assert result.steps[1].result == pytest.approx(3.7)
+    assert any("lithium-ion is assumed" in a for a in result.assumptions)
+    assert evaluate(claims).routing is Routing.NO_ACTION_NEEDED
+
+
+def test_implied_voltage_mismatch_is_a_soft_flag_only():
+    # 37 Wh / 50 Ah = 0.74 V, not a lithium-ion voltage
+    claims = Claims(product_type=ProductType.POWER_BANK, capacity_mah=num(50000), energy_wh=num(37))
+    result = check_label_consistency(claims)
+    assert result.status is CheckStatus.FLAG
+    assert result.steps[1].result == pytest.approx(0.74)
+    report = evaluate(claims)
+    assert report.verdict is Verdict.FLAG and report.routing is Routing.NEEDS_HUMAN_REVIEW
+
+
+def test_implied_voltage_needs_a_chemistry():
+    claims = Claims(capacity_mah=num(20000), energy_wh=num(74))
+    assert check_label_consistency(claims).status is CheckStatus.NOT_ASSESSED
 
 
 def test_power_bank_usable_output_below_cell_capacity_is_not_flagged():
@@ -136,8 +161,8 @@ def test_honest_18650_and_21700_pass():
     assert check_form_factor_bound(best_21700).status is CheckStatus.PASS
 
 
-@pytest.mark.parametrize("mah, status", [(2850, CheckStatus.PASS), (1100, CheckStatus.PASS), (4700, CheckStatus.VIOLATED)])
-def test_nimh_aa_ceiling(mah, status):
+@pytest.mark.parametrize("mah, status", [(2850, CheckStatus.PASS), (1100, CheckStatus.PASS), (3000, CheckStatus.FLAG), (9800, CheckStatus.FLAG)])
+def test_nimh_ceiling_is_soft_so_it_never_gives_a_hard_result(mah, status):
     claims = Claims(chemistry=chem(Chemistry.NIMH), form_factors=sizes("AA"), nominal_voltage_v=num(1.2), capacity_mah=num(mah))
     assert check_form_factor_bound(claims).status is status
 
@@ -177,7 +202,19 @@ def test_weight_bound_violation_on_product_weight():
 def test_package_weight_never_produces_a_hard_result():
     claims = Claims(chemistry=chem(Chemistry.LI_ION), capacity_mah=num(50000), weight=WeightClaim(value_g=10, kind=PACKAGE))
     assert check_weight_bound(claims).status is CheckStatus.NOT_ASSESSED
-    assert evaluate(claims).verdict is Verdict.NO_CHECKABLE_CLAIM
+    report = evaluate(claims)
+    assert report.verdict is Verdict.NO_CHECKABLE_CLAIM
+    # a numeric claim was stated but could not be tested: missing data goes to a person
+    assert report.routing is Routing.NEEDS_HUMAN_REVIEW
+
+
+def test_nimh_weight_ceiling_is_soft():
+    # 1.2 V x 9.8 Ah = 11.76 Wh at 0.03 kg = 392 Wh/kg, above 140 Wh/kg
+    claims = Claims(chemistry=chem(Chemistry.NIMH), nominal_voltage_v=num(1.2), capacity_mah=num(9800), weight=WeightClaim(value_g=30, kind=PRODUCT))
+    result = check_weight_bound(claims)
+    assert result.status is CheckStatus.FLAG
+    assert "flag rather than a hard result" in result.summary
+    assert evaluate(claims).verdict is Verdict.FLAG
 
 
 def test_dimension_bound_violation_on_product_dimensions():
@@ -279,7 +316,15 @@ def test_low_extraction_confidence_routes_an_impossible_verdict_to_a_person():
     assert "low confidence" in report.routing_reason
 
 
-def test_empty_listing_has_no_checkable_claim():
+def test_low_confidence_on_a_passing_listing_goes_to_a_person():
+    claims = Claims(chemistry=chem(Chemistry.NIMH), form_factors=sizes("AA"), nominal_voltage_v=num(1.2), capacity_mah=num(700, confidence=0.5))
+    report = evaluate(claims)
+    assert report.verdict is Verdict.NO_RED_FLAGS
+    assert report.routing is Routing.NEEDS_HUMAN_REVIEW
+
+
+def test_empty_listing_has_no_checkable_claim_and_needs_no_action():
     report = evaluate(Claims())
     assert report.verdict is Verdict.NO_CHECKABLE_CLAIM
+    assert report.routing is Routing.NO_ACTION_NEEDED
     assert len(report.not_assessed) == 6

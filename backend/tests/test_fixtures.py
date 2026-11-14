@@ -15,7 +15,7 @@ from claimcheck.checks import (
     CHEMISTRY_MISMATCH,
     WEIGHT_BOUND,
 )
-from claimcheck.models import CheckStatus, Routing, Verdict
+from claimcheck.models import CheckStatus, Verdict
 from tests.fixtures_data import BY_ID, FIXTURES
 
 
@@ -97,7 +97,7 @@ def test_report_wording_and_shape(fixture):
     report = evaluate(fixture.claims)
     data = json.loads(report.model_dump_json())
     assert data["verdict"] in {"Impossible", "Flag", "No red flags", "No checkable claim"}
-    assert data["routing"] in {"auto-resolvable", "needs human review"}
+    assert data["routing"] in {"auto-resolvable", "needs human review", "no action needed"}
     assert len(data["checks"]) == 6
     text = json.dumps(data).lower()
     for banned in ("verified", "seller", "fake", "counterfeit", "scam"):
@@ -106,4 +106,4 @@ def test_report_wording_and_shape(fixture):
     for check in report.checks:
         if check.status in (CheckStatus.PASS, CheckStatus.VIOLATED) and check.check_id != LABEL_CONTRADICTION:
             assert check.steps, check.check_id
-    assert report.routing is Routing.AUTO_RESOLVABLE or report.routing is Routing.NEEDS_HUMAN_REVIEW
+    assert data["schema_version"] == "1.0"

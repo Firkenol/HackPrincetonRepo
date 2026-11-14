@@ -21,8 +21,16 @@ class Verdict(str, Enum):
 
 
 class Routing(str, Enum):
-    AUTO_RESOLVABLE = "auto-resolvable"
-    NEEDS_HUMAN_REVIEW = "needs human review"
+    AUTO_RESOLVABLE = "auto-resolvable"  # hard bound violated, calculation reproducible
+    NEEDS_HUMAN_REVIEW = "needs human review"  # flags, missing data, low confidence
+    NO_ACTION_NEEDED = "no action needed"  # nothing found, extraction confidence high
+
+
+class ProductType(str, Enum):
+    LOOSE_CELL = "loose_cell"
+    BATTERY_PACK = "battery_pack"
+    POWER_BANK = "power_bank"
+    UNKNOWN = "unknown"
 
 
 class CheckStatus(str, Enum):
@@ -108,6 +116,9 @@ class Claims(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
+    product_type: ProductType = Field(
+        default=ProductType.UNKNOWN, description="What kind of product the listing is for."
+    )
     chemistry: ChemistryClaim | None = Field(default=None, description="Chemistry as stated in the title or description.")
     form_factors: list[TextClaim] = Field(default_factory=list, description="Size codes such as 18650, 21700, AA, AAA.")
     cell_count: NumberClaim | None = Field(
@@ -173,6 +184,7 @@ class Citation(BaseModel):
     quote: str
     accessed: str
     note: str = ""
+    hard_bound: bool = True  # False: exceeding this value is a soft flag only
 
 
 class CheckResult(BaseModel):
@@ -192,6 +204,7 @@ class CheckResult(BaseModel):
 class EvidenceReport(BaseModel):
     """The main output. A person with a calculator can reproduce every number in it."""
 
+    schema_version: Literal["1.0"] = "1.0"
     claims: Claims
     checks: list[CheckResult]
     verdict: Verdict

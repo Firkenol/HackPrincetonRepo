@@ -25,6 +25,7 @@ from claimcheck.models import (
     Citation,
     Claims,
     MeasurementKind,
+    ProductType,
     Quantity,
     Step,
     TextClaim,
@@ -62,7 +63,23 @@ def _cite(c: K.Constant) -> Citation:
         quote=c.source.quote,
         accessed=c.source.accessed,
         note=c.note,
+        hard_bound=c.hard_bound,
     )
+
+
+_SOFT_CEILING_NOTE = (
+    "This ceiling comes from a secondary source with little headroom, so exceeding it is "
+    "reported as a flag rather than a hard result."
+)
+
+
+def _exceeded(ceiling: K.Constant) -> CheckStatus:
+    """Status for a claim above a ceiling: hard only when the ceiling is a hard bound."""
+    return CheckStatus.VIOLATED if ceiling.hard_bound else CheckStatus.FLAG
+
+
+def _soft_suffix(exceeded: bool, ceiling: K.Constant) -> str:
+    return f" {_SOFT_CEILING_NOTE}" if exceeded and not ceiling.hard_bound else ""
 
 
 def _claim_q(name: str, claim, value: float | str, unit: str = "") -> Quantity:
@@ -149,6 +166,8 @@ def _effective_chemistry(claims: Claims) -> tuple[str | None, str | None]:
                 f"Chemistry not stated; {ff.code} is a {_label(ff.default_chemistry)} size code, "
                 f"so {_label(ff.default_chemistry)} is assumed.",
             )
+    if claims.product_type is ProductType.POWER_BANK:
+        return "li-ion", "Chemistry not stated; power banks use lithium-ion cells, so lithium-ion is assumed."
     return None, None
 
 
@@ -307,18 +326,18 @@ def check_label_consistency(claims: Claims) -> CheckResult:
         )
 
     e, v, q = claims.energy_wh, claims.nominal_voltage_v, claims.capacity_mah
-    missing = [name for name, c in (("Wh", e), ("voltage", v), ("capacity", q)) if c is None]
+    missing = [name for name, c in (("Wh", e), ("capacity", q)) if c is None]
     if missing:
-        return _not_assessed(cid, f"Needs Wh, voltage and capacity all stated; not stated: {', '.join(missing)}.", notes=notes)
+        return _not_assessed(cid, f"Needs Wh and capacity both stated; not stated: {', '.join(missing)}.", notes=notes)
 
-    chem, _ = _effective_chemistry(claims)
-    if series_cells(v.value, chem) == 0:
-        return _not_assessed(
-            cid,
-            f"The stated {fmt(v.value)} V is not a nominal battery voltage for {_label(chem)} "
-            f"({_voltage_range_text(chem)}); this check needs the battery's nominal voltage.",
-            notes=notes,
-        )
+    chem, chem_assumption = _effective_chemistry(claims)
+    if v is None or series_cells(v.value, chem) == 0:
+        if v is not None:
+            notes.append(
+                f"The stated {fmt(v.value)} V is not a nominal battery voltage for {_label(chem)} "
+                f"({_voltage_range_text(chem)}); it may be an output voltage, so it is not used."
+            )
+        return _implied_voltage_check(claims, chem, chem_assumption, notes)
 
     ah = ar.mah_to_ah(q.value)
     computed = ar.energy_wh(v.value, q.value)
@@ -357,6 +376,64 @@ def check_label_consistency(claims: Claims) -> CheckResult:
         ],
         formula="E (Wh) = V (V) × Q (Ah)",
         steps=steps,
+        notes=notes,
+    )
+
+
+def _implied_voltage_check(claims: Claims, chem: str | None, chem_assumption: str | None, notes: list[str]) -> CheckResult:
+    """Label consistency when no usable voltage is printed, as on most power banks.
+
+    Wh ÷ Ah is the voltage the label implies. It has to be a nominal battery voltage
+    for the chemistry. Soft flag only.
+    """
+    cid = LABEL_CONSISTENCY
+    e, q = claims.energy_wh, claims.capacity_mah
+    if chem not in K.MIN_CELL_VOLTAGE:
+        return _not_assessed(
+            cid,
+            "No usable voltage is stated, and the voltage implied by Wh ÷ Ah cannot be judged because "
+            "the chemistry is not stated or has no voltage range on file.",
+            notes=notes,
+        )
+
+    ah = ar.mah_to_ah(q.value)
+    implied = e.value / ah
+    cells = series_cells(implied, chem)
+    range_text = _voltage_range_text(chem)
+    if cells:
+        outcome = f"matches {cells} cell{'s' if cells > 1 else ''} in series at {range_text}"
+        summary = (
+            f"Label states {fmt(e.value)} Wh and {fmt(q.value)} mAh; {fmt(e.value)} Wh ÷ {fmt(ah)} Ah = "
+            f"{fmt(implied)} V, a nominal {_label(chem)} voltage ({range_text})."
+        )
+    else:
+        outcome = f"matches no whole number of cells at {range_text}"
+        summary = (
+            f"Label states {fmt(e.value)} Wh and {fmt(q.value)} mAh; {fmt(e.value)} Wh ÷ {fmt(ah)} Ah = "
+            f"{fmt(implied)} V, which is not a nominal {_label(chem)} voltage ({range_text}). "
+            "The energy and capacity on the label do not fit together."
+        )
+    steps = [
+        _step("Capacity in Ah", "Q = mAh ÷ 1000", f"{fmt(q.value)} mAh ÷ 1000", ah, "Ah"),
+        _step("Voltage implied by the label", "V = E ÷ Q", f"{fmt(e.value)} Wh ÷ {fmt(ah)} Ah", implied, "V"),
+        Step(
+            label="Comparison",
+            formula="V = whole number of cells × nominal cell voltage",
+            substitution=f"{fmt(implied)} V {outcome}",
+            text=f"Comparison: {fmt(implied)} V {outcome}",
+        ),
+    ]
+    low, high = K.MIN_CELL_VOLTAGE[chem], K.MAX_CELL_VOLTAGE[chem]
+    return CheckResult(
+        check_id=cid,
+        title=TITLES[cid],
+        status=CheckStatus.PASS if cells else CheckStatus.FLAG,
+        summary=summary,
+        inputs=[_claim_q("Energy", e, e.value, "Wh"), _claim_q("Capacity", q, q.value, "mAh"), _const_q(low), _const_q(high)],
+        formula="V (V) = E (Wh) ÷ Q (Ah)",
+        steps=steps,
+        constants=[_cite(low)] if low is high else [_cite(low), _cite(high)],
+        assumptions=[chem_assumption] if chem_assumption else [],
         notes=notes,
     )
 
@@ -439,6 +516,7 @@ def check_form_factor_bound(claims: Claims) -> CheckResult:
             f"The claim amounts to {fmt(energy.wh)} Wh. The envelope of {size} is at most {fmt(total_l)} L, "
             f"which holds no more than {fmt(cap_wh)} Wh at the best-case {_label(chem)} ceiling of "
             f"{fmt(ceiling.value)} Wh/L. The claim is {fmt(energy.wh / cap_wh)}× that cap."
+            f"{_soft_suffix(violated, ceiling)}"
         )
     else:
         summary = (
@@ -448,7 +526,7 @@ def check_form_factor_bound(claims: Claims) -> CheckResult:
     return CheckResult(
         check_id=cid,
         title=TITLES[cid],
-        status=CheckStatus.VIOLATED if violated else CheckStatus.PASS,
+        status=_exceeded(ceiling) if violated else CheckStatus.PASS,
         summary=summary,
         inputs=[_claim_q("Size code", ff_claim, ff.code), *energy.inputs, _const_q(ff.diameter_mm), _const_q(ff.height_mm), _const_q(ceiling)],
         formula="E ≤ ceiling (Wh/L) × π × (d ÷ 2)² × h",
@@ -528,12 +606,12 @@ def check_dimension_bound(claims: Claims) -> CheckResult:
     verb = "exceeds" if violated else "is under"
     summary = (
         f"{fmt(energy.wh)} Wh in {fmt(box_l)} L is {fmt(density)} Wh/L, which {verb} the best-case "
-        f"{_label(chem)} ceiling of {fmt(ceiling.value)} Wh/L."
+        f"{_label(chem)} ceiling of {fmt(ceiling.value)} Wh/L.{_soft_suffix(violated, ceiling)}"
     )
     return CheckResult(
         check_id=cid,
         title=TITLES[cid],
-        status=CheckStatus.VIOLATED if violated else CheckStatus.PASS,
+        status=_exceeded(ceiling) if violated else CheckStatus.PASS,
         summary=summary,
         inputs=[*energy.inputs, dims_input, _const_q(ceiling)],
         formula="E ÷ (L × W × H) ≤ ceiling (Wh/L)",
@@ -592,12 +670,12 @@ def check_weight_bound(claims: Claims) -> CheckResult:
     verb = "exceeds" if violated else "is under"
     summary = (
         f"{fmt(energy.wh)} Wh at {fmt(kg)} kg is {fmt(specific)} Wh/kg, which {verb} the best-case "
-        f"{_label(chem)} ceiling of {fmt(ceiling.value)} Wh/kg."
+        f"{_label(chem)} ceiling of {fmt(ceiling.value)} Wh/kg.{_soft_suffix(violated, ceiling)}"
     )
     return CheckResult(
         check_id=cid,
         title=TITLES[cid],
-        status=CheckStatus.VIOLATED if violated else CheckStatus.PASS,
+        status=_exceeded(ceiling) if violated else CheckStatus.PASS,
         summary=summary,
         inputs=[*energy.inputs, weight_input, _const_q(ceiling)],
         formula="E ÷ m ≤ ceiling (Wh/kg)",

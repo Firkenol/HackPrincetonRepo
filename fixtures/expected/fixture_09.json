@@ -1,0 +1,194 @@
+{
+  "schema_version": "1.0",
+  "claims": {
+    "product_type": "unknown",
+    "chemistry": {
+      "found_in": "title",
+      "quote": null,
+      "confidence": 1.0,
+      "value": "li-ion"
+    },
+    "form_factors": [],
+    "cell_count": {
+      "found_in": "title",
+      "quote": null,
+      "confidence": 1.0,
+      "value": 2.0
+    },
+    "nominal_voltage_v": {
+      "found_in": "label",
+      "quote": null,
+      "confidence": 1.0,
+      "value": 7.4
+    },
+    "capacity_mah": {
+      "found_in": "label",
+      "quote": null,
+      "confidence": 1.0,
+      "value": 5200.0
+    },
+    "energy_wh": {
+      "found_in": "label",
+      "quote": null,
+      "confidence": 1.0,
+      "value": 38.48
+    },
+    "output_capacity_mah": null,
+    "weight": null,
+    "dimensions": null,
+    "shelf_life_years": null,
+    "printed_codes": [],
+    "printed_terms": []
+  },
+  "checks": [
+    {
+      "check_id": "label_consistency",
+      "title": "Label consistency (Wh = V × Ah)",
+      "status": "pass",
+      "summary": "Label states 38.48 Wh; 7.4 V × 5.2 Ah = 38.48 Wh. The difference of 0% is within the 3% tolerance.",
+      "inputs": [
+        {
+          "name": "Energy",
+          "value": 38.48,
+          "unit": "Wh",
+          "origin": "claim",
+          "found_in": "label",
+          "confidence": 1.0
+        },
+        {
+          "name": "Nominal voltage",
+          "value": 7.4,
+          "unit": "V",
+          "origin": "claim",
+          "found_in": "label",
+          "confidence": 1.0
+        },
+        {
+          "name": "Capacity",
+          "value": 5200.0,
+          "unit": "mAh",
+          "origin": "claim",
+          "found_in": "label",
+          "confidence": 1.0
+        }
+      ],
+      "formula": "E (Wh) = V (V) × Q (Ah)",
+      "steps": [
+        {
+          "label": "Capacity in Ah",
+          "formula": "Q = mAh ÷ 1000",
+          "substitution": "5,200 mAh ÷ 1000",
+          "result": 5.2,
+          "unit": "Ah",
+          "text": "Capacity in Ah: 5,200 mAh ÷ 1000 = 5.2 Ah"
+        },
+        {
+          "label": "Energy from voltage and capacity",
+          "formula": "E = V × Q",
+          "substitution": "7.4 V × 5.2 Ah",
+          "result": 38.480000000000004,
+          "unit": "Wh",
+          "text": "Energy from voltage and capacity: 7.4 V × 5.2 Ah = 38.48 Wh"
+        },
+        {
+          "label": "Difference from the label",
+          "formula": "|E_label − E| ÷ E",
+          "substitution": "|38.48 Wh − 38.48 Wh| ÷ 38.48 Wh",
+          "result": 1.846524781081341e-14,
+          "unit": "%",
+          "text": "Difference from the label: |38.48 Wh − 38.48 Wh| ÷ 38.48 Wh = 0 %"
+        }
+      ],
+      "constants": [],
+      "assumptions": [],
+      "notes": [],
+      "not_assessed_reason": null
+    },
+    {
+      "check_id": "form_factor_bound",
+      "title": "Form-factor bound",
+      "status": "not_assessed",
+      "summary": "Not assessed. No standard size code is stated.",
+      "inputs": [],
+      "formula": null,
+      "steps": [],
+      "constants": [],
+      "assumptions": [],
+      "notes": [],
+      "not_assessed_reason": "No standard size code is stated."
+    },
+    {
+      "check_id": "dimension_bound",
+      "title": "Dimension bound (Wh/L)",
+      "status": "not_assessed",
+      "summary": "Not assessed. Dimensions are not stated.",
+      "inputs": [],
+      "formula": null,
+      "steps": [],
+      "constants": [],
+      "assumptions": [],
+      "notes": [],
+      "not_assessed_reason": "Dimensions are not stated."
+    },
+    {
+      "check_id": "weight_bound",
+      "title": "Weight bound (Wh/kg)",
+      "status": "not_assessed",
+      "summary": "Not assessed. Weight is not stated.",
+      "inputs": [],
+      "formula": null,
+      "steps": [],
+      "constants": [],
+      "assumptions": [],
+      "notes": [],
+      "not_assessed_reason": "Weight is not stated."
+    },
+    {
+      "check_id": "label_contradiction",
+      "title": "Label contradiction",
+      "status": "not_assessed",
+      "summary": "Not assessed. No designation code or grade wording was read from the product itself.",
+      "inputs": [
+        {
+          "name": "Stated chemistry",
+          "value": "lithium-ion",
+          "unit": "",
+          "origin": "claim",
+          "found_in": "title",
+          "confidence": 1.0
+        }
+      ],
+      "formula": null,
+      "steps": [],
+      "constants": [],
+      "assumptions": [],
+      "notes": [],
+      "not_assessed_reason": "No designation code or grade wording was read from the product itself."
+    },
+    {
+      "check_id": "chemistry_mismatch",
+      "title": "Chemistry mismatch",
+      "status": "not_assessed",
+      "summary": "Not assessed. No shelf-life claim is stated.",
+      "inputs": [],
+      "formula": null,
+      "steps": [],
+      "constants": [],
+      "assumptions": [],
+      "notes": [],
+      "not_assessed_reason": "No shelf-life claim is stated."
+    }
+  ],
+  "verdict": "No red flags",
+  "verdict_reason": "The claims that could be tested are physically plausible (Label consistency (Wh = V × Ah)). This does not confirm that the claims are true.",
+  "routing": "no action needed",
+  "routing_reason": "The claims that could be tested are plausible and were read with high confidence.",
+  "assumptions": [],
+  "not_assessed": [
+    "Form-factor bound: No standard size code is stated.",
+    "Dimension bound (Wh/L): Dimensions are not stated.",
+    "Weight bound (Wh/kg): Weight is not stated.",
+    "Label contradiction: No designation code or grade wording was read from the product itself.",
+    "Chemistry mismatch: No shelf-life claim is stated."
+  ]
+}
