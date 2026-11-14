@@ -15,6 +15,7 @@ from langchain_core.language_models.chat_models import BaseChatModel
 
 PROVIDER_VAR = "MODEL_PROVIDER"
 MODEL_VAR = "MODEL_ID"
+MAX_RETRIES = 8
 
 
 class ModelNotConfigured(RuntimeError):
@@ -31,4 +32,7 @@ def load_model() -> BaseChatModel:
     if not provider or not model_id:
         raise ModelNotConfigured(f"Set {PROVIDER_VAR} and {MODEL_VAR} to choose a model. See .env.example.")
     # temperature 0: extraction should be repeatable.
-    return init_chat_model(model_id, model_provider=provider, temperature=0)
+    # One listing takes about eight model calls, which a low requests-per-minute quota
+    # throttles. max_retries makes the provider's client wait and retry with backoff
+    # instead of failing the run.
+    return init_chat_model(model_id, model_provider=provider, temperature=0, max_retries=MAX_RETRIES)

@@ -1,4 +1,4 @@
-"""Agent wiring, tool calls and report assembly, tested with a scripted model. No network."""
+"""Orchestrator and subagent wiring, tool calls and report assembly, tested with a scripted model. No network."""
 
 from __future__ import annotations
 
@@ -10,10 +10,23 @@ from langchain_core.messages import AIMessage
 
 import agent.model as model_module
 from agent import run_listing
-from agent.runner import MSG_EMPTY, MSG_FAILED, MSG_IMAGE, MSG_NO_CLAIMS, MSG_NO_MODEL
-from agent.tests.fake_model import ScriptedChatModel, all_checks, assemble, calls, full_script, record
+from agent.runner import MSG_EMPTY, MSG_FAILED, MSG_NO_CLAIMS, MSG_NO_MODEL
+from agent.prompts import LISTING_READER, PHYSICS_CHECKER, REPORT_WRITER
+from agent.tests.fake_model import (
+    FULL_SCRIPT_TURNS,
+    TASK,
+    ScriptedChatModel,
+    all_checks,
+    calls,
+    checker_turns,
+    full_script,
+    reader_turns,
+    record,
+    say,
+    writer_turns,
+)
 from agent.tests.listings import LISTING_TEXT
-from agent.tools import ASSEMBLE_REPORT, CHECK_TOOL_NAMES, LOOKUP_FORM_FACTOR, RECORD_CLAIMS, TOOL_NAMES
+from agent.tools import ASSEMBLE_REPORT, CHECK_TOOL_NAMES, LOOKUP_FORM_FACTOR, RECORD_CLAIMS, TOOL_NAMES, TOOLS_BY_AGENT
 from claimcheck.checks import ALL_CHECKS
 from claimcheck.events import STREAM_EVENT_ADAPTER, ErrorEvent, FinalReportEvent
 from claimcheck.models import CheckResult
@@ -21,6 +34,7 @@ from tests.fixtures_data import BY_ID
 
 EXPECTED_DIR = Path(__file__).resolve().parents[3] / "fixtures" / "expected"
 PHASE_2_FIXTURES = [1, 2, 6, 7, 8, 9]
+TEXT_FIXTURES = [*PHASE_2_FIXTURES, *range(10, 21)]  # every fixture that has a text version
 
 
 def drain(generator):
@@ -41,7 +55,7 @@ def run(fixture_id: int, script=None):
 # ------------------------------------------------------------------ acceptance
 
 
-@pytest.mark.parametrize("fixture_id", PHASE_2_FIXTURES)
+@pytest.mark.parametrize("fixture_id", TEXT_FIXTURES)
 def test_fixture_text_gives_expected_verdict_and_routing(fixture_id):
     fixture = BY_ID[fixture_id]
     _, events, report = run(fixture_id)
@@ -82,7 +96,7 @@ def test_events_follow_the_contract():
 
     called = [e for e in events if e.type == "tool_call"]
     returned = [e for e in events if e.type == "tool_result"]
-    assert [e.tool for e in called] == [RECORD_CLAIMS, *CHECK_TOOL_NAMES, ASSEMBLE_REPORT]
+    assert [e.tool for e in called] == [TASK, RECORD_CLAIMS, TASK, *CHECK_TOOL_NAMES, TASK, ASSEMBLE_REPORT]
     assert {e.call_id for e in called} == {e.call_id for e in returned}
     assert all(e.ok for e in returned)
     # a tool's result never comes before its call
@@ -110,36 +124,107 @@ def test_assemble_report_result_matches_the_final_report():
     assert result["routing"] == report.routing.value == "auto-resolvable"
 
 
+def test_every_event_names_the_agent_it_came_from():
+    _, events, _ = run(6)
+
+    owner = {tool: agent for agent, tools in TOOLS_BY_AGENT.items() for tool in tools}
+    for event in events:
+        if event.type in ("tool_call", "tool_result"):
+            assert event.agent == owner.get(event.tool, "orchestrator"), event.tool
+    assert events[0].agent == "orchestrator" and events[-1].agent == "orchestrator"
+
+    # each subagent starts with one step line, straight after the orchestrator delegates to it
+    steps = [e.agent for e in events if e.type == "agent_step"]
+    assert steps == ["orchestrator", LISTING_READER, PHYSICS_CHECKER, REPORT_WRITER]
+    for index, event in enumerate(events):
+        if event.type == "tool_call" and event.tool == TASK:
+            assert events[index + 1].type == "agent_step"
+            assert events[index + 1].agent == event.args["subagent_type"]
+
+
+def test_delegation_events_show_the_subagent_and_nothing_a_model_wrote():
+    _, events, _ = run(6)
+    delegations = [e for e in events if e.type == "tool_call" and e.tool == TASK]
+    assert [e.args for e in delegations] == [
+        {"subagent_type": name} for name in (LISTING_READER, PHYSICS_CHECKER, REPORT_WRITER)
+    ]
+    finished = [e for e in events if e.type == "tool_result" and e.tool == TASK]
+    assert len(finished) == 3
+    assert all(e.result is None and e.summary == "The subagent finished." for e in finished)
+
+
 # ---------------------------------------------------------------------- wiring
 
 
-def test_model_receives_the_listing_the_tools_and_the_skills():
-    model, _, _ = run(7)
+def _system(prompt) -> str:
+    return " ".join(str(prompt[0].text).split())
 
-    assert set(TOOL_NAMES) <= set(model.bound_tools)
-    first_prompt = model.prompts[0]
-    system = str(first_prompt[0].content)
-    assert "Never do arithmetic" in system
-    assert "reading-battery-listings" in system and "running-claim-checks" in system
-    assert LISTING_TEXT[7].strip() in str(first_prompt[-1].content)
-    assert len(model.prompts) == 4  # record, checks, assemble, closing sentence
+
+def test_there_are_three_subagents_and_each_has_only_its_own_tools():
+    model, _, _ = run(7)
+    assert len(model.prompts) == FULL_SCRIPT_TURNS
+
+    orchestrator = model.tools_per_prompt[0]
+    assert TASK in orchestrator and not set(TOOL_NAMES) & set(orchestrator)
+    assert all(name in _system(model.orchestrator_prompts()[0]) for name in TOOLS_BY_AGENT)
+
+    for agent, own in TOOLS_BY_AGENT.items():
+        bound = next(tools for tools in model.tools_per_prompt if own[0] in tools)
+        assert set(own) <= set(bound), agent
+        assert not (set(TOOL_NAMES) - set(own)) & set(bound), agent
+        assert TASK not in bound, agent  # a subagent cannot delegate
+
+
+def test_each_subagent_has_its_own_prompt_and_its_own_skill():
+    model, _, _ = run(7)
+    expected = {
+        RECORD_CLAIMS: ("Extraction is your only job", "reading-battery-listings"),
+        CHECK_TOOL_NAMES[0]: ("you never calculate", "running-claim-checks"),
+        ASSEMBLE_REPORT: ("You add nothing to it", "assembling-evidence-reports"),
+    }
+    all_skills = {skill for _, skill in expected.values()}
+    for tool, (phrase, skill) in expected.items():
+        system = _system(model.prompts_with_tool(tool)[0])
+        assert phrase in system, tool
+        assert skill in system, tool
+        # the skills folder of another subagent is not offered
+        assert not any(f"/{other}/SKILL.md" in system for other in all_skills - {skill}), tool
+    orchestrator = _system(model.orchestrator_prompts()[0])
+    assert not any(f"/{skill}/SKILL.md" in orchestrator for skill in all_skills)
+
+
+def test_only_the_listing_reader_is_shown_the_listing():
+    model, _, _ = run(7)
+    listing = LISTING_TEXT[7].strip()
+    for prompt, tools in zip(model.prompts, model.tools_per_prompt, strict=True):
+        text = "".join(str(m.content) for m in prompt[1:])
+        if RECORD_CLAIMS in tools:
+            assert listing in text
+            assert prompt[1].type == "human" and prompt[2].type == "human"  # the task, then the listing
+        else:
+            assert listing not in text and "2200mAh" not in text
 
 
 def test_model_sees_tool_output_on_its_next_turn():
     model, _, _ = run(1)
-    after_checks = model.prompts[2]
+    after_checks = model.prompts_with_tool(CHECK_TOOL_NAMES[0])[1]
     tool_outputs = [m for m in after_checks if m.type == "tool" and m.name == "check_form_factor_bound"]
     assert len(tool_outputs) == 1
     assert json.loads(tool_outputs[0].content)["status"] == "violated"
 
 
 def test_lookup_form_factor_reads_the_constants_file():
+    lookups = calls((LOOKUP_FORM_FACTOR, {"code": "18650"}), (LOOKUP_FORM_FACTOR, {"code": "C"}))
     script = [
-        calls((LOOKUP_FORM_FACTOR, {"code": "18650"}), (LOOKUP_FORM_FACTOR, {"code": "C"})),
-        *full_script(BY_ID[1].claims),
+        *reader_turns(record(BY_ID[1].claims)),
+        *checker_turns(lookups, all_checks()),
+        *writer_turns(),
+        say(),
     ]
     _, events, _ = run(1, script)
-    found, missing = [e.result for e in events if e.type == "tool_result" and e.tool == LOOKUP_FORM_FACTOR]
+    # the two lookups run in parallel, so their results may arrive in either order
+    by_known = {e.result["known"]: e.result for e in events if e.type == "tool_result" and e.tool == LOOKUP_FORM_FACTOR}
+    found, missing = by_known[True], by_known[False]
     assert found["known"] is True and found["max_diameter_mm"] == 18.5 and found["max_height_mm"] == 65.3
     assert missing["known"] is False
 
@@ -150,7 +235,9 @@ def test_lookup_form_factor_reads_the_constants_file():
 def test_model_text_never_reaches_events_or_report():
     made_up = "I calculate 9999 Wh, so this is verified."
     script = full_script(BY_ID[6].claims, closing=made_up)
-    script[0] = AIMessage(content="By my arithmetic 31337 Wh.", tool_calls=script[0].tool_calls)
+    # prose beside a tool call, from the orchestrator and from the listing reader
+    for turn in (0, 1):
+        script[turn] = AIMessage(content="By my arithmetic 31337 Wh.", tool_calls=script[turn].tool_calls)
     _, events, report = run(6, script)
 
     everything = "".join(e.model_dump_json() for e in events)
@@ -159,7 +246,7 @@ def test_model_text_never_reaches_events_or_report():
 
 
 def test_report_is_complete_when_the_model_skips_checks_and_assembly():
-    script = [record(BY_ID[1].claims), AIMessage(content="Looks fine to me.")]
+    script = [*reader_turns(record(BY_ID[1].claims)), AIMessage(content="Looks fine to me.")]
     _, events, report = run(1, script)
 
     assert isinstance(events[-1], FinalReportEvent)
@@ -175,10 +262,10 @@ def test_report_is_complete_when_the_model_skips_checks_and_assembly():
 
 
 def test_check_before_claims_is_rejected_then_recovers():
-    script = [all_checks(), *full_script(BY_ID[2].claims)]
+    script = [*checker_turns(), *full_script(BY_ID[2].claims)]
     _, events, report = run(2, script)
 
-    results = [e for e in events if e.type == "tool_result"]
+    results = [e for e in events if e.type == "tool_result" and e.tool != TASK]
     assert [e.ok for e in results[:6]] == [False] * 6
     assert all(e.result is None for e in results[:6])
     assert all(e.ok for e in results[6:])
@@ -186,17 +273,25 @@ def test_check_before_claims_is_rejected_then_recovers():
 
 
 def test_invalid_claims_are_rejected_by_the_schema_then_corrected():
-    bad = calls((RECORD_CLAIMS, {"claims": {"capacity_mah": {"value": -700}, "seller": "Some Store"}}))
-    _, events, report = run(2, [bad, *full_script(BY_ID[2].claims)])
+    bad = calls((RECORD_CLAIMS, {"claims": {"capacity": {"value": -700, "unit": "mAh", "found_in": "title", "confidence": 1}, "seller": "Some Store"}}))
+    script = [*reader_turns(bad, record(BY_ID[2].claims)), *checker_turns(), *writer_turns(), say()]
+    _, events, report = run(2, script)
 
     first = next(e for e in events if e.type == "tool_result")
-    assert first.tool == RECORD_CLAIMS and first.ok is False
+    assert first.tool == RECORD_CLAIMS and first.ok is False and first.agent == LISTING_READER
     assert report.claims == BY_ID[2].claims
     assert "seller" not in report.model_dump_json()
 
 
 def test_re_recording_claims_replaces_the_earlier_ones():
-    script = [record(BY_ID[1].claims), all_checks(), record(BY_ID[2].claims), all_checks(), assemble(), AIMessage(content="Done.")]
+    script = [
+        *reader_turns(record(BY_ID[1].claims)),
+        *checker_turns(),
+        *reader_turns(record(BY_ID[2].claims)),
+        *checker_turns(),
+        *writer_turns(),
+        say(),
+    ]
     _, _, report = run(2, script)
     assert report.claims == BY_ID[2].claims
     assert report.verdict is BY_ID[2].verdict
@@ -220,16 +315,10 @@ def test_no_claims_recorded_ends_with_an_error():
 
 def test_model_failure_ends_with_a_generic_error():
     # the script runs out on the second turn, which raises inside the agent
-    model = ScriptedChatModel(script=[record(BY_ID[1].claims)])
+    model = ScriptedChatModel(script=reader_turns(record(BY_ID[1].claims))[:2])
     events, report = drain(run_listing(LISTING_TEXT[1], model=model))
     _only_error(events, report, MSG_FAILED)
     assert "script" not in events[-1].message
-
-
-@pytest.mark.parametrize("image", [b"\x89PNG\r\n", Path("screenshot.png")])
-def test_image_input_is_not_available_yet(image):
-    events, report = drain(run_listing(image, model=ScriptedChatModel(script=[])))
-    _only_error(events, report, MSG_IMAGE)
 
 
 def test_empty_text_is_an_error():

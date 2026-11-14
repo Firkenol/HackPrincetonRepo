@@ -293,6 +293,62 @@ def _resolve_energy(claims: Claims) -> _Energy | None:
     return chosen
 
 
+
+@dataclass
+class _NearCeiling:
+    """A finished product whose claim is under the cell ceiling but implausibly close to it."""
+
+    step: Step
+    threshold: Quantity
+    sentence: str
+    assumption: str
+
+
+def _near_cell_ceiling(claims: Claims, value: float, ceiling: K.Constant, unit: str, energy: "_Energy") -> _NearCeiling | None:
+    """Soft review flag for power banks. The threshold is team policy, not a physical limit."""
+    if claims.product_type is not ProductType.POWER_BANK:
+        return None
+    fraction = policy.FINISHED_PRODUCT_CEILING_FRACTION
+    limit = ceiling.value * fraction
+    if value <= limit:
+        return None
+    share = value / ceiling.value
+    step = Step(
+        label="Share of the cell ceiling",
+        formula="value ÷ ceiling",
+        substitution=f"{fmt(value)} {unit} ÷ {fmt(ceiling.value)} {unit}",
+        result=share,
+        unit="× the cell ceiling",
+        text=(
+            f"Share of the cell ceiling: {fmt(value)} {unit} ÷ {fmt(ceiling.value)} {unit} = {fmt(share)}, "
+            f"above the review threshold of {fmt(fraction)}"
+        ),
+    )
+    threshold = Quantity(
+        name="Review threshold for finished products (team policy, not a physical limit)",
+        value=fraction,
+        unit="× the cell ceiling",
+        origin="assumption",
+    )
+    assumed_voltage = next((q for q in energy.inputs if q.name == "Nominal voltage (assumed)"), None)
+    depends = (
+        f" This result depends on an assumed nominal voltage of {fmt(assumed_voltage.value)} V; "
+        "the listing does not state one."
+        if assumed_voltage is not None
+        else ""
+    )
+    sentence = (
+        f" No physical bound is exceeded, but the claim is {fmt(share)} of the ceiling for a bare cell. "
+        "A power bank also carries a case and electronics, so a figure this close to the cell ceiling is "
+        f"unusual and is flagged for review (team threshold: {fmt(fraction)} of the ceiling).{depends}"
+    )
+    assumption = (
+        f"A power bank above {fmt(fraction)} of the bare-cell ceiling is flagged for review. "
+        "This threshold is a team policy choice, not a physical limit."
+    )
+    return _NearCeiling(step, threshold, sentence, assumption)
+
+
 def _cell_count(claims: Claims) -> tuple[int, str | None]:
     if claims.cell_count:
         return max(1, int(claims.cell_count.value)), None
@@ -608,16 +664,25 @@ def check_dimension_bound(claims: Claims) -> CheckResult:
         f"{fmt(energy.wh)} Wh in {fmt(box_l)} L is {fmt(density)} Wh/L, which {verb} the best-case "
         f"{_label(chem)} ceiling of {fmt(ceiling.value)} Wh/L.{_soft_suffix(violated, ceiling)}"
     )
+    near = None if violated else _near_cell_ceiling(claims, density, ceiling, "Wh/L", energy)
+    status = _exceeded(ceiling) if violated else CheckStatus.PASS
+    inputs = [*energy.inputs, dims_input, _const_q(ceiling)]
+    extra_assumptions: list[str] = []
+    if near:
+        status, summary = CheckStatus.FLAG, summary + near.sentence
+        steps.append(near.step)
+        inputs.append(near.threshold)
+        extra_assumptions.append(near.assumption)
     return CheckResult(
         check_id=cid,
         title=TITLES[cid],
-        status=_exceeded(ceiling) if violated else CheckStatus.PASS,
+        status=status,
         summary=summary,
-        inputs=[*energy.inputs, dims_input, _const_q(ceiling)],
+        inputs=inputs,
         formula="E ÷ (L × W × H) ≤ ceiling (Wh/L)",
         steps=steps,
         constants=[*energy.constants, _cite(ceiling)],
-        assumptions=_dedupe([a for a in (*energy.assumptions, chem_assumption, ceiling_assumption) if a]),
+        assumptions=_dedupe([a for a in (*energy.assumptions, chem_assumption, ceiling_assumption, *extra_assumptions) if a]),
         notes=[*energy.notes, "The bounding box is at least as large as the product, which makes this bound lenient."],
     )
 
@@ -672,16 +737,25 @@ def check_weight_bound(claims: Claims) -> CheckResult:
         f"{fmt(energy.wh)} Wh at {fmt(kg)} kg is {fmt(specific)} Wh/kg, which {verb} the best-case "
         f"{_label(chem)} ceiling of {fmt(ceiling.value)} Wh/kg.{_soft_suffix(violated, ceiling)}"
     )
+    near = None if violated else _near_cell_ceiling(claims, specific, ceiling, "Wh/kg", energy)
+    status = _exceeded(ceiling) if violated else CheckStatus.PASS
+    inputs = [*energy.inputs, weight_input, _const_q(ceiling)]
+    extra_assumptions: list[str] = []
+    if near:
+        status, summary = CheckStatus.FLAG, summary + near.sentence
+        steps.append(near.step)
+        inputs.append(near.threshold)
+        extra_assumptions.append(near.assumption)
     return CheckResult(
         check_id=cid,
         title=TITLES[cid],
-        status=_exceeded(ceiling) if violated else CheckStatus.PASS,
+        status=status,
         summary=summary,
-        inputs=[*energy.inputs, weight_input, _const_q(ceiling)],
+        inputs=inputs,
         formula="E ÷ m ≤ ceiling (Wh/kg)",
         steps=steps,
         constants=[*energy.constants, _cite(ceiling)],
-        assumptions=_dedupe([a for a in (*energy.assumptions, chem_assumption, ceiling_assumption) if a]),
+        assumptions=_dedupe([a for a in (*energy.assumptions, chem_assumption, ceiling_assumption, *extra_assumptions) if a]),
         notes=energy.notes,
     )
 

@@ -10,6 +10,8 @@ Newest first. API and frontend owners: check this list when you pull.
 
 | Date | Change | What to do |
 |---|---|---|
+| 2026-11-14 | HTTP transport replaced on the project owner's instruction: `POST /api/verify-listing` (was `/api/check`), plus `POST /api/batch`, `GET /api/dashboard-stats`, `GET /api/samples`, `GET /api/health`. The stream opens with one `meta` frame before the contract events. Replay mode serves `fixtures/expected/` and marks responses as sample data. The frontend folder is `web/`. | See "HTTP transport" below. The event and report models are unchanged. |
+| 2026-11-14 | Skills are grouped by subagent: `backend/skills/<subagent>/<skill>/SKILL.md`. | Nothing outside the agent reads them. |
 | 2026-11-14 | `run_listing` returns `EvidenceReport | None` (was `EvidenceReport`). A failed run ends with one `error` event and returns `None`; it does not raise. Approved by the project owner. | Handle `error` as a terminal event. Do not assume the return value is a report. |
 | 2026-11-14 | `run_listing` is implemented (it used to raise `NotImplementedError`) and the agent lives in `backend/agent/`. `replay_claims` also ends with an `error` event and returns `None` if a check fails. | Nothing, unless you caught `NotImplementedError`. |
 
@@ -21,7 +23,7 @@ Newest first. API and frontend owners: check this list when you pull.
 | Stream events | `backend/claimcheck/events.py` |
 | Entry point signature `run_listing(image_or_text)` | `backend/claimcheck/pipeline.py` |
 | The verdict strings, routing strings and check ids below | `backend/claimcheck/models.py`, `backend/claimcheck/checks.py` |
-| HTTP transport: one streaming endpoint | this document |
+| HTTP transport: the routes under "HTTP transport" | this document |
 
 Not frozen: constants, policy thresholds, check wording, anything inside the agent, `replay_claims`.
 
@@ -33,16 +35,16 @@ Not frozen: constants, policy thresholds, check wording, anything inside the age
 |---|---|
 | Checks, constants, models (done) | `backend/claimcheck/` |
 | Agent: deepagents setup, tools, subagents, `run_listing` implementation | `backend/agent/` |
-| Skills, one folder per skill with a `SKILL.md` | `backend/skills/` |
+| Skills, one folder per subagent, then one folder per skill with a `SKILL.md` | `backend/skills/` |
 | API (FastAPI) | `backend/api/` |
-| Web frontend (Next.js) | `frontend/` |
+| Web frontend (Next.js) | `web/` |
 | Extra check packs | `backend/claimcheck/packs/` |
 | Screenshots for the fixtures | `fixtures/` |
 | Expected report per fixture | `fixtures/expected/fixture_NN.json` |
 
 Rules that keep the parts independent:
 
-- The API imports only `run_listing`, the event models and `to_sse`. It does not import checks or the agent.
+- The API imports only `run_listing`, `replay_claims`, the event and report models and `to_sse`. It does not import checks or the agent.
 - The frontend depends only on the event JSON and the report JSON described here.
 - The agent calls the check functions as tools. It never does arithmetic itself.
 - A check pack is a module that exposes `CHECKS`, a tuple of functions `Claims -> CheckResult`. Any physical constant it needs goes in `backend/claimcheck/constants.py` with a citation, not in the pack.
@@ -97,7 +99,7 @@ It yields stream events as the run proceeds. A run ends in exactly one of two wa
 
 `run_listing` does not raise for a failed run: a missing model setting, a model error and an unreadable listing all end with the `error` event. A caller that only streams can ignore the return value and should treat `error` as the end of the stream.
 
-`run_listing` runs the agent, so it needs a model: set `MODEL_PROVIDER` and `MODEL_ID` (see `.env.example`). Text input works; a screenshot gives an `error` event until Phase 3.
+`run_listing` runs the agent, so it needs a model: set `MODEL_PROVIDER` and `MODEL_ID` (see `.env.example`). Text and image input both work. An image that is not PNG, JPEG or WebP, or is larger than 3.5 MB, ends with an `error` event.
 
 `replay_claims(claims)` yields the same event types for claims that are already extracted, without calling a model. Use it to build and test the API and the UI without a key:
 
@@ -138,25 +140,38 @@ No event ever carries a seller or store name.
 
 ## HTTP transport
 
-One endpoint, served by the API:
+Served by `backend/api/` (FastAPI).
 
 ```
-POST /api/check
+POST /api/verify-listing
 Content-Type: multipart/form-data
-  image   a screenshot file          (send exactly one of image or text)
-  text    pasted listing text
+  image    a screenshot file          (send exactly one of image, text or sample)
+  text     pasted listing text
+  sample   a fixture id, such as fixture_01
 Response: text/event-stream
 ```
 
-Each stream event is one Server-Sent Events message, with the SSE `event` name equal to the event's `type` and the JSON object as `data`. `claimcheck.events.to_sse(event)` produces the frame:
+The stream opens with one frame that is not a contract event:
 
 ```
-event: tool_call
-data: {"type":"tool_call","run_id":"9f2c","seq":3,...}
+event: meta
+data: {"mode": "replay", "sample_data": true, "sample_id": "fixture_01"}
 
 ```
 
-Batch mode is the frontend calling this endpoint once per file. There is no separate batch endpoint.
+Every frame after it is one stream event, with the SSE `event` name equal to the event's `type` and the JSON object as `data`, as produced by `claimcheck.events.to_sse(event)`. The stream ends with `final_report` or `error`.
+
+| Route | Response |
+|---|---|
+| `POST /api/batch` | Runs every listing in `fixtures/`. JSON: `mode`, `sample_data`, `ran_at`, `items` (each with `id`, `source`, `listing_text`, `image_url`, `report`, `error`) and `counts` (`total`, `errors`, `by_verdict`, `by_routing`). |
+| `GET /api/dashboard-stats` | Counts from the latest batch run: `has_run`, `ran_at`, `listings_checked`, `impossible_claims`, `routed_to_human_review`, `no_action_needed`, `auto_resolvable`, `errors`, `by_verdict`, `by_routing`. All counts are null until a batch has run. |
+| `GET /api/samples` | The fixture listings. |
+| `GET /api/fixtures/{name}` | A fixture screenshot. |
+| `GET /api/health` | `status`, `mode`, `sample_data`. |
+
+**Modes.** `live` when `MODEL_PROVIDER` and `MODEL_ID` are set, otherwise `replay` (or when `CARNOT_REPLAY=1`). In replay mode the API serves the reports in `fixtures/expected/`: a listing that is one of the fixtures streams its checks through `replay_claims`; any other listing ends with an `error` event saying it was not checked. Every JSON body carries `mode` and `sample_data`, and every response has the `X-Carnot-Mode` header.
+
+The batch view in the web app calls `POST /api/batch`.
 
 ## Data models
 

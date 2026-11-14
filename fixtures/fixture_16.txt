@@ -1,0 +1,10 @@
+3.7V Rechargeable 2000mAh Lipo Battery 1S PH 2.0 Plug 1Pack
+1S 1C 3.7V Lithium Polymer Batteries 2000mAh Integrated Protection Circuit for Arduino ESP32 Development Board
+
+About this item
+- Battery Specifications: Dimensions: 34*10*50mm/ 1.34*0.39*1.97inch; Battery Weight(Single): 35g; Capacity: 2000mAh; Plug: PH2.0; Discharge Rate: 1C.
+- Excellent Performance: A-grade lithium cobalt oxide battery system, featuring higher energy and higher density.
+- Safe and reliable to use: Each lipo battery comes equipped with a built-in protection board that prevents overcharging, over-discharging, overcurrent, overheating, and short circuits.
+- Application scenarios: suitable for battery replacement of 3.7V electronic products. (NOTE!!! The maximum operating current of this battery is only about 1.5A.)
+
+Printed on the pack: 2000 mAh; 3.7V 7.4Wh

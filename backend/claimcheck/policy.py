@@ -23,3 +23,13 @@ FORM_FACTOR_MISMATCH_RATIO = 2.0
 # Extraction confidence at or above this counts as high. Below it, a result is
 # routed to a person whatever the verdict. Calibrate in Phase 3.
 MIN_CONFIDENCE = 0.8
+
+# TEAM POLICY, NOT PHYSICS. A power bank is a finished product: its weight and size
+# include the case, the circuit board and the connectors, so its energy per kilogram or
+# per litre has to sit well below that of a bare cell. The cell ceilings in constants.py
+# are best-case laboratory figures. A power bank whose claim works out above this
+# fraction of the cell ceiling does not break a physical bound, but it is close enough
+# to one to be worth a person's look, so it is reported as a flag (never "Impossible").
+# 0.6 was chosen by the team; it has no source. Ordinary power banks sit near 0.3 to
+# 0.35 of the lithium-ion weight ceiling.
+FINISHED_PRODUCT_CEILING_FRACTION = 0.6

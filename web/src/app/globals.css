@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+/* Carnot palette. A cold slate-blue base; the only saturated colours on screen are
+   the four verdict colours, so a verdict is never competing with decoration. */
+@theme inline {
+  --color-ink: #0c121b;
+  --color-panel: #131b27;
+  --color-raised: #1a2433;
+  --color-line: #273347;
+  --color-line-soft: #1e2838;
+  --color-text: #e7ecf3;
+  --color-muted: #93a0b4;
+  --color-faint: #66738a;
+  --color-accent: #7cc4ff;
+
+  --color-impossible: #f26d78;
+  --color-flag: #f2b441;
+  --color-clear: #4fcf8e;
+  --color-quiet: #9aa4b2;
+
+  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--color-ink);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Thin scrollbars inside the panes */
+.pane-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line) transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
