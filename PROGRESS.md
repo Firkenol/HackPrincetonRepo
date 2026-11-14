@@ -8,8 +8,8 @@ Read this first. Update it before stopping. Phases are the build order in SPEC.m
 - [x] **2. deepagents agent with tools, text input from the command line.** Merged to main on 2026-11-14 (branch `phase-2-agent`). Passes with a scripted fake model; the live run on a real model is still open (see below).
 - [ ] **3. Image input.** Built and tested with the scripted model on branch `phase-3-image` (not merged). Open: live extraction from real screenshots (see below).
 - [ ] **4. Subagents, skills, evidence report.** Built and tested with the scripted model on branch `phase-4-subagents` (not merged). Open: a live run, and LangSmith showing the subagent and tool calls.
-- [ ] **5. Web UI and batch mode.**
-- [ ] **6. README and demo script.**
+- [ ] **5. Web UI and batch mode.** Built on branch `console` (not merged) as the Carnot console: FastAPI in `backend/api/`, Next.js in `web/`. Tested in sample data mode and with the scripted model. Open: a live run, screenshots in `fixtures/`.
+- [ ] **6. README and demo script.** `README.md` is written (setup, both servers, modes, limits). `DEMO.md` is not written.
 
 ## Phase 2 status (2026-11-14)
 
@@ -71,6 +71,30 @@ Open:
 3. **CONTRACT.md says "one folder per skill" under `backend/skills/`.** Skills now sit one level deeper, grouped by subagent, because deepagents gives a subagent a folder of skills. CONTRACT.md was not edited; that row needs a one-line update by the owner.
 4. The `task` tool also offers deepagents' built-in `general-purpose` subagent (see decisions).
 
+## Console status (2026-11-14, branch `console`, created from `phase-4-subagents`)
+
+The product is now called Carnot. The engine (`claimcheck`, `agent`, `skills`) is unchanged on this branch: no check, rule or constant was added or altered.
+
+Done:
+
+- **API** (`backend/api/`): `POST /api/verify-listing` (image, text or sample id; streams the contract's events), `POST /api/batch` (every listing in `fixtures/`, reports and counts), `GET /api/dashboard-stats` (counts from the latest batch run, null before one), plus `/api/samples`, `/api/fixtures/{name}`, `/api/health`.
+- **Replay mode** when `MODEL_PROVIDER` or `MODEL_ID` is empty, or `CARNOT_REPLAY=1`: serves the reports in `fixtures/expected/`, and every response is marked (`mode`, `sample_data`, the `X-Carnot-Mode` header, a `meta` frame at the start of a stream).
+- **Fixture listing texts are files**: `fixtures/fixture_01.txt` to `fixture_09.txt`, the same text the agent tests use (a test compares them).
+- **Web console** (`web/`): metrics bar, audit feed, verdict card with the listing beside the verdict badge and routing label, "Show the math" (inputs, formula, steps, constants with sources, not-assessed reasons), paste and upload with drag and drop, live trace, JSON download, batch view with a summary table and a routing chart. Falls back to bundled sample reports when the API is unreachable, labelled.
+- Both servers were started and the console was checked in a browser in sample data mode: the nine fixtures, a pasted fixture streaming its trace, and the batch view.
+- Tests: backend 423 passed, 19 skipped (58 of the passes are for the API). Web 69 passed; `tsc`, `eslint` and `next build` are clean.
+
+Open:
+
+1. **No live run**, for the same account reason as before. Live mode is tested only with the scripted model behind the API.
+2. **No screenshots in `fixtures/`.** The batch runs the text versions. A screenshot named `fixture_NN.png` takes the place of the text file for that fixture. Image upload in the browser was not tried by hand; it is covered by API and client tests.
+3. **`DEMO.md` is not written.**
+4. **Dashboard counts are kept in memory** and reset when the API restarts.
+5. **The listing pane shows the input as submitted**, so a seller name in a pasted listing or an unblurred screenshot is visible there, to the person who submitted it. Nothing else on screen can show one.
+6. `readme.txt` at the repo root is the original placeholder and was left alone; `README.md` is the real one.
+7. `npm audit` reports 7 moderate advisories in the Next.js toolchain as scaffolded. Not changed, to keep the versions the scaffold chose.
+8. On Windows, `npm test` must be started from a path with an upper-case drive letter (see README).
+
 ## Decisions made while unattended
 
 2026-11-14, Phase 4:
@@ -89,3 +113,17 @@ Open:
 - Windows Smart App Control blocked the native builds of `xxhash` 4.1.0 and `ormsgpack` 1.13.1. `requirements.txt` pins `xxhash` 4.0.2 and `ormsgpack` 1.13.0, which load.
 - boto3 reads the region from `AWS_DEFAULT_REGION`; `langchain-aws` also accepts `AWS_REGION`, which is what `.env.example` uses.
 - The AWS key in use belongs to the account root user. An IAM user limited to Bedrock would be safer.
+
+2026-11-14, console:
+
+8. **Branch `console` was created from `phase-4-subagents`**, the newest branch, after its suite passed (365 passed) and it was committed and pushed.
+9. **The HTTP transport in CONTRACT.md was replaced** with the routes in the owner's instruction (`/api/verify-listing`, `/api/batch`, `/api/dashboard-stats`) and the frontend folder is `web/`, not `frontend/`. CONTRACT.md is updated with a row under "Contract changes". The frozen models, events and `run_listing` signature were not touched.
+10. **In replay mode a listing that is not a fixture is not given a report.** It ends with an `error` event saying it was not checked. Showing a sample verdict for someone's own listing would be a false result. The web app does the same when the API is offline.
+11. **Replay mode is decided by `MODEL_PROVIDER` and `MODEL_ID`**, not by looking for a provider key, so the API stays provider-neutral. A configured model with a bad key runs live and ends with the generic error event.
+12. **The endpoint is named `verify-listing` as instructed.** The word appears only in that URL. No screen, event or report says "verified"; tests check this on both sides.
+13. **The stream starts with a `meta` frame** (mode, sample_data, sample id). It is an extra SSE frame, not a new contract event, so `events.py` is unchanged.
+14. **The audit feed and batch table name a listing by a description built from its extracted claims** (for example "18650 lithium-ion battery, 12,000 mAh, 3.7 V"), never by its title.
+15. **In sample data mode the web app runs the batch on load**, since it costs nothing, so the console opens with the nine fixtures and real counts. In live mode it does not: the tiles show a dash until someone runs the batch.
+16. **Dashboard stats count only the latest batch run**, as instructed. Listings checked one at a time do not change them.
+17. **New dependencies**, all pinned: fastapi, uvicorn, python-multipart (backend); next, react, tailwindcss, lucide-react, recharts, framer-motion, vitest, Testing Library, jsdom (web). The scaffold came from `create-next-app` 16.4.6 and its config was kept.
+18. **Verdict colours**: Impossible red `#f26d78`, Flag amber `#f2b441`, No red flags green `#4fcf8e`, No checkable claim gray `#9aa4b2`.

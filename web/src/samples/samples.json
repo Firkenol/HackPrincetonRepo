@@ -1,0 +1,2608 @@
+[
+ {
+  "id": "fixture_01",
+  "source": "text",
+  "listing_text": "18650 Rechargeable Battery 12000mAh 3.7V Li-ion High Capacity Flat Top Cell, 4 Pack\n\n- 12000mAh capacity per cell for flashlights and headlamps\n- 3.7V lithium-ion, rechargeable\n\nTechnical details\nBattery cell composition: Lithium Ion\nItem package weight: 0.600 Kilograms (600 g)\nPackage dimensions: 150 x 150 x 150 mm\n",
+  "image_url": null,
+  "report": {
+   "schema_version": "1.0",
+   "claims": {
+    "product_type": "unknown",
+    "chemistry": {
+     "found_in": "title",
+     "quote": null,
+     "confidence": 1,
+     "value": "li-ion"
+    },
+    "form_factors": [
+     {
+      "found_in": "title",
+      "quote": null,
+      "confidence": 1,
+      "value": "18650"
+     }
+    ],
+    "cell_count": null,
+    "nominal_voltage_v": {
+     "found_in": "title",
+     "quote": null,
+     "confidence": 1,
+     "value": 3.7
+    },
+    "capacity_mah": {
+     "found_in": "title",
+     "quote": null,
+     "confidence": 1,
+     "value": 12000
+    },
+    "energy_wh": null,
+    "output_capacity_mah": null,
+    "weight": {
+     "found_in": "spec table",
+     "quote": null,
+     "confidence": 1,
+     "value_g": 600,
+     "kind": "package"
+    },
+    "dimensions": {
+     "found_in": "spec table",
+     "quote": null,
+     "confidence": 1,
+     "length_mm": 150,
+     "width_mm": 150,
+     "height_mm": 150,
+     "kind": "package"
+    },
+    "shelf_life_years": null,
+    "printed_codes": [],
+    "printed_terms": []
+   },
+   "checks": [
+    {
+     "check_id": "label_consistency",
+     "title": "Label consistency (Wh = V × Ah)",
+     "status": "not_assessed",
+     "summary": "Not assessed. Needs Wh and capacity both stated; not stated: Wh.",
+     "inputs": [],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "Needs Wh and capacity both stated; not stated: Wh."
+    },
+    {
+     "check_id": "form_factor_bound",
+     "title": "Form-factor bound",
+     "status": "violated",
+     "summary": "The claim amounts to 44.4 Wh. The envelope of one 18650-size cell is at most 0.01755 L, which holds no more than 23.19 Wh at the best-case lithium-ion ceiling of 1,321 Wh/L. The claim is 1.915× that cap.",
+     "inputs": [
+      {
+       "name": "Size code",
+       "value": "18650",
+       "unit": "",
+       "origin": "claim",
+       "found_in": "title",
+       "confidence": 1
+      },
+      {
+       "name": "Nominal voltage",
+       "value": 3.7,
+       "unit": "V",
+       "origin": "claim",
+       "found_in": "title",
+       "confidence": 1
+      },
+      {
+       "name": "Capacity",
+       "value": 12000,
+       "unit": "mAh",
+       "origin": "claim",
+       "found_in": "title",
+       "confidence": 1
+      },
+      {
+       "name": "18650 maximum diameter",
+       "value": 18.5,
+       "unit": "mm",
+       "origin": "constant",
+       "found_in": null,
+       "confidence": null
+      },
+      {
+       "name": "18650 maximum height",
+       "value": 65.3,
+       "unit": "mm",
+       "origin": "constant",
+       "found_in": null,
+       "confidence": null
+      },
+      {
+       "name": "Highest volumetric energy density measured by a third-party lab for a lithium-ion cell",
+       "value": 1321,
+       "unit": "Wh/L",
+       "origin": "constant",
+       "found_in": null,
+       "confidence": null
+      }
+     ],
+     "formula": "E ≤ ceiling (Wh/L) × π × (d ÷ 2)² × h",
+     "steps": [
+      {
+       "label": "Capacity in Ah",
+       "formula": "Q = mAh ÷ 1000",
+       "substitution": "12,000 mAh ÷ 1000",
+       "result": 12,
+       "unit": "Ah",
+       "text": "Capacity in Ah: 12,000 mAh ÷ 1000 = 12 Ah"
+      },
+      {
+       "label": "Energy implied by the stated capacity",
+       "formula": "E = V × Q",
+       "substitution": "3.7 V × 12 Ah",
+       "result": 44.400000000000006,
+       "unit": "Wh",
+       "text": "Energy implied by the stated capacity: 3.7 V × 12 Ah = 44.4 Wh"
+      },
+      {
+       "label": "18650 envelope volume",
+       "formula": "V = π × (d ÷ 2)² × h",
+       "substitution": "π × (18.5 mm ÷ 2)² × 65.3 mm = 17,553 mm³",
+       "result": 0.017552804648907315,
+       "unit": "L",
+       "text": "18650 envelope volume: π × (18.5 mm ÷ 2)² × 65.3 mm = 17,553 mm³ = 0.01755 L"
+      },
+      {
+       "label": "Most energy that volume can hold",
+       "formula": "E_max = ceiling × V",
+       "substitution": "1,321 Wh/L × 0.01755 L",
+       "result": 23.187254941206564,
+       "unit": "Wh",
+       "text": "Most energy that volume can hold: 1,321 Wh/L × 0.01755 L = 23.19 Wh"
+      },
+      {
+       "label": "Comparison",
+       "formula": "value ≤ cap",
+       "substitution": "44.4 Wh > 23.19 Wh",
+       "result": 1.9148450350237802,
+       "unit": "× the cap",
+       "text": "Comparison: 44.4 Wh > 23.19 Wh (1.915× the cap)"
+      }
+     ],
+     "constants": [
+      {
+       "key": "ff_18650_diameter",
+       "value": 18.5,
+       "unit": "mm",
+       "description": "18650 maximum diameter",
+       "source_title": "Panasonic NCR18650B lithium-ion cell datasheet, version 13.11 R1",
+       "source_publisher": "SANYO Energy (U.S.A.) Corporation / Panasonic, 2012",
+       "source_url": "https://e2e.ti.com/cfs-file/__key/communityserver-discussions-components-files/196/Panasonic-NCR18650B-datasheet.pdf",
+       "locator": "Specifications table and dimension drawing",
+       "quote": "Nominal voltage 3.6V; Weight (max.) 48.5 g; Max. 18.5 mm; Max. 65.3 mm",
+       "accessed": "2026-11-13",
+       "note": "",
+       "hard_bound": true
+      },
+      {
+       "key": "ff_18650_height",
+       "value": 65.3,
+       "unit": "mm",
+       "description": "18650 maximum height",
+       "source_title": "Panasonic NCR18650B lithium-ion cell datasheet, version 13.11 R1",
+       "source_publisher": "SANYO Energy (U.S.A.) Corporation / Panasonic, 2012",
+       "source_url": "https://e2e.ti.com/cfs-file/__key/communityserver-discussions-components-files/196/Panasonic-NCR18650B-datasheet.pdf",
+       "locator": "Specifications table and dimension drawing",
+       "quote": "Nominal voltage 3.6V; Weight (max.) 48.5 g; Max. 18.5 mm; Max. 65.3 mm",
+       "accessed": "2026-11-13",
+       "note": "",
+       "hard_bound": true
+      },
+      {
+       "key": "li_ion_max_wh_per_l",
+       "value": 1321,
+       "unit": "Wh/L",
+       "description": "Highest volumetric energy density measured by a third-party lab for a lithium-ion cell",
+       "source_title": "The All-New Amprius 500 Wh/kg Battery Platform is Here",
+       "source_publisher": "Amprius Technologies press release, 23 March 2023",
+       "source_url": "https://amprius.com/the-all-new-amprius-500-wh-kg-battery-platform-is-here/",
+       "locator": "Paragraph on third-party testing by Mobile Power Solutions",
+       "quote": "The results indicate that this cell model provides >504 Wh/kg and >1321 Wh/l at 25°C.",
+       "accessed": "2026-11-13",
+       "note": "About twice the 676 Wh/L of a leading commercial 18650 (Panasonic NCR18650B datasheet).",
+       "hard_bound": true
+      }
+     ],
+     "assumptions": [
+      "Cell count not stated; the capacity claim is taken as covering one cell."
+     ],
+     "notes": [],
+     "not_assessed_reason": null
+    },
+    {
+     "check_id": "dimension_bound",
+     "title": "Dimension bound (Wh/L)",
+     "status": "not_assessed",
+     "summary": "Not assessed. The listed dimensions describe the package, not the product.",
+     "inputs": [
+      {
+       "name": "Dimensions (package)",
+       "value": "150 × 150 × 150 mm",
+       "unit": "",
+       "origin": "claim",
+       "found_in": "spec table",
+       "confidence": 1
+      }
+     ],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [
+      "The listed dimensions (150 × 150 × 150 mm) are package dimensions. Package figures often describe the shipping box or are placeholders, so they are not used as a bound.",
+      "All three dimensions are equal, a common placeholder pattern.",
+      "The listed volume is 192.3× the 18650 envelope, so it does not describe the cell."
+     ],
+     "not_assessed_reason": "The listed dimensions describe the package, not the product."
+    },
+    {
+     "check_id": "weight_bound",
+     "title": "Weight bound (Wh/kg)",
+     "status": "not_assessed",
+     "summary": "Not assessed. The listed weight describes the package, not the product.",
+     "inputs": [
+      {
+       "name": "Weight (package)",
+       "value": 600,
+       "unit": "g",
+       "origin": "claim",
+       "found_in": "spec table",
+       "confidence": 1
+      }
+     ],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [
+      "The listed weight (600 g) is a package weight. Package figures often include packaging or are placeholders, so they are not used as a bound.",
+      "It is 12.37× the maximum mass of one 18650 cell (48.5 g), so it describes the package or is a placeholder, not the cell."
+     ],
+     "not_assessed_reason": "The listed weight describes the package, not the product."
+    },
+    {
+     "check_id": "label_contradiction",
+     "title": "Label contradiction",
+     "status": "not_assessed",
+     "summary": "Not assessed. No designation code or grade wording was read from the product itself.",
+     "inputs": [
+      {
+       "name": "Stated chemistry",
+       "value": "lithium-ion",
+       "unit": "",
+       "origin": "claim",
+       "found_in": "title",
+       "confidence": 1
+      }
+     ],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "No designation code or grade wording was read from the product itself."
+    },
+    {
+     "check_id": "chemistry_mismatch",
+     "title": "Chemistry mismatch",
+     "status": "not_assessed",
+     "summary": "Not assessed. No shelf-life claim is stated.",
+     "inputs": [],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "No shelf-life claim is stated."
+    }
+   ],
+   "verdict": "Impossible",
+   "verdict_reason": "The claim amounts to 44.4 Wh. The envelope of one 18650-size cell is at most 0.01755 L, which holds no more than 23.19 Wh at the best-case lithium-ion ceiling of 1,321 Wh/L. The claim is 1.915× that cap.",
+   "routing": "auto-resolvable",
+   "routing_reason": "A hard physical bound is violated and the calculation is reproducible.",
+   "assumptions": [
+    "Cell count not stated; the capacity claim is taken as covering one cell."
+   ],
+   "not_assessed": [
+    "Label consistency (Wh = V × Ah): Needs Wh and capacity both stated; not stated: Wh.",
+    "Dimension bound (Wh/L): The listed dimensions describe the package, not the product.",
+    "Weight bound (Wh/kg): The listed weight describes the package, not the product.",
+    "Label contradiction: No designation code or grade wording was read from the product itself.",
+    "Chemistry mismatch: No shelf-life claim is stated."
+   ]
+  },
+  "error": null
+ },
+ {
+  "id": "fixture_02",
+  "source": "text",
+  "listing_text": "AA Rechargeable Batteries Ni-MH 700mAh 1.2V, 8 Count\n\n- Ni-MH AA cells, 700mAh each, 1.2V\n- For solar garden lights and remote controls\n",
+  "image_url": null,
+  "report": {
+   "schema_version": "1.0",
+   "claims": {
+    "product_type": "unknown",
+    "chemistry": {
+     "found_in": "title",
+     "quote": null,
+     "confidence": 1,
+     "value": "nimh"
+    },
+    "form_factors": [
+     {
+      "found_in": "title",
+      "quote": null,
+      "confidence": 1,
+      "value": "AA"
+     }
+    ],
+    "cell_count": null,
+    "nominal_voltage_v": {
+     "found_in": "title",
+     "quote": null,
+     "confidence": 1,
+     "value": 1.2
+    },
+    "capacity_mah": {
+     "found_in": "title",
+     "quote": null,
+     "confidence": 1,
+     "value": 700
+    },
+    "energy_wh": null,
+    "output_capacity_mah": null,
+    "weight": null,
+    "dimensions": null,
+    "shelf_life_years": null,
+    "printed_codes": [],
+    "printed_terms": []
+   },
+   "checks": [
+    {
+     "check_id": "label_consistency",
+     "title": "Label consistency (Wh = V × Ah)",
+     "status": "not_assessed",
+     "summary": "Not assessed. Needs Wh and capacity both stated; not stated: Wh.",
+     "inputs": [],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "Needs Wh and capacity both stated; not stated: Wh."
+    },
+    {
+     "check_id": "form_factor_bound",
+     "title": "Form-factor bound",
+     "status": "pass",
+     "summary": "The claim amounts to 0.84 Wh, within the 3.502 Wh that the envelope of one AA-size cell can hold at the best-case NiMH ceiling of 420 Wh/L.",
+     "inputs": [
+      {
+       "name": "Size code",
+       "value": "AA",
+       "unit": "",
+       "origin": "claim",
+       "found_in": "title",
+       "confidence": 1
+      },
+      {
+       "name": "Nominal voltage",
+       "value": 1.2,
+       "unit": "V",
+       "origin": "claim",
+       "found_in": "title",
+       "confidence": 1
+      },
+      {
+       "name": "Capacity",
+       "value": 700,
+       "unit": "mAh",
+       "origin": "claim",
+       "found_in": "title",
+       "confidence": 1
+      },
+      {
+       "name": "AA maximum diameter",
+       "value": 14.5,
+       "unit": "mm",
+       "origin": "constant",
+       "found_in": null,
+       "confidence": null
+      },
+      {
+       "name": "AA maximum length",
+       "value": 50.5,
+       "unit": "mm",
+       "origin": "constant",
+       "found_in": null,
+       "confidence": null
+      },
+      {
+       "name": "Top of the published volumetric energy density range for NiMH cells",
+       "value": 420,
+       "unit": "Wh/L",
+       "origin": "constant",
+       "found_in": null,
+       "confidence": null
+      }
+     ],
+     "formula": "E ≤ ceiling (Wh/L) × π × (d ÷ 2)² × h",
+     "steps": [
+      {
+       "label": "Capacity in Ah",
+       "formula": "Q = mAh ÷ 1000",
+       "substitution": "700 mAh ÷ 1000",
+       "result": 0.7,
+       "unit": "Ah",
+       "text": "Capacity in Ah: 700 mAh ÷ 1000 = 0.7 Ah"
+      },
+      {
+       "label": "Energy implied by the stated capacity",
+       "formula": "E = V × Q",
+       "substitution": "1.2 V × 0.7 Ah",
+       "result": 0.84,
+       "unit": "Wh",
+       "text": "Energy implied by the stated capacity: 1.2 V × 0.7 Ah = 0.84 Wh"
+      },
+      {
+       "label": "AA envelope volume",
+       "formula": "V = π × (d ÷ 2)² × h",
+       "substitution": "π × (14.5 mm ÷ 2)² × 50.5 mm = 8,339 mm³",
+       "result": 0.008339063174642832,
+       "unit": "L",
+       "text": "AA envelope volume: π × (14.5 mm ÷ 2)² × 50.5 mm = 8,339 mm³ = 0.008339 L"
+      },
+      {
+       "label": "Most energy that volume can hold",
+       "formula": "E_max = ceiling × V",
+       "substitution": "420 Wh/L × 0.008339 L",
+       "result": 3.5024065333499896,
+       "unit": "Wh",
+       "text": "Most energy that volume can hold: 420 Wh/L × 0.008339 L = 3.502 Wh"
+      },
+      {
+       "label": "Comparison",
+       "formula": "value ≤ cap",
+       "substitution": "0.84 Wh ≤ 3.502 Wh",
+       "result": 0.23983509395654162,
+       "unit": "× the cap",
+       "text": "Comparison: 0.84 Wh ≤ 3.502 Wh (0.2398× the cap)"
+      }
+     ],
+     "constants": [
+      {
+       "key": "ff_aa_diameter",
+       "value": 14.5,
+       "unit": "mm",
+       "description": "AA maximum diameter",
+       "source_title": "AA battery",
+       "source_publisher": "Wikipedia, citing IEC 60086-2:2021 (Primary batteries, Part 2)",
+       "source_url": "https://en.wikipedia.org/wiki/AA_battery",
+       "locator": "Dimensions section",
+       "quote": "An AA cell measures 49.5–50.5 mm (1.95–1.99 in) in length, including the button terminal—and 13.7–14.5 mm (0.54–0.57 in) in diameter.",
+       "accessed": "2026-11-13",
+       "note": "",
+       "hard_bound": true
+      },
+      {
+       "key": "ff_aa_height",
+       "value": 50.5,
+       "unit": "mm",
+       "description": "AA maximum length",
+       "source_title": "AA battery",
+       "source_publisher": "Wikipedia, citing IEC 60086-2:2021 (Primary batteries, Part 2)",
+       "source_url": "https://en.wikipedia.org/wiki/AA_battery",
+       "locator": "Dimensions section",
+       "quote": "An AA cell measures 49.5–50.5 mm (1.95–1.99 in) in length, including the button terminal—and 13.7–14.5 mm (0.54–0.57 in) in diameter.",
+       "accessed": "2026-11-13",
+       "note": "",
+       "hard_bound": true
+      },
+      {
+       "key": "nimh_max_wh_per_l",
+       "value": 420,
+       "unit": "Wh/L",
+       "description": "Top of the published volumetric energy density range for NiMH cells",
+       "source_title": "nikkel-metallhydridbatteri",
+       "source_publisher": "Store norske leksikon (author Knut Hofstad, updated 3 October 2024)",
+       "source_url": "https://snl.no/nikkel-metallhydridbatteri",
+       "locator": "Fact box",
+       "quote": "energitettheten kan variere fra 170 til 420 Wh/L",
+       "accessed": "2026-11-13",
+       "note": "Secondary source with thin headroom over the highest AA ratings on sale, so exceeding it is a soft flag, not a hard result.",
+       "hard_bound": false
+      }
+     ],
+     "assumptions": [
+      "Cell count not stated; the capacity claim is taken as covering one cell."
+     ],
+     "notes": [],
+     "not_assessed_reason": null
+    },
+    {
+     "check_id": "dimension_bound",
+     "title": "Dimension bound (Wh/L)",
+     "status": "not_assessed",
+     "summary": "Not assessed. Dimensions are not stated.",
+     "inputs": [],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "Dimensions are not stated."
+    },
+    {
+     "check_id": "weight_bound",
+     "title": "Weight bound (Wh/kg)",
+     "status": "not_assessed",
+     "summary": "Not assessed. Weight is not stated.",
+     "inputs": [],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "Weight is not stated."
+    },
+    {
+     "check_id": "label_contradiction",
+     "title": "Label contradiction",
+     "status": "not_assessed",
+     "summary": "Not assessed. No designation code or grade wording was read from the product itself.",
+     "inputs": [
+      {
+       "name": "Stated chemistry",
+       "value": "NiMH",
+       "unit": "",
+       "origin": "claim",
+       "found_in": "title",
+       "confidence": 1
+      }
+     ],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "No designation code or grade wording was read from the product itself."
+    },
+    {
+     "check_id": "chemistry_mismatch",
+     "title": "Chemistry mismatch",
+     "status": "not_assessed",
+     "summary": "Not assessed. No shelf-life claim is stated.",
+     "inputs": [],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "No shelf-life claim is stated."
+    }
+   ],
+   "verdict": "No red flags",
+   "verdict_reason": "The claims that could be tested are physically plausible (Form-factor bound). This does not confirm that the claims are true.",
+   "routing": "no action needed",
+   "routing_reason": "The claims that could be tested are plausible and were read with high confidence.",
+   "assumptions": [
+    "Cell count not stated; the capacity claim is taken as covering one cell."
+   ],
+   "not_assessed": [
+    "Label consistency (Wh = V × Ah): Needs Wh and capacity both stated; not stated: Wh.",
+    "Dimension bound (Wh/L): Dimensions are not stated.",
+    "Weight bound (Wh/kg): Weight is not stated.",
+    "Label contradiction: No designation code or grade wording was read from the product itself.",
+    "Chemistry mismatch: No shelf-life claim is stated."
+   ]
+  },
+  "error": null
+ },
+ {
+  "id": "fixture_03",
+  "source": "text",
+  "listing_text": "Alkaline Batteries Combo Pack, AA and AAA, 24 Count\n\n- Alkaline AA and AAA batteries for everyday devices\n\nPrinted on the cells in the product photo: R6 Heavy Duty (AA cells), R03 Heavy Duty (AAA cells)\n",
+  "image_url": null,
+  "report": {
+   "schema_version": "1.0",
+   "claims": {
+    "product_type": "unknown",
+    "chemistry": {
+     "found_in": "title",
+     "quote": null,
+     "confidence": 1,
+     "value": "alkaline"
+    },
+    "form_factors": [
+     {
+      "found_in": "title",
+      "quote": null,
+      "confidence": 1,
+      "value": "AA"
+     },
+     {
+      "found_in": "title",
+      "quote": null,
+      "confidence": 1,
+      "value": "AAA"
+     }
+    ],
+    "cell_count": null,
+    "nominal_voltage_v": null,
+    "capacity_mah": null,
+    "energy_wh": null,
+    "output_capacity_mah": null,
+    "weight": null,
+    "dimensions": null,
+    "shelf_life_years": null,
+    "printed_codes": [
+     {
+      "found_in": "product photo",
+      "quote": null,
+      "confidence": 1,
+      "value": "R6"
+     },
+     {
+      "found_in": "product photo",
+      "quote": null,
+      "confidence": 1,
+      "value": "R03"
+     }
+    ],
+    "printed_terms": [
+     {
+      "found_in": "product photo",
+      "quote": null,
+      "confidence": 1,
+      "value": "Heavy Duty"
+     }
+    ]
+   },
+   "checks": [
+    {
+     "check_id": "label_consistency",
+     "title": "Label consistency (Wh = V × Ah)",
+     "status": "not_assessed",
+     "summary": "Not assessed. Needs Wh and capacity both stated; not stated: Wh, capacity.",
+     "inputs": [],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "Needs Wh and capacity both stated; not stated: Wh, capacity."
+    },
+    {
+     "check_id": "form_factor_bound",
+     "title": "Form-factor bound",
+     "status": "not_assessed",
+     "summary": "Not assessed. No capacity or energy claim is stated.",
+     "inputs": [],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "No capacity or energy claim is stated."
+    },
+    {
+     "check_id": "dimension_bound",
+     "title": "Dimension bound (Wh/L)",
+     "status": "not_assessed",
+     "summary": "Not assessed. Dimensions are not stated.",
+     "inputs": [],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "Dimensions are not stated."
+    },
+    {
+     "check_id": "weight_bound",
+     "title": "Weight bound (Wh/kg)",
+     "status": "not_assessed",
+     "summary": "Not assessed. Weight is not stated.",
+     "inputs": [],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "Weight is not stated."
+    },
+    {
+     "check_id": "label_contradiction",
+     "title": "Label contradiction",
+     "status": "flag",
+     "summary": "The listing states alkaline, but the product is marked R6 (IEC designation for zinc-carbon) and R03 (IEC designation for zinc-carbon) and 'Heavy Duty' (a carbon-zinc grade name). The listing text and the product markings disagree.",
+     "inputs": [
+      {
+       "name": "Stated chemistry",
+       "value": "alkaline",
+       "unit": "",
+       "origin": "claim",
+       "found_in": "title",
+       "confidence": 1
+      },
+      {
+       "name": "Printed code",
+       "value": "R6",
+       "unit": "",
+       "origin": "claim",
+       "found_in": "product photo",
+       "confidence": 1
+      },
+      {
+       "name": "Printed code",
+       "value": "R03",
+       "unit": "",
+       "origin": "claim",
+       "found_in": "product photo",
+       "confidence": 1
+      },
+      {
+       "name": "Printed wording",
+       "value": "Heavy Duty",
+       "unit": "",
+       "origin": "claim",
+       "found_in": "product photo",
+       "confidence": 1
+      }
+     ],
+     "formula": null,
+     "steps": [],
+     "constants": [
+      {
+       "key": "iec_r6_example",
+       "value": 6,
+       "unit": "IEC size",
+       "description": "R6 designates a zinc-carbon AA cell",
+       "source_title": "Eveready 1215 product datasheet, form no. 1215NA0218",
+       "source_publisher": "Energizer Brands, LLC",
+       "source_url": "https://data.energizer.com/pdfs/1215.pdf",
+       "locator": "Specifications block",
+       "quote": "AA SUPER HEAVY DUTY; Chemical System: Zinc-Manganese Dioxide (Zn/MnO2); Designation: ANSI-15D, IEC-R6; Battery Voltage: 1.5 Volts",
+       "accessed": "2026-11-13",
+       "note": "",
+       "hard_bound": true
+      },
+      {
+       "key": "iec_lr03_example",
+       "value": 3,
+       "unit": "IEC size",
+       "description": "LR03 designates an alkaline AAA cell",
+       "source_title": "Energizer EN92 product datasheet, form no. EN92EU0126",
+       "source_publisher": "Energizer Brands, LLC",
+       "source_url": "https://data.energizer.com/pdfs/EN92EU0126.pdf",
+       "locator": "Specifications block and industry standard dimensions drawing",
+       "quote": "Classification: Alkaline; Designation: ANSI-24A, IEC-LR03; Nominal Voltage: 1.5 volts; Shelf Life: 10 years at 21°C; 10.50 / 44.50 mm maximum",
+       "accessed": "2026-11-13",
+       "note": "",
+       "hard_bound": true
+      },
+      {
+       "key": "carbon_zinc_grades",
+       "value": 3,
+       "unit": "grades",
+       "description": "Grade names used for carbon-zinc cells",
+       "source_title": "Eveready Carbon Zinc Battery Handbook and Application Manual",
+       "source_publisher": "Energizer Brands, LLC, 2018",
+       "source_url": "https://data.energizer.com/pdfs/carbonzinc_appman.pdf",
+       "locator": "Page 1, introduction",
+       "quote": "Eveready Carbon Zinc batteries are marketed in three basic grades—General Purpose, Heavy Duty and Super Heavy Duty.",
+       "accessed": "2026-11-13",
+       "note": "",
+       "hard_bound": true
+      }
+     ],
+     "assumptions": [],
+     "notes": [
+      "IEC designations: no letter before R means zinc-carbon (R6, R03); L means alkaline (LR6, LR03); H means NiMH (HR6, HR03). Source: IEC 60086-1 letter codes."
+     ],
+     "not_assessed_reason": null
+    },
+    {
+     "check_id": "chemistry_mismatch",
+     "title": "Chemistry mismatch",
+     "status": "not_assessed",
+     "summary": "Not assessed. No shelf-life claim is stated.",
+     "inputs": [],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "No shelf-life claim is stated."
+    }
+   ],
+   "verdict": "Flag",
+   "verdict_reason": "The listing states alkaline, but the product is marked R6 (IEC designation for zinc-carbon) and R03 (IEC designation for zinc-carbon) and 'Heavy Duty' (a carbon-zinc grade name). The listing text and the product markings disagree.",
+   "routing": "needs human review",
+   "routing_reason": "A contradiction or unusual claim needs a person's judgment.",
+   "assumptions": [],
+   "not_assessed": [
+    "Label consistency (Wh = V × Ah): Needs Wh and capacity both stated; not stated: Wh, capacity.",
+    "Form-factor bound: No capacity or energy claim is stated.",
+    "Dimension bound (Wh/L): Dimensions are not stated.",
+    "Weight bound (Wh/kg): Weight is not stated.",
+    "Chemistry mismatch: No shelf-life claim is stated."
+   ]
+  },
+  "error": null
+ },
+ {
+  "id": "fixture_04",
+  "source": "text",
+  "listing_text": "Carbon Zinc Batteries AA and AAA Value Pack\n\n- Carbon zinc AA and AAA cells for clocks and remote controls\n- 10-year shelf life\n",
+  "image_url": null,
+  "report": {
+   "schema_version": "1.0",
+   "claims": {
+    "product_type": "unknown",
+    "chemistry": {
+     "found_in": "title",
+     "quote": null,
+     "confidence": 1,
+     "value": "zinc-carbon"
+    },
+    "form_factors": [
+     {
+      "found_in": "title",
+      "quote": null,
+      "confidence": 1,
+      "value": "AA"
+     },
+     {
+      "found_in": "title",
+      "quote": null,
+      "confidence": 1,
+      "value": "AAA"
+     }
+    ],
+    "cell_count": null,
+    "nominal_voltage_v": null,
+    "capacity_mah": null,
+    "energy_wh": null,
+    "output_capacity_mah": null,
+    "weight": null,
+    "dimensions": null,
+    "shelf_life_years": {
+     "found_in": "title",
+     "quote": null,
+     "confidence": 1,
+     "value": 10
+    },
+    "printed_codes": [],
+    "printed_terms": []
+   },
+   "checks": [
+    {
+     "check_id": "label_consistency",
+     "title": "Label consistency (Wh = V × Ah)",
+     "status": "not_assessed",
+     "summary": "Not assessed. Needs Wh and capacity both stated; not stated: Wh, capacity.",
+     "inputs": [],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "Needs Wh and capacity both stated; not stated: Wh, capacity."
+    },
+    {
+     "check_id": "form_factor_bound",
+     "title": "Form-factor bound",
+     "status": "not_assessed",
+     "summary": "Not assessed. No capacity or energy claim is stated.",
+     "inputs": [],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "No capacity or energy claim is stated."
+    },
+    {
+     "check_id": "dimension_bound",
+     "title": "Dimension bound (Wh/L)",
+     "status": "not_assessed",
+     "summary": "Not assessed. Dimensions are not stated.",
+     "inputs": [],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "Dimensions are not stated."
+    },
+    {
+     "check_id": "weight_bound",
+     "title": "Weight bound (Wh/kg)",
+     "status": "not_assessed",
+     "summary": "Not assessed. Weight is not stated.",
+     "inputs": [],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "Weight is not stated."
+    },
+    {
+     "check_id": "label_contradiction",
+     "title": "Label contradiction",
+     "status": "not_assessed",
+     "summary": "Not assessed. No designation code or grade wording was read from the product itself.",
+     "inputs": [
+      {
+       "name": "Stated chemistry",
+       "value": "zinc-carbon",
+       "unit": "",
+       "origin": "claim",
+       "found_in": "title",
+       "confidence": 1
+      }
+     ],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "No designation code or grade wording was read from the product itself."
+    },
+    {
+     "check_id": "chemistry_mismatch",
+     "title": "Chemistry mismatch",
+     "status": "flag",
+     "summary": "The listing claims a 10-year shelf life for a zinc-carbon product. Published storage data for this chemistry runs to 4 years (at 4 years the handbook reports 65-80% of fresh service retained). A shelf life of 10 years is what alkaline datasheets state. The claim is unusual for the stated chemistry.",
+     "inputs": [
+      {
+       "name": "Shelf life",
+       "value": 10,
+       "unit": "years",
+       "origin": "claim",
+       "found_in": "title",
+       "confidence": 1
+      },
+      {
+       "name": "Stated chemistry",
+       "value": "zinc-carbon",
+       "unit": "",
+       "origin": "claim",
+       "found_in": "title",
+       "confidence": 1
+      },
+      {
+       "name": "Longest storage period with published service retention for carbon-zinc cells",
+       "value": 4,
+       "unit": "years",
+       "origin": "constant",
+       "found_in": null,
+       "confidence": null
+      }
+     ],
+     "formula": null,
+     "steps": [
+      {
+       "label": "Comparison",
+       "formula": "claimed shelf life ≤ longest published storage period",
+       "substitution": "10 years > 4 years",
+       "result": 2.5,
+       "unit": "× the published period",
+       "text": "Comparison: 10 years > 4 years"
+      }
+     ],
+     "constants": [
+      {
+       "key": "zinc_carbon_max_published_storage_years",
+       "value": 4,
+       "unit": "years",
+       "description": "Longest storage period with published service retention for carbon-zinc cells",
+       "source_title": "Eveready Carbon Zinc Battery Handbook and Application Manual",
+       "source_publisher": "Energizer Brands, LLC, 2018",
+       "source_url": "https://data.energizer.com/pdfs/carbonzinc_appman.pdf",
+       "locator": "Page 8, table 'Service Maintenance (storage at 21°C)'",
+       "quote": "1 year 90-100%; 2 years 80-90%; 3 years 75-85%; 4 years 65-80%",
+       "accessed": "2026-11-13",
+       "note": "At 4 years the handbook reports 65-80% of fresh service retained.",
+       "hard_bound": true
+      },
+      {
+       "key": "alkaline_shelf_life_reference_years",
+       "value": 10,
+       "unit": "years",
+       "description": "Shelf life stated on an alkaline cell datasheet, for comparison",
+       "source_title": "Energizer EN92 product datasheet, form no. EN92EU0126",
+       "source_publisher": "Energizer Brands, LLC",
+       "source_url": "https://data.energizer.com/pdfs/EN92EU0126.pdf",
+       "locator": "Specifications block and industry standard dimensions drawing",
+       "quote": "Classification: Alkaline; Designation: ANSI-24A, IEC-LR03; Nominal Voltage: 1.5 volts; Shelf Life: 10 years at 21°C; 10.50 / 44.50 mm maximum",
+       "accessed": "2026-11-13",
+       "note": "",
+       "hard_bound": true
+      }
+     ],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": null
+    }
+   ],
+   "verdict": "Flag",
+   "verdict_reason": "The listing claims a 10-year shelf life for a zinc-carbon product. Published storage data for this chemistry runs to 4 years (at 4 years the handbook reports 65-80% of fresh service retained). A shelf life of 10 years is what alkaline datasheets state. The claim is unusual for the stated chemistry.",
+   "routing": "needs human review",
+   "routing_reason": "A contradiction or unusual claim needs a person's judgment.",
+   "assumptions": [],
+   "not_assessed": [
+    "Label consistency (Wh = V × Ah): Needs Wh and capacity both stated; not stated: Wh, capacity.",
+    "Form-factor bound: No capacity or energy claim is stated.",
+    "Dimension bound (Wh/L): Dimensions are not stated.",
+    "Weight bound (Wh/kg): Weight is not stated.",
+    "Label contradiction: No designation code or grade wording was read from the product itself."
+   ]
+  },
+  "error": null
+ },
+ {
+  "id": "fixture_05",
+  "source": "text",
+  "listing_text": "Heavy Duty Batteries AA and AAA Multipack, Carbon Zinc\n\n- Carbon zinc AA and AAA cells for low-drain devices\n\nPrinted on the cells in the product photo: R6 Heavy Duty (AA cells), R03 Heavy Duty (AAA cells)\n",
+  "image_url": null,
+  "report": {
+   "schema_version": "1.0",
+   "claims": {
+    "product_type": "unknown",
+    "chemistry": {
+     "found_in": "title",
+     "quote": null,
+     "confidence": 1,
+     "value": "zinc-carbon"
+    },
+    "form_factors": [
+     {
+      "found_in": "title",
+      "quote": null,
+      "confidence": 1,
+      "value": "AA"
+     },
+     {
+      "found_in": "title",
+      "quote": null,
+      "confidence": 1,
+      "value": "AAA"
+     }
+    ],
+    "cell_count": null,
+    "nominal_voltage_v": null,
+    "capacity_mah": null,
+    "energy_wh": null,
+    "output_capacity_mah": null,
+    "weight": null,
+    "dimensions": null,
+    "shelf_life_years": null,
+    "printed_codes": [
+     {
+      "found_in": "product photo",
+      "quote": null,
+      "confidence": 1,
+      "value": "R6"
+     },
+     {
+      "found_in": "product photo",
+      "quote": null,
+      "confidence": 1,
+      "value": "R03"
+     }
+    ],
+    "printed_terms": [
+     {
+      "found_in": "product photo",
+      "quote": null,
+      "confidence": 1,
+      "value": "Heavy Duty"
+     }
+    ]
+   },
+   "checks": [
+    {
+     "check_id": "label_consistency",
+     "title": "Label consistency (Wh = V × Ah)",
+     "status": "not_assessed",
+     "summary": "Not assessed. Needs Wh and capacity both stated; not stated: Wh, capacity.",
+     "inputs": [],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "Needs Wh and capacity both stated; not stated: Wh, capacity."
+    },
+    {
+     "check_id": "form_factor_bound",
+     "title": "Form-factor bound",
+     "status": "not_assessed",
+     "summary": "Not assessed. No capacity or energy claim is stated.",
+     "inputs": [],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "No capacity or energy claim is stated."
+    },
+    {
+     "check_id": "dimension_bound",
+     "title": "Dimension bound (Wh/L)",
+     "status": "not_assessed",
+     "summary": "Not assessed. Dimensions are not stated.",
+     "inputs": [],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "Dimensions are not stated."
+    },
+    {
+     "check_id": "weight_bound",
+     "title": "Weight bound (Wh/kg)",
+     "status": "not_assessed",
+     "summary": "Not assessed. Weight is not stated.",
+     "inputs": [],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "Weight is not stated."
+    },
+    {
+     "check_id": "label_contradiction",
+     "title": "Label contradiction",
+     "status": "pass",
+     "summary": "The product markings (R6 (IEC designation for zinc-carbon), R03 (IEC designation for zinc-carbon), 'Heavy Duty' (a carbon-zinc grade name)) agree with the stated chemistry (zinc-carbon).",
+     "inputs": [
+      {
+       "name": "Stated chemistry",
+       "value": "zinc-carbon",
+       "unit": "",
+       "origin": "claim",
+       "found_in": "title",
+       "confidence": 1
+      },
+      {
+       "name": "Printed code",
+       "value": "R6",
+       "unit": "",
+       "origin": "claim",
+       "found_in": "product photo",
+       "confidence": 1
+      },
+      {
+       "name": "Printed code",
+       "value": "R03",
+       "unit": "",
+       "origin": "claim",
+       "found_in": "product photo",
+       "confidence": 1
+      },
+      {
+       "name": "Printed wording",
+       "value": "Heavy Duty",
+       "unit": "",
+       "origin": "claim",
+       "found_in": "product photo",
+       "confidence": 1
+      }
+     ],
+     "formula": null,
+     "steps": [],
+     "constants": [
+      {
+       "key": "iec_r6_example",
+       "value": 6,
+       "unit": "IEC size",
+       "description": "R6 designates a zinc-carbon AA cell",
+       "source_title": "Eveready 1215 product datasheet, form no. 1215NA0218",
+       "source_publisher": "Energizer Brands, LLC",
+       "source_url": "https://data.energizer.com/pdfs/1215.pdf",
+       "locator": "Specifications block",
+       "quote": "AA SUPER HEAVY DUTY; Chemical System: Zinc-Manganese Dioxide (Zn/MnO2); Designation: ANSI-15D, IEC-R6; Battery Voltage: 1.5 Volts",
+       "accessed": "2026-11-13",
+       "note": "",
+       "hard_bound": true
+      },
+      {
+       "key": "iec_lr03_example",
+       "value": 3,
+       "unit": "IEC size",
+       "description": "LR03 designates an alkaline AAA cell",
+       "source_title": "Energizer EN92 product datasheet, form no. EN92EU0126",
+       "source_publisher": "Energizer Brands, LLC",
+       "source_url": "https://data.energizer.com/pdfs/EN92EU0126.pdf",
+       "locator": "Specifications block and industry standard dimensions drawing",
+       "quote": "Classification: Alkaline; Designation: ANSI-24A, IEC-LR03; Nominal Voltage: 1.5 volts; Shelf Life: 10 years at 21°C; 10.50 / 44.50 mm maximum",
+       "accessed": "2026-11-13",
+       "note": "",
+       "hard_bound": true
+      },
+      {
+       "key": "carbon_zinc_grades",
+       "value": 3,
+       "unit": "grades",
+       "description": "Grade names used for carbon-zinc cells",
+       "source_title": "Eveready Carbon Zinc Battery Handbook and Application Manual",
+       "source_publisher": "Energizer Brands, LLC, 2018",
+       "source_url": "https://data.energizer.com/pdfs/carbonzinc_appman.pdf",
+       "locator": "Page 1, introduction",
+       "quote": "Eveready Carbon Zinc batteries are marketed in three basic grades—General Purpose, Heavy Duty and Super Heavy Duty.",
+       "accessed": "2026-11-13",
+       "note": "",
+       "hard_bound": true
+      }
+     ],
+     "assumptions": [],
+     "notes": [
+      "IEC designations: no letter before R means zinc-carbon (R6, R03); L means alkaline (LR6, LR03); H means NiMH (HR6, HR03). Source: IEC 60086-1 letter codes."
+     ],
+     "not_assessed_reason": null
+    },
+    {
+     "check_id": "chemistry_mismatch",
+     "title": "Chemistry mismatch",
+     "status": "not_assessed",
+     "summary": "Not assessed. No shelf-life claim is stated.",
+     "inputs": [],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "No shelf-life claim is stated."
+    }
+   ],
+   "verdict": "No checkable claim",
+   "verdict_reason": "The listing states nothing numeric or testable, so no check could run.",
+   "routing": "no action needed",
+   "routing_reason": "The listing states nothing that a calculation can test.",
+   "assumptions": [],
+   "not_assessed": [
+    "Label consistency (Wh = V × Ah): Needs Wh and capacity both stated; not stated: Wh, capacity.",
+    "Form-factor bound: No capacity or energy claim is stated.",
+    "Dimension bound (Wh/L): Dimensions are not stated.",
+    "Weight bound (Wh/kg): Weight is not stated.",
+    "Chemistry mismatch: No shelf-life claim is stated."
+   ]
+  },
+  "error": null
+ },
+ {
+  "id": "fixture_06",
+  "source": "text",
+  "listing_text": "2S LiPo Battery 7.4V 6200mAh Hard Case Pack for 1/10 RC Car\n\nLabel on pack: 7.4V 6200mAh 45.88Wh 2S\n\nSpecifications\nCells: 2S (2 cells in series)\nDimensions: 139.5 x 47.5 x 26 mm\nWeight: 315 g\n",
+  "image_url": null,
+  "report": {
+   "schema_version": "1.0",
+   "claims": {
+    "product_type": "unknown",
+    "chemistry": {
+     "found_in": "title",
+     "quote": null,
+     "confidence": 1,
+     "value": "li-ion"
+    },
+    "form_factors": [],
+    "cell_count": {
+     "found_in": "title",
+     "quote": null,
+     "confidence": 1,
+     "value": 2
+    },
+    "nominal_voltage_v": {
+     "found_in": "label",
+     "quote": null,
+     "confidence": 1,
+     "value": 7.4
+    },
+    "capacity_mah": {
+     "found_in": "label",
+     "quote": null,
+     "confidence": 1,
+     "value": 6200
+    },
+    "energy_wh": {
+     "found_in": "label",
+     "quote": null,
+     "confidence": 1,
+     "value": 45.88
+    },
+    "output_capacity_mah": null,
+    "weight": {
+     "found_in": "spec table",
+     "quote": null,
+     "confidence": 1,
+     "value_g": 315,
+     "kind": "product"
+    },
+    "dimensions": {
+     "found_in": "spec table",
+     "quote": null,
+     "confidence": 1,
+     "length_mm": 139.5,
+     "width_mm": 47.5,
+     "height_mm": 26,
+     "kind": "product"
+    },
+    "shelf_life_years": null,
+    "printed_codes": [],
+    "printed_terms": []
+   },
+   "checks": [
+    {
+     "check_id": "label_consistency",
+     "title": "Label consistency (Wh = V × Ah)",
+     "status": "pass",
+     "summary": "Label states 45.88 Wh; 7.4 V × 6.2 Ah = 45.88 Wh. The difference of 0% is within the 3% tolerance.",
+     "inputs": [
+      {
+       "name": "Energy",
+       "value": 45.88,
+       "unit": "Wh",
+       "origin": "claim",
+       "found_in": "label",
+       "confidence": 1
+      },
+      {
+       "name": "Nominal voltage",
+       "value": 7.4,
+       "unit": "V",
+       "origin": "claim",
+       "found_in": "label",
+       "confidence": 1
+      },
+      {
+       "name": "Capacity",
+       "value": 6200,
+       "unit": "mAh",
+       "origin": "claim",
+       "found_in": "label",
+       "confidence": 1
+      }
+     ],
+     "formula": "E (Wh) = V (V) × Q (Ah)",
+     "steps": [
+      {
+       "label": "Capacity in Ah",
+       "formula": "Q = mAh ÷ 1000",
+       "substitution": "6,200 mAh ÷ 1000",
+       "result": 6.2,
+       "unit": "Ah",
+       "text": "Capacity in Ah: 6,200 mAh ÷ 1000 = 6.2 Ah"
+      },
+      {
+       "label": "Energy from voltage and capacity",
+       "formula": "E = V × Q",
+       "substitution": "7.4 V × 6.2 Ah",
+       "result": 45.88,
+       "unit": "Wh",
+       "text": "Energy from voltage and capacity: 7.4 V × 6.2 Ah = 45.88 Wh"
+      },
+      {
+       "label": "Difference from the label",
+       "formula": "|E_label − E| ÷ E",
+       "substitution": "|45.88 Wh − 45.88 Wh| ÷ 45.88 Wh",
+       "result": 0,
+       "unit": "%",
+       "text": "Difference from the label: |45.88 Wh − 45.88 Wh| ÷ 45.88 Wh = 0 %"
+      }
+     ],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": null
+    },
+    {
+     "check_id": "form_factor_bound",
+     "title": "Form-factor bound",
+     "status": "not_assessed",
+     "summary": "Not assessed. No standard size code is stated.",
+     "inputs": [],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "No standard size code is stated."
+    },
+    {
+     "check_id": "dimension_bound",
+     "title": "Dimension bound (Wh/L)",
+     "status": "pass",
+     "summary": "45.88 Wh in 0.1723 L is 266.3 Wh/L, which is under the best-case lithium-ion ceiling of 1,321 Wh/L.",
+     "inputs": [
+      {
+       "name": "Energy",
+       "value": 45.88,
+       "unit": "Wh",
+       "origin": "claim",
+       "found_in": "label",
+       "confidence": 1
+      },
+      {
+       "name": "Dimensions (product)",
+       "value": "139.5 × 47.5 × 26 mm",
+       "unit": "",
+       "origin": "claim",
+       "found_in": "spec table",
+       "confidence": 1
+      },
+      {
+       "name": "Highest volumetric energy density measured by a third-party lab for a lithium-ion cell",
+       "value": 1321,
+       "unit": "Wh/L",
+       "origin": "constant",
+       "found_in": null,
+       "confidence": null
+      }
+     ],
+     "formula": "E ÷ (L × W × H) ≤ ceiling (Wh/L)",
+     "steps": [
+      {
+       "label": "Energy stated on the label",
+       "formula": "E",
+       "substitution": "as printed",
+       "result": 45.88,
+       "unit": "Wh",
+       "text": "Energy stated on the label: 45.88 Wh"
+      },
+      {
+       "label": "Volume from the stated dimensions",
+       "formula": "V = L × W × H",
+       "substitution": "139.5 mm × 47.5 mm × 26 mm = 172,282 mm³",
+       "result": 0.1722825,
+       "unit": "L",
+       "text": "Volume from the stated dimensions: 139.5 mm × 47.5 mm × 26 mm = 172,282 mm³ = 0.1723 L"
+      },
+      {
+       "label": "Energy density",
+       "formula": "E ÷ V",
+       "substitution": "45.88 Wh ÷ 0.1723 L",
+       "result": 266.3067926225821,
+       "unit": "Wh/L",
+       "text": "Energy density: 45.88 Wh ÷ 0.1723 L = 266.3 Wh/L"
+      },
+      {
+       "label": "Comparison",
+       "formula": "value ≤ ceiling",
+       "substitution": "266.3 Wh/L ≤ 1,321 Wh/L",
+       "result": 0.20159484679983505,
+       "unit": "× the ceiling",
+       "text": "Comparison: 266.3 Wh/L ≤ 1,321 Wh/L (0.2016× the ceiling)"
+      }
+     ],
+     "constants": [
+      {
+       "key": "li_ion_max_wh_per_l",
+       "value": 1321,
+       "unit": "Wh/L",
+       "description": "Highest volumetric energy density measured by a third-party lab for a lithium-ion cell",
+       "source_title": "The All-New Amprius 500 Wh/kg Battery Platform is Here",
+       "source_publisher": "Amprius Technologies press release, 23 March 2023",
+       "source_url": "https://amprius.com/the-all-new-amprius-500-wh-kg-battery-platform-is-here/",
+       "locator": "Paragraph on third-party testing by Mobile Power Solutions",
+       "quote": "The results indicate that this cell model provides >504 Wh/kg and >1321 Wh/l at 25°C.",
+       "accessed": "2026-11-13",
+       "note": "About twice the 676 Wh/L of a leading commercial 18650 (Panasonic NCR18650B datasheet).",
+       "hard_bound": true
+      }
+     ],
+     "assumptions": [],
+     "notes": [
+      "The bounding box is at least as large as the product, which makes this bound lenient."
+     ],
+     "not_assessed_reason": null
+    },
+    {
+     "check_id": "weight_bound",
+     "title": "Weight bound (Wh/kg)",
+     "status": "pass",
+     "summary": "45.88 Wh at 0.315 kg is 145.7 Wh/kg, which is under the best-case lithium-ion ceiling of 504 Wh/kg.",
+     "inputs": [
+      {
+       "name": "Energy",
+       "value": 45.88,
+       "unit": "Wh",
+       "origin": "claim",
+       "found_in": "label",
+       "confidence": 1
+      },
+      {
+       "name": "Weight (product)",
+       "value": 315,
+       "unit": "g",
+       "origin": "claim",
+       "found_in": "spec table",
+       "confidence": 1
+      },
+      {
+       "name": "Highest specific energy measured by a third-party lab for a lithium-ion cell",
+       "value": 504,
+       "unit": "Wh/kg",
+       "origin": "constant",
+       "found_in": null,
+       "confidence": null
+      }
+     ],
+     "formula": "E ÷ m ≤ ceiling (Wh/kg)",
+     "steps": [
+      {
+       "label": "Energy stated on the label",
+       "formula": "E",
+       "substitution": "as printed",
+       "result": 45.88,
+       "unit": "Wh",
+       "text": "Energy stated on the label: 45.88 Wh"
+      },
+      {
+       "label": "Weight in kg",
+       "formula": "m = g ÷ 1000",
+       "substitution": "315 g ÷ 1000",
+       "result": 0.315,
+       "unit": "kg",
+       "text": "Weight in kg: 315 g ÷ 1000 = 0.315 kg"
+      },
+      {
+       "label": "Specific energy",
+       "formula": "E ÷ m",
+       "substitution": "45.88 Wh ÷ 0.315 kg",
+       "result": 145.65079365079364,
+       "unit": "Wh/kg",
+       "text": "Specific energy: 45.88 Wh ÷ 0.315 kg = 145.7 Wh/kg"
+      },
+      {
+       "label": "Comparison",
+       "formula": "value ≤ ceiling",
+       "substitution": "145.7 Wh/kg ≤ 504 Wh/kg",
+       "result": 0.2889896699420509,
+       "unit": "× the ceiling",
+       "text": "Comparison: 145.7 Wh/kg ≤ 504 Wh/kg (0.289× the ceiling)"
+      }
+     ],
+     "constants": [
+      {
+       "key": "li_ion_max_wh_per_kg",
+       "value": 504,
+       "unit": "Wh/kg",
+       "description": "Highest specific energy measured by a third-party lab for a lithium-ion cell",
+       "source_title": "The All-New Amprius 500 Wh/kg Battery Platform is Here",
+       "source_publisher": "Amprius Technologies press release, 23 March 2023",
+       "source_url": "https://amprius.com/the-all-new-amprius-500-wh-kg-battery-platform-is-here/",
+       "locator": "Paragraph on third-party testing by Mobile Power Solutions",
+       "quote": "The results indicate that this cell model provides >504 Wh/kg and >1321 Wh/l at 25°C.",
+       "accessed": "2026-11-13",
+       "note": "About twice the 243 Wh/kg of a leading commercial 18650 (Panasonic NCR18650B datasheet).",
+       "hard_bound": true
+      }
+     ],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": null
+    },
+    {
+     "check_id": "label_contradiction",
+     "title": "Label contradiction",
+     "status": "not_assessed",
+     "summary": "Not assessed. No designation code or grade wording was read from the product itself.",
+     "inputs": [
+      {
+       "name": "Stated chemistry",
+       "value": "lithium-ion",
+       "unit": "",
+       "origin": "claim",
+       "found_in": "title",
+       "confidence": 1
+      }
+     ],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "No designation code or grade wording was read from the product itself."
+    },
+    {
+     "check_id": "chemistry_mismatch",
+     "title": "Chemistry mismatch",
+     "status": "not_assessed",
+     "summary": "Not assessed. No shelf-life claim is stated.",
+     "inputs": [],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "No shelf-life claim is stated."
+    }
+   ],
+   "verdict": "No red flags",
+   "verdict_reason": "The claims that could be tested are physically plausible (Label consistency (Wh = V × Ah), Dimension bound (Wh/L), Weight bound (Wh/kg)). This does not confirm that the claims are true.",
+   "routing": "no action needed",
+   "routing_reason": "The claims that could be tested are plausible and were read with high confidence.",
+   "assumptions": [],
+   "not_assessed": [
+    "Form-factor bound: No standard size code is stated.",
+    "Label contradiction: No designation code or grade wording was read from the product itself.",
+    "Chemistry mismatch: No shelf-life claim is stated."
+   ]
+  },
+  "error": null
+ },
+ {
+  "id": "fixture_07",
+  "source": "text",
+  "listing_text": "3S LiPo Battery 11.1V 2200mAh Soft Pack for RC Airplane and Quadcopter\n\nLabel on pack: 11.1V 2200mAh 24.42Wh 3S\n\nSpecifications\nCells: 3S\nDimensions: 106 x 33 x 23 mm\nWeight: 179 g\n",
+  "image_url": null,
+  "report": {
+   "schema_version": "1.0",
+   "claims": {
+    "product_type": "unknown",
+    "chemistry": {
+     "found_in": "title",
+     "quote": null,
+     "confidence": 1,
+     "value": "li-ion"
+    },
+    "form_factors": [],
+    "cell_count": {
+     "found_in": "title",
+     "quote": null,
+     "confidence": 1,
+     "value": 3
+    },
+    "nominal_voltage_v": {
+     "found_in": "label",
+     "quote": null,
+     "confidence": 1,
+     "value": 11.1
+    },
+    "capacity_mah": {
+     "found_in": "label",
+     "quote": null,
+     "confidence": 1,
+     "value": 2200
+    },
+    "energy_wh": {
+     "found_in": "label",
+     "quote": null,
+     "confidence": 1,
+     "value": 24.42
+    },
+    "output_capacity_mah": null,
+    "weight": {
+     "found_in": "spec table",
+     "quote": null,
+     "confidence": 1,
+     "value_g": 179,
+     "kind": "product"
+    },
+    "dimensions": {
+     "found_in": "spec table",
+     "quote": null,
+     "confidence": 1,
+     "length_mm": 106,
+     "width_mm": 33,
+     "height_mm": 23,
+     "kind": "product"
+    },
+    "shelf_life_years": null,
+    "printed_codes": [],
+    "printed_terms": []
+   },
+   "checks": [
+    {
+     "check_id": "label_consistency",
+     "title": "Label consistency (Wh = V × Ah)",
+     "status": "pass",
+     "summary": "Label states 24.42 Wh; 11.1 V × 2.2 Ah = 24.42 Wh. The difference of 0% is within the 3% tolerance.",
+     "inputs": [
+      {
+       "name": "Energy",
+       "value": 24.42,
+       "unit": "Wh",
+       "origin": "claim",
+       "found_in": "label",
+       "confidence": 1
+      },
+      {
+       "name": "Nominal voltage",
+       "value": 11.1,
+       "unit": "V",
+       "origin": "claim",
+       "found_in": "label",
+       "confidence": 1
+      },
+      {
+       "name": "Capacity",
+       "value": 2200,
+       "unit": "mAh",
+       "origin": "claim",
+       "found_in": "label",
+       "confidence": 1
+      }
+     ],
+     "formula": "E (Wh) = V (V) × Q (Ah)",
+     "steps": [
+      {
+       "label": "Capacity in Ah",
+       "formula": "Q = mAh ÷ 1000",
+       "substitution": "2,200 mAh ÷ 1000",
+       "result": 2.2,
+       "unit": "Ah",
+       "text": "Capacity in Ah: 2,200 mAh ÷ 1000 = 2.2 Ah"
+      },
+      {
+       "label": "Energy from voltage and capacity",
+       "formula": "E = V × Q",
+       "substitution": "11.1 V × 2.2 Ah",
+       "result": 24.42,
+       "unit": "Wh",
+       "text": "Energy from voltage and capacity: 11.1 V × 2.2 Ah = 24.42 Wh"
+      },
+      {
+       "label": "Difference from the label",
+       "formula": "|E_label − E| ÷ E",
+       "substitution": "|24.42 Wh − 24.42 Wh| ÷ 24.42 Wh",
+       "result": 0,
+       "unit": "%",
+       "text": "Difference from the label: |24.42 Wh − 24.42 Wh| ÷ 24.42 Wh = 0 %"
+      }
+     ],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": null
+    },
+    {
+     "check_id": "form_factor_bound",
+     "title": "Form-factor bound",
+     "status": "not_assessed",
+     "summary": "Not assessed. No standard size code is stated.",
+     "inputs": [],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "No standard size code is stated."
+    },
+    {
+     "check_id": "dimension_bound",
+     "title": "Dimension bound (Wh/L)",
+     "status": "pass",
+     "summary": "24.42 Wh in 0.08045 L is 303.5 Wh/L, which is under the best-case lithium-ion ceiling of 1,321 Wh/L.",
+     "inputs": [
+      {
+       "name": "Energy",
+       "value": 24.42,
+       "unit": "Wh",
+       "origin": "claim",
+       "found_in": "label",
+       "confidence": 1
+      },
+      {
+       "name": "Dimensions (product)",
+       "value": "106 × 33 × 23 mm",
+       "unit": "",
+       "origin": "claim",
+       "found_in": "spec table",
+       "confidence": 1
+      },
+      {
+       "name": "Highest volumetric energy density measured by a third-party lab for a lithium-ion cell",
+       "value": 1321,
+       "unit": "Wh/L",
+       "origin": "constant",
+       "found_in": null,
+       "confidence": null
+      }
+     ],
+     "formula": "E ÷ (L × W × H) ≤ ceiling (Wh/L)",
+     "steps": [
+      {
+       "label": "Energy stated on the label",
+       "formula": "E",
+       "substitution": "as printed",
+       "result": 24.42,
+       "unit": "Wh",
+       "text": "Energy stated on the label: 24.42 Wh"
+      },
+      {
+       "label": "Volume from the stated dimensions",
+       "formula": "V = L × W × H",
+       "substitution": "106 mm × 33 mm × 23 mm = 80,454 mm³",
+       "result": 0.080454,
+       "unit": "L",
+       "text": "Volume from the stated dimensions: 106 mm × 33 mm × 23 mm = 80,454 mm³ = 0.08045 L"
+      },
+      {
+       "label": "Energy density",
+       "formula": "E ÷ V",
+       "substitution": "24.42 Wh ÷ 0.08045 L",
+       "result": 303.52748154224776,
+       "unit": "Wh/L",
+       "text": "Energy density: 24.42 Wh ÷ 0.08045 L = 303.5 Wh/L"
+      },
+      {
+       "label": "Comparison",
+       "formula": "value ≤ ceiling",
+       "substitution": "303.5 Wh/L ≤ 1,321 Wh/L",
+       "result": 0.22977099284046007,
+       "unit": "× the ceiling",
+       "text": "Comparison: 303.5 Wh/L ≤ 1,321 Wh/L (0.2298× the ceiling)"
+      }
+     ],
+     "constants": [
+      {
+       "key": "li_ion_max_wh_per_l",
+       "value": 1321,
+       "unit": "Wh/L",
+       "description": "Highest volumetric energy density measured by a third-party lab for a lithium-ion cell",
+       "source_title": "The All-New Amprius 500 Wh/kg Battery Platform is Here",
+       "source_publisher": "Amprius Technologies press release, 23 March 2023",
+       "source_url": "https://amprius.com/the-all-new-amprius-500-wh-kg-battery-platform-is-here/",
+       "locator": "Paragraph on third-party testing by Mobile Power Solutions",
+       "quote": "The results indicate that this cell model provides >504 Wh/kg and >1321 Wh/l at 25°C.",
+       "accessed": "2026-11-13",
+       "note": "About twice the 676 Wh/L of a leading commercial 18650 (Panasonic NCR18650B datasheet).",
+       "hard_bound": true
+      }
+     ],
+     "assumptions": [],
+     "notes": [
+      "The bounding box is at least as large as the product, which makes this bound lenient."
+     ],
+     "not_assessed_reason": null
+    },
+    {
+     "check_id": "weight_bound",
+     "title": "Weight bound (Wh/kg)",
+     "status": "pass",
+     "summary": "24.42 Wh at 0.179 kg is 136.4 Wh/kg, which is under the best-case lithium-ion ceiling of 504 Wh/kg.",
+     "inputs": [
+      {
+       "name": "Energy",
+       "value": 24.42,
+       "unit": "Wh",
+       "origin": "claim",
+       "found_in": "label",
+       "confidence": 1
+      },
+      {
+       "name": "Weight (product)",
+       "value": 179,
+       "unit": "g",
+       "origin": "claim",
+       "found_in": "spec table",
+       "confidence": 1
+      },
+      {
+       "name": "Highest specific energy measured by a third-party lab for a lithium-ion cell",
+       "value": 504,
+       "unit": "Wh/kg",
+       "origin": "constant",
+       "found_in": null,
+       "confidence": null
+      }
+     ],
+     "formula": "E ÷ m ≤ ceiling (Wh/kg)",
+     "steps": [
+      {
+       "label": "Energy stated on the label",
+       "formula": "E",
+       "substitution": "as printed",
+       "result": 24.42,
+       "unit": "Wh",
+       "text": "Energy stated on the label: 24.42 Wh"
+      },
+      {
+       "label": "Weight in kg",
+       "formula": "m = g ÷ 1000",
+       "substitution": "179 g ÷ 1000",
+       "result": 0.179,
+       "unit": "kg",
+       "text": "Weight in kg: 179 g ÷ 1000 = 0.179 kg"
+      },
+      {
+       "label": "Specific energy",
+       "formula": "E ÷ m",
+       "substitution": "24.42 Wh ÷ 0.179 kg",
+       "result": 136.42458100558662,
+       "unit": "Wh/kg",
+       "text": "Specific energy: 24.42 Wh ÷ 0.179 kg = 136.4 Wh/kg"
+      },
+      {
+       "label": "Comparison",
+       "formula": "value ≤ ceiling",
+       "substitution": "136.4 Wh/kg ≤ 504 Wh/kg",
+       "result": 0.270683692471402,
+       "unit": "× the ceiling",
+       "text": "Comparison: 136.4 Wh/kg ≤ 504 Wh/kg (0.2707× the ceiling)"
+      }
+     ],
+     "constants": [
+      {
+       "key": "li_ion_max_wh_per_kg",
+       "value": 504,
+       "unit": "Wh/kg",
+       "description": "Highest specific energy measured by a third-party lab for a lithium-ion cell",
+       "source_title": "The All-New Amprius 500 Wh/kg Battery Platform is Here",
+       "source_publisher": "Amprius Technologies press release, 23 March 2023",
+       "source_url": "https://amprius.com/the-all-new-amprius-500-wh-kg-battery-platform-is-here/",
+       "locator": "Paragraph on third-party testing by Mobile Power Solutions",
+       "quote": "The results indicate that this cell model provides >504 Wh/kg and >1321 Wh/l at 25°C.",
+       "accessed": "2026-11-13",
+       "note": "About twice the 243 Wh/kg of a leading commercial 18650 (Panasonic NCR18650B datasheet).",
+       "hard_bound": true
+      }
+     ],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": null
+    },
+    {
+     "check_id": "label_contradiction",
+     "title": "Label contradiction",
+     "status": "not_assessed",
+     "summary": "Not assessed. No designation code or grade wording was read from the product itself.",
+     "inputs": [
+      {
+       "name": "Stated chemistry",
+       "value": "lithium-ion",
+       "unit": "",
+       "origin": "claim",
+       "found_in": "title",
+       "confidence": 1
+      }
+     ],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "No designation code or grade wording was read from the product itself."
+    },
+    {
+     "check_id": "chemistry_mismatch",
+     "title": "Chemistry mismatch",
+     "status": "not_assessed",
+     "summary": "Not assessed. No shelf-life claim is stated.",
+     "inputs": [],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "No shelf-life claim is stated."
+    }
+   ],
+   "verdict": "No red flags",
+   "verdict_reason": "The claims that could be tested are physically plausible (Label consistency (Wh = V × Ah), Dimension bound (Wh/L), Weight bound (Wh/kg)). This does not confirm that the claims are true.",
+   "routing": "no action needed",
+   "routing_reason": "The claims that could be tested are plausible and were read with high confidence.",
+   "assumptions": [],
+   "not_assessed": [
+    "Form-factor bound: No standard size code is stated.",
+    "Label contradiction: No designation code or grade wording was read from the product itself.",
+    "Chemistry mismatch: No shelf-life claim is stated."
+   ]
+  },
+  "error": null
+ },
+ {
+  "id": "fixture_08",
+  "source": "text",
+  "listing_text": "2S LiPo Battery 7.4V 5200mAh Hard Case for RC Truck and Buggy\n\nLabel on pack: 7.4V 5200mAh 38.48Wh 2S\n\nSpecifications\nCells: 2S\nDimensions: 25 x 47 x 139 mm\nWeight: 307 g\n",
+  "image_url": null,
+  "report": {
+   "schema_version": "1.0",
+   "claims": {
+    "product_type": "unknown",
+    "chemistry": {
+     "found_in": "title",
+     "quote": null,
+     "confidence": 1,
+     "value": "li-ion"
+    },
+    "form_factors": [],
+    "cell_count": {
+     "found_in": "title",
+     "quote": null,
+     "confidence": 1,
+     "value": 2
+    },
+    "nominal_voltage_v": {
+     "found_in": "label",
+     "quote": null,
+     "confidence": 1,
+     "value": 7.4
+    },
+    "capacity_mah": {
+     "found_in": "label",
+     "quote": null,
+     "confidence": 1,
+     "value": 5200
+    },
+    "energy_wh": {
+     "found_in": "label",
+     "quote": null,
+     "confidence": 1,
+     "value": 38.48
+    },
+    "output_capacity_mah": null,
+    "weight": {
+     "found_in": "spec table",
+     "quote": null,
+     "confidence": 1,
+     "value_g": 307,
+     "kind": "product"
+    },
+    "dimensions": {
+     "found_in": "spec table",
+     "quote": null,
+     "confidence": 1,
+     "length_mm": 25,
+     "width_mm": 47,
+     "height_mm": 139,
+     "kind": "product"
+    },
+    "shelf_life_years": null,
+    "printed_codes": [],
+    "printed_terms": []
+   },
+   "checks": [
+    {
+     "check_id": "label_consistency",
+     "title": "Label consistency (Wh = V × Ah)",
+     "status": "pass",
+     "summary": "Label states 38.48 Wh; 7.4 V × 5.2 Ah = 38.48 Wh. The difference of 0% is within the 3% tolerance.",
+     "inputs": [
+      {
+       "name": "Energy",
+       "value": 38.48,
+       "unit": "Wh",
+       "origin": "claim",
+       "found_in": "label",
+       "confidence": 1
+      },
+      {
+       "name": "Nominal voltage",
+       "value": 7.4,
+       "unit": "V",
+       "origin": "claim",
+       "found_in": "label",
+       "confidence": 1
+      },
+      {
+       "name": "Capacity",
+       "value": 5200,
+       "unit": "mAh",
+       "origin": "claim",
+       "found_in": "label",
+       "confidence": 1
+      }
+     ],
+     "formula": "E (Wh) = V (V) × Q (Ah)",
+     "steps": [
+      {
+       "label": "Capacity in Ah",
+       "formula": "Q = mAh ÷ 1000",
+       "substitution": "5,200 mAh ÷ 1000",
+       "result": 5.2,
+       "unit": "Ah",
+       "text": "Capacity in Ah: 5,200 mAh ÷ 1000 = 5.2 Ah"
+      },
+      {
+       "label": "Energy from voltage and capacity",
+       "formula": "E = V × Q",
+       "substitution": "7.4 V × 5.2 Ah",
+       "result": 38.480000000000004,
+       "unit": "Wh",
+       "text": "Energy from voltage and capacity: 7.4 V × 5.2 Ah = 38.48 Wh"
+      },
+      {
+       "label": "Difference from the label",
+       "formula": "|E_label − E| ÷ E",
+       "substitution": "|38.48 Wh − 38.48 Wh| ÷ 38.48 Wh",
+       "result": 1.846524781081341e-14,
+       "unit": "%",
+       "text": "Difference from the label: |38.48 Wh − 38.48 Wh| ÷ 38.48 Wh = 0 %"
+      }
+     ],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": null
+    },
+    {
+     "check_id": "form_factor_bound",
+     "title": "Form-factor bound",
+     "status": "not_assessed",
+     "summary": "Not assessed. No standard size code is stated.",
+     "inputs": [],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "No standard size code is stated."
+    },
+    {
+     "check_id": "dimension_bound",
+     "title": "Dimension bound (Wh/L)",
+     "status": "pass",
+     "summary": "38.48 Wh in 0.1633 L is 235.6 Wh/L, which is under the best-case lithium-ion ceiling of 1,321 Wh/L.",
+     "inputs": [
+      {
+       "name": "Nominal voltage",
+       "value": 7.4,
+       "unit": "V",
+       "origin": "claim",
+       "found_in": "label",
+       "confidence": 1
+      },
+      {
+       "name": "Capacity",
+       "value": 5200,
+       "unit": "mAh",
+       "origin": "claim",
+       "found_in": "label",
+       "confidence": 1
+      },
+      {
+       "name": "Dimensions (product)",
+       "value": "25 × 47 × 139 mm",
+       "unit": "",
+       "origin": "claim",
+       "found_in": "spec table",
+       "confidence": 1
+      },
+      {
+       "name": "Highest volumetric energy density measured by a third-party lab for a lithium-ion cell",
+       "value": 1321,
+       "unit": "Wh/L",
+       "origin": "constant",
+       "found_in": null,
+       "confidence": null
+      }
+     ],
+     "formula": "E ÷ (L × W × H) ≤ ceiling (Wh/L)",
+     "steps": [
+      {
+       "label": "Capacity in Ah",
+       "formula": "Q = mAh ÷ 1000",
+       "substitution": "5,200 mAh ÷ 1000",
+       "result": 5.2,
+       "unit": "Ah",
+       "text": "Capacity in Ah: 5,200 mAh ÷ 1000 = 5.2 Ah"
+      },
+      {
+       "label": "Energy implied by the stated capacity",
+       "formula": "E = V × Q",
+       "substitution": "7.4 V × 5.2 Ah",
+       "result": 38.480000000000004,
+       "unit": "Wh",
+       "text": "Energy implied by the stated capacity: 7.4 V × 5.2 Ah = 38.48 Wh"
+      },
+      {
+       "label": "Volume from the stated dimensions",
+       "formula": "V = L × W × H",
+       "substitution": "25 mm × 47 mm × 139 mm = 163,325 mm³",
+       "result": 0.163325,
+       "unit": "L",
+       "text": "Volume from the stated dimensions: 25 mm × 47 mm × 139 mm = 163,325 mm³ = 0.1633 L"
+      },
+      {
+       "label": "Energy density",
+       "formula": "E ÷ V",
+       "substitution": "38.48 Wh ÷ 0.1633 L",
+       "result": 235.6038573396602,
+       "unit": "Wh/L",
+       "text": "Energy density: 38.48 Wh ÷ 0.1633 L = 235.6 Wh/L"
+      },
+      {
+       "label": "Comparison",
+       "formula": "value ≤ ceiling",
+       "substitution": "235.6 Wh/L ≤ 1,321 Wh/L",
+       "result": 0.17835265506408798,
+       "unit": "× the ceiling",
+       "text": "Comparison: 235.6 Wh/L ≤ 1,321 Wh/L (0.1784× the ceiling)"
+      }
+     ],
+     "constants": [
+      {
+       "key": "li_ion_max_wh_per_l",
+       "value": 1321,
+       "unit": "Wh/L",
+       "description": "Highest volumetric energy density measured by a third-party lab for a lithium-ion cell",
+       "source_title": "The All-New Amprius 500 Wh/kg Battery Platform is Here",
+       "source_publisher": "Amprius Technologies press release, 23 March 2023",
+       "source_url": "https://amprius.com/the-all-new-amprius-500-wh-kg-battery-platform-is-here/",
+       "locator": "Paragraph on third-party testing by Mobile Power Solutions",
+       "quote": "The results indicate that this cell model provides >504 Wh/kg and >1321 Wh/l at 25°C.",
+       "accessed": "2026-11-13",
+       "note": "About twice the 676 Wh/L of a leading commercial 18650 (Panasonic NCR18650B datasheet).",
+       "hard_bound": true
+      }
+     ],
+     "assumptions": [],
+     "notes": [
+      "The label gives 38.48 Wh and the stated capacity implies 38.48 Wh; the larger figure is tested.",
+      "The bounding box is at least as large as the product, which makes this bound lenient."
+     ],
+     "not_assessed_reason": null
+    },
+    {
+     "check_id": "weight_bound",
+     "title": "Weight bound (Wh/kg)",
+     "status": "pass",
+     "summary": "38.48 Wh at 0.307 kg is 125.3 Wh/kg, which is under the best-case lithium-ion ceiling of 504 Wh/kg.",
+     "inputs": [
+      {
+       "name": "Nominal voltage",
+       "value": 7.4,
+       "unit": "V",
+       "origin": "claim",
+       "found_in": "label",
+       "confidence": 1
+      },
+      {
+       "name": "Capacity",
+       "value": 5200,
+       "unit": "mAh",
+       "origin": "claim",
+       "found_in": "label",
+       "confidence": 1
+      },
+      {
+       "name": "Weight (product)",
+       "value": 307,
+       "unit": "g",
+       "origin": "claim",
+       "found_in": "spec table",
+       "confidence": 1
+      },
+      {
+       "name": "Highest specific energy measured by a third-party lab for a lithium-ion cell",
+       "value": 504,
+       "unit": "Wh/kg",
+       "origin": "constant",
+       "found_in": null,
+       "confidence": null
+      }
+     ],
+     "formula": "E ÷ m ≤ ceiling (Wh/kg)",
+     "steps": [
+      {
+       "label": "Capacity in Ah",
+       "formula": "Q = mAh ÷ 1000",
+       "substitution": "5,200 mAh ÷ 1000",
+       "result": 5.2,
+       "unit": "Ah",
+       "text": "Capacity in Ah: 5,200 mAh ÷ 1000 = 5.2 Ah"
+      },
+      {
+       "label": "Energy implied by the stated capacity",
+       "formula": "E = V × Q",
+       "substitution": "7.4 V × 5.2 Ah",
+       "result": 38.480000000000004,
+       "unit": "Wh",
+       "text": "Energy implied by the stated capacity: 7.4 V × 5.2 Ah = 38.48 Wh"
+      },
+      {
+       "label": "Weight in kg",
+       "formula": "m = g ÷ 1000",
+       "substitution": "307 g ÷ 1000",
+       "result": 0.307,
+       "unit": "kg",
+       "text": "Weight in kg: 307 g ÷ 1000 = 0.307 kg"
+      },
+      {
+       "label": "Specific energy",
+       "formula": "E ÷ m",
+       "substitution": "38.48 Wh ÷ 0.307 kg",
+       "result": 125.34201954397396,
+       "unit": "Wh/kg",
+       "text": "Specific energy: 38.48 Wh ÷ 0.307 kg = 125.3 Wh/kg"
+      },
+      {
+       "label": "Comparison",
+       "formula": "value ≤ ceiling",
+       "substitution": "125.3 Wh/kg ≤ 504 Wh/kg",
+       "result": 0.24869448322217055,
+       "unit": "× the ceiling",
+       "text": "Comparison: 125.3 Wh/kg ≤ 504 Wh/kg (0.2487× the ceiling)"
+      }
+     ],
+     "constants": [
+      {
+       "key": "li_ion_max_wh_per_kg",
+       "value": 504,
+       "unit": "Wh/kg",
+       "description": "Highest specific energy measured by a third-party lab for a lithium-ion cell",
+       "source_title": "The All-New Amprius 500 Wh/kg Battery Platform is Here",
+       "source_publisher": "Amprius Technologies press release, 23 March 2023",
+       "source_url": "https://amprius.com/the-all-new-amprius-500-wh-kg-battery-platform-is-here/",
+       "locator": "Paragraph on third-party testing by Mobile Power Solutions",
+       "quote": "The results indicate that this cell model provides >504 Wh/kg and >1321 Wh/l at 25°C.",
+       "accessed": "2026-11-13",
+       "note": "About twice the 243 Wh/kg of a leading commercial 18650 (Panasonic NCR18650B datasheet).",
+       "hard_bound": true
+      }
+     ],
+     "assumptions": [],
+     "notes": [
+      "The label gives 38.48 Wh and the stated capacity implies 38.48 Wh; the larger figure is tested."
+     ],
+     "not_assessed_reason": null
+    },
+    {
+     "check_id": "label_contradiction",
+     "title": "Label contradiction",
+     "status": "not_assessed",
+     "summary": "Not assessed. No designation code or grade wording was read from the product itself.",
+     "inputs": [
+      {
+       "name": "Stated chemistry",
+       "value": "lithium-ion",
+       "unit": "",
+       "origin": "claim",
+       "found_in": "title",
+       "confidence": 1
+      }
+     ],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "No designation code or grade wording was read from the product itself."
+    },
+    {
+     "check_id": "chemistry_mismatch",
+     "title": "Chemistry mismatch",
+     "status": "not_assessed",
+     "summary": "Not assessed. No shelf-life claim is stated.",
+     "inputs": [],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "No shelf-life claim is stated."
+    }
+   ],
+   "verdict": "No red flags",
+   "verdict_reason": "The claims that could be tested are physically plausible (Label consistency (Wh = V × Ah), Dimension bound (Wh/L), Weight bound (Wh/kg)). This does not confirm that the claims are true.",
+   "routing": "no action needed",
+   "routing_reason": "The claims that could be tested are plausible and were read with high confidence.",
+   "assumptions": [],
+   "not_assessed": [
+    "Form-factor bound: No standard size code is stated.",
+    "Label contradiction: No designation code or grade wording was read from the product itself.",
+    "Chemistry mismatch: No shelf-life claim is stated."
+   ]
+  },
+  "error": null
+ },
+ {
+  "id": "fixture_09",
+  "source": "text",
+  "listing_text": "2S LiPo Battery 7.4V 5200mAh Hard Case for RC Car\n\nLabel on pack: 7.4V 5200mAh 38.48Wh 2S\n",
+  "image_url": null,
+  "report": {
+   "schema_version": "1.0",
+   "claims": {
+    "product_type": "unknown",
+    "chemistry": {
+     "found_in": "title",
+     "quote": null,
+     "confidence": 1,
+     "value": "li-ion"
+    },
+    "form_factors": [],
+    "cell_count": {
+     "found_in": "title",
+     "quote": null,
+     "confidence": 1,
+     "value": 2
+    },
+    "nominal_voltage_v": {
+     "found_in": "label",
+     "quote": null,
+     "confidence": 1,
+     "value": 7.4
+    },
+    "capacity_mah": {
+     "found_in": "label",
+     "quote": null,
+     "confidence": 1,
+     "value": 5200
+    },
+    "energy_wh": {
+     "found_in": "label",
+     "quote": null,
+     "confidence": 1,
+     "value": 38.48
+    },
+    "output_capacity_mah": null,
+    "weight": null,
+    "dimensions": null,
+    "shelf_life_years": null,
+    "printed_codes": [],
+    "printed_terms": []
+   },
+   "checks": [
+    {
+     "check_id": "label_consistency",
+     "title": "Label consistency (Wh = V × Ah)",
+     "status": "pass",
+     "summary": "Label states 38.48 Wh; 7.4 V × 5.2 Ah = 38.48 Wh. The difference of 0% is within the 3% tolerance.",
+     "inputs": [
+      {
+       "name": "Energy",
+       "value": 38.48,
+       "unit": "Wh",
+       "origin": "claim",
+       "found_in": "label",
+       "confidence": 1
+      },
+      {
+       "name": "Nominal voltage",
+       "value": 7.4,
+       "unit": "V",
+       "origin": "claim",
+       "found_in": "label",
+       "confidence": 1
+      },
+      {
+       "name": "Capacity",
+       "value": 5200,
+       "unit": "mAh",
+       "origin": "claim",
+       "found_in": "label",
+       "confidence": 1
+      }
+     ],
+     "formula": "E (Wh) = V (V) × Q (Ah)",
+     "steps": [
+      {
+       "label": "Capacity in Ah",
+       "formula": "Q = mAh ÷ 1000",
+       "substitution": "5,200 mAh ÷ 1000",
+       "result": 5.2,
+       "unit": "Ah",
+       "text": "Capacity in Ah: 5,200 mAh ÷ 1000 = 5.2 Ah"
+      },
+      {
+       "label": "Energy from voltage and capacity",
+       "formula": "E = V × Q",
+       "substitution": "7.4 V × 5.2 Ah",
+       "result": 38.480000000000004,
+       "unit": "Wh",
+       "text": "Energy from voltage and capacity: 7.4 V × 5.2 Ah = 38.48 Wh"
+      },
+      {
+       "label": "Difference from the label",
+       "formula": "|E_label − E| ÷ E",
+       "substitution": "|38.48 Wh − 38.48 Wh| ÷ 38.48 Wh",
+       "result": 1.846524781081341e-14,
+       "unit": "%",
+       "text": "Difference from the label: |38.48 Wh − 38.48 Wh| ÷ 38.48 Wh = 0 %"
+      }
+     ],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": null
+    },
+    {
+     "check_id": "form_factor_bound",
+     "title": "Form-factor bound",
+     "status": "not_assessed",
+     "summary": "Not assessed. No standard size code is stated.",
+     "inputs": [],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "No standard size code is stated."
+    },
+    {
+     "check_id": "dimension_bound",
+     "title": "Dimension bound (Wh/L)",
+     "status": "not_assessed",
+     "summary": "Not assessed. Dimensions are not stated.",
+     "inputs": [],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "Dimensions are not stated."
+    },
+    {
+     "check_id": "weight_bound",
+     "title": "Weight bound (Wh/kg)",
+     "status": "not_assessed",
+     "summary": "Not assessed. Weight is not stated.",
+     "inputs": [],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "Weight is not stated."
+    },
+    {
+     "check_id": "label_contradiction",
+     "title": "Label contradiction",
+     "status": "not_assessed",
+     "summary": "Not assessed. No designation code or grade wording was read from the product itself.",
+     "inputs": [
+      {
+       "name": "Stated chemistry",
+       "value": "lithium-ion",
+       "unit": "",
+       "origin": "claim",
+       "found_in": "title",
+       "confidence": 1
+      }
+     ],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "No designation code or grade wording was read from the product itself."
+    },
+    {
+     "check_id": "chemistry_mismatch",
+     "title": "Chemistry mismatch",
+     "status": "not_assessed",
+     "summary": "Not assessed. No shelf-life claim is stated.",
+     "inputs": [],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "No shelf-life claim is stated."
+    }
+   ],
+   "verdict": "No red flags",
+   "verdict_reason": "The claims that could be tested are physically plausible (Label consistency (Wh = V × Ah)). This does not confirm that the claims are true.",
+   "routing": "no action needed",
+   "routing_reason": "The claims that could be tested are plausible and were read with high confidence.",
+   "assumptions": [],
+   "not_assessed": [
+    "Form-factor bound: No standard size code is stated.",
+    "Dimension bound (Wh/L): Dimensions are not stated.",
+    "Weight bound (Wh/kg): Weight is not stated.",
+    "Label contradiction: No designation code or grade wording was read from the product itself.",
+    "Chemistry mismatch: No shelf-life claim is stated."
+   ]
+  },
+  "error": null
+ }
+]
