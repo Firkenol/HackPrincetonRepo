@@ -328,3 +328,103 @@ def test_empty_listing_has_no_checkable_claim_and_needs_no_action():
     assert report.verdict is Verdict.NO_CHECKABLE_CLAIM
     assert report.routing is Routing.NO_ACTION_NEEDED
     assert len(report.not_assessed) == 6
+
+
+# ------------------------------------------- finished products near the cell ceiling
+
+
+def _power_bank(capacity_mah: float, weight_g: float | None = None, dims_mm=None, energy_wh: float | None = None, product_type="power_bank"):
+    from claimcheck.models import Claims
+
+    stated = {"found_in": "bullet points", "confidence": 1.0}
+    data = {"product_type": product_type, "capacity_mah": {"value": capacity_mah, **stated}}
+    if weight_g is not None:
+        data["weight"] = {"value_g": weight_g, "kind": "product", **stated}
+    if dims_mm is not None:
+        data["dimensions"] = {"length_mm": dims_mm[0], "width_mm": dims_mm[1], "height_mm": dims_mm[2], "kind": "product", **stated}
+    if energy_wh is not None:
+        data["energy_wh"] = {"value": energy_wh, **stated}
+    return Claims.model_validate(data)
+
+
+OUNCE_G = 28.349523125
+
+
+def test_power_bank_close_to_the_cell_weight_ceiling_is_a_flag_not_impossible():
+    from claimcheck import policy
+    from claimcheck.verdict import evaluate
+
+    # 60,000 mAh at 15.5 oz and 15 x 7.5 x 2.8 cm, no voltage stated
+    report = evaluate(_power_bank(60000, weight_g=15.5 * OUNCE_G, dims_mm=(150, 75, 28)))
+    status = {c.check_id: c for c in report.checks}
+
+    assert report.verdict.value == "Flag" and report.routing.value == "needs human review"
+    weight = status["weight_bound"]
+    assert weight.status.value == "flag"
+    assert status["dimension_bound"].status.value == "pass"
+    # under the hard bound, so never "violated"
+    assert not any(c.status.value == "violated" for c in report.checks)
+    assert "No physical bound is exceeded" in weight.summary
+    # the report says the result rests on an assumed voltage, and that the threshold is policy
+    assert "depends on an assumed nominal voltage of 3.6 V" in report.verdict_reason
+    assert any("team policy" in a and "not a physical limit" in a for a in report.assumptions)
+    threshold = next(q for q in weight.inputs if "team policy" in q.name)
+    assert threshold.value == policy.FINISHED_PRODUCT_CEILING_FRACTION and threshold.origin == "assumption"
+    assert weight.steps[-1].label == "Share of the cell ceiling"
+    assert 0.97 < weight.steps[-1].result < 0.98
+
+
+@pytest.mark.parametrize(
+    ("name", "claims"),
+    [
+        ("10: 8.11 oz, thickness only", _power_bank(10000, weight_g=8.11 * OUNCE_G)),
+        ("11: 8 oz, 6 x 2.7 x 0.7 in", _power_bank(10000, weight_g=8 * OUNCE_G, dims_mm=(152.4, 68.58, 17.78))),
+        ("12: 0.45 lb, thickness only", _power_bank(10000, weight_g=0.45 * 453.59237)),
+        ("15: 37 Wh, 7.68 oz, 5.5 x 2.6 x 0.6 in", _power_bank(10000, weight_g=7.68 * OUNCE_G, dims_mm=(139.7, 66.04, 15.24), energy_wh=37)),
+    ],
+)
+def test_ordinary_power_banks_are_not_flagged(name, claims):
+    from claimcheck.verdict import evaluate
+
+    report = evaluate(claims)
+    assert report.verdict.value == "No red flags", name
+    assert report.routing.value == "no action needed", name
+    weight = next(c for c in report.checks if c.check_id == "weight_bound")
+    assert weight.status.value == "pass"
+    # 157 to 176 Wh/kg, about a third of the cell ceiling
+    assert 150 < weight.steps[-2].result < 180, name
+
+
+def test_a_stated_voltage_removes_the_assumed_voltage_sentence():
+    from claimcheck.models import NumberClaim
+    from claimcheck.verdict import evaluate
+
+    claims = _power_bank(60000, weight_g=15.5 * OUNCE_G)
+    claims = claims.model_copy(update={"nominal_voltage_v": NumberClaim(value=3.7, found_in="spec table", confidence=1.0)})
+    report = evaluate(claims)
+    assert report.verdict.value == "Impossible" or "assumed nominal voltage" not in report.verdict_reason
+
+
+def test_the_near_ceiling_flag_applies_only_to_power_banks():
+    from claimcheck.verdict import evaluate
+
+    pack = _power_bank(60000, weight_g=15.5 * OUNCE_G, product_type="battery_pack")
+    pack = pack.model_copy(update={"chemistry": None})
+    report = evaluate(pack)
+    assert report.verdict.value != "Flag"
+
+
+def test_power_bank_above_the_hard_ceiling_is_still_impossible():
+    from claimcheck.verdict import evaluate
+
+    report = evaluate(_power_bank(100000, weight_g=300))
+    assert report.verdict.value == "Impossible"
+    weight = next(c for c in report.checks if c.check_id == "weight_bound")
+    assert weight.status.value == "violated" and "No physical bound is exceeded" not in weight.summary
+
+
+def test_the_review_threshold_is_policy_and_below_one():
+    from claimcheck import constants, policy
+
+    assert 0 < policy.FINISHED_PRODUCT_CEILING_FRACTION < 1
+    assert not hasattr(constants, "FINISHED_PRODUCT_CEILING_FRACTION")

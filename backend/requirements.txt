@@ -9,6 +9,8 @@ python-dotenv==1.2.4
 fastapi==0.163.0
 uvicorn==0.54.0
 python-multipart==0.0.33
+# Stitches a listing saved as two screenshots (fixture_NNa.png, fixture_NNb.png) into one image.
+pillow==13.0.0
 
 # Model providers. deepagents installs the Anthropic and Google GenAI integrations.
 # langchain-aws serves MODEL_PROVIDER=bedrock_converse. Any other provider needs its

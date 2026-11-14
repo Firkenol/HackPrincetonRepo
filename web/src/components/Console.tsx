@@ -3,7 +3,16 @@
 import { MotionConfig } from "framer-motion";
 import { FlaskConical, Radio, WifiOff } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ApiUnreachable, absoluteUrl, fetchStats, runBatch, verifyListing, type Frame, type ListingInput } from "@/lib/api";
+import {
+  ApiUnreachable,
+  absoluteUrl,
+  fetchLatestBatch,
+  fetchStats,
+  runBatch,
+  verifyListing,
+  type Frame,
+  type ListingInput,
+} from "@/lib/api";
 import { countItems, statsFromCounts } from "@/lib/counts";
 import type { BatchItem, Counts, DashboardStats, DataSource, Listing } from "@/lib/types";
 import { SAMPLES, matchSample } from "@/samples";
@@ -11,7 +20,7 @@ import { AuditFeed } from "./AuditFeed";
 import { BatchView } from "./BatchView";
 import { Intake } from "./Intake";
 import { MathModule } from "./MathModule";
-import { MetricsBar, sampleLabel } from "./MetricsBar";
+import { MetricsBar, formatRanAt, sampleLabel } from "./MetricsBar";
 import { TracePanel } from "./TracePanel";
 import { VerdictCard } from "./VerdictCard";
 
@@ -45,6 +54,8 @@ export function Console() {
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [view, setView] = useState<"listings" | "batch">("listings");
   const [batchRunning, setBatchRunning] = useState(false);
+  // When the batch on screen ran, and whether that was before this page was opened.
+  const [batchRun, setBatchRun] = useState<{ ranAt: string | null; preRun: boolean } | null>(null);
   const checkNumber = useRef(0);
 
   /** Replace the batch rows in the feed, keeping listings the person checked themselves on top. */
@@ -67,6 +78,7 @@ export function Console() {
       const result = await runBatch();
       setSource(result.mode);
       showBatch(result.items, result.counts, result.sample_data);
+      setBatchRun({ ranAt: result.ran_at, preRun: false });
       setStats(await fetchStats());
     } catch (error) {
       if (error instanceof ApiUnreachable) goOffline();
@@ -85,7 +97,16 @@ export function Console() {
         if (cancelled) return;
         setSource(first.mode);
         setStats(first);
-        if (first.mode === "replay") await doBatch();
+        if (first.mode === "replay") {
+          await doBatch();
+        } else if (first.has_run) {
+          // A live batch is slow, so it is run ahead of time. Show that run, labelled as pre-run.
+          const latest = await fetchLatestBatch();
+          if (!cancelled && latest.has_run && latest.counts) {
+            showBatch(latest.items, latest.counts, latest.sample_data);
+            setBatchRun({ ranAt: latest.ran_at, preRun: true });
+          }
+        }
       } catch (error) {
         if (!cancelled && error instanceof ApiUnreachable) goOffline();
       }
@@ -93,7 +114,7 @@ export function Console() {
     return () => {
       cancelled = true;
     };
-  }, [doBatch, goOffline]);
+  }, [doBatch, goOffline, showBatch]);
 
   const update = useCallback((key: string, change: (listing: Listing) => Listing) => {
     setListings((current) => current.map((l) => (l.key === key ? change(l) : l)));
@@ -163,7 +184,7 @@ export function Console() {
           )}
         </header>
 
-        <MetricsBar stats={stats} source={source ?? "live"} />
+        <MetricsBar stats={stats} source={source ?? "live"} preRun={Boolean(batchRun?.preRun)} />
 
         <div className="grid flex-1 lg:grid-cols-[19rem_1fr]">
           <aside className="max-h-72 border-b border-line bg-panel lg:sticky lg:top-0 lg:h-screen lg:max-h-screen lg:self-start lg:border-b-0 lg:border-r">
@@ -202,6 +223,13 @@ export function Console() {
                 running={batchRunning}
                 canRun={source !== "offline" && source !== null}
                 sampleLabel={label}
+                runLabel={
+                  batchRun?.ranAt
+                    ? `${batchRun.preRun ? "Pre-run batch" : "Ran"}, ${formatRanAt(batchRun.ranAt)}`
+                    : batchRun?.preRun
+                      ? "Pre-run batch"
+                      : null
+                }
                 onRun={doBatch}
                 onOpen={(id) => {
                   setSelectedKey(id);

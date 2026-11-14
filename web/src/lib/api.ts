@@ -1,4 +1,4 @@
-import type { BatchResponse, DashboardStats, Mode, StreamEvent } from "./types";
+import type { BatchResponse, DashboardStats, LatestBatch, Mode, StreamEvent } from "./types";
 
 export const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000").replace(/\/$/, "");
 
@@ -29,6 +29,8 @@ async function json<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const fetchStats = () => json<DashboardStats>("/api/dashboard-stats");
 export const runBatch = () => json<BatchResponse>("/api/batch", { method: "POST" });
+/** The latest batch run, without running anything. Used to show a batch that was run ahead of time. */
+export const fetchLatestBatch = () => json<LatestBatch>("/api/batch");
 export const fetchHealth = () => json<{ status: string; mode: Mode; sample_data: boolean }>("/api/health");
 
 /** A fixture screenshot URL from the API, made absolute. */

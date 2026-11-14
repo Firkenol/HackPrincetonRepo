@@ -55,7 +55,7 @@ def _error(message: str) -> Iterator[StreamEvent]:
 
 
 def _fixture_input(fixture: Fixture) -> Any:
-    return fixture.image_path if fixture.image_path else fixture.text
+    return fixture.image_bytes() if fixture.has_image else fixture.text
 
 
 # ------------------------------------------------------------------ one listing
@@ -145,6 +145,7 @@ class BatchRun:
     def as_json(self) -> dict[str, Any]:
         return {
             **mode_fields(self.mode),
+            "has_run": True,
             "ran_at": self.ran_at,
             "items": [item.as_json() for item in self.items],
             "counts": self.counts,
@@ -152,7 +153,9 @@ class BatchRun:
 
 
 def image_url(fixture: Fixture) -> str | None:
-    return f"/api/fixtures/{fixture.image_path.name}" if fixture.image_path else None
+    if fixture.image_path:
+        return f"/api/fixtures/{fixture.image_path.name}"
+    return f"/api/fixtures/{fixture.id}.png" if fixture.image_parts else None
 
 
 def run_batch(mode: str, runner: Runner | None = None) -> BatchRun:
@@ -177,7 +180,7 @@ def run_batch(mode: str, runner: Runner | None = None) -> BatchRun:
             BatchItem(
                 id=fixture.id,
                 source=fixture.source,
-                listing_text=None if fixture.image_path else fixture.text,
+                listing_text=None if fixture.has_image else fixture.text,
                 image_url=image_url(fixture),
                 report=report,
                 error=error,

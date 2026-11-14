@@ -51,6 +51,7 @@ export function BatchView({
   running,
   canRun,
   sampleLabel,
+  runLabel = null,
   onRun,
   onOpen,
 }: {
@@ -59,6 +60,8 @@ export function BatchView({
   running: boolean;
   canRun: boolean;
   sampleLabel: string | null;
+  /** When the batch on screen ran, e.g. "Pre-run batch, 11/14/2026, 2:53 PM". */
+  runLabel?: string | null;
   onRun: () => void;
   onOpen: (id: string) => void;
 }) {
@@ -71,7 +74,12 @@ export function BatchView({
           </h2>
           <p className="mt-0.5 text-sm text-muted">Runs every listing in the fixtures folder and counts the results.</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          {runLabel && (
+            <span data-testid="batch-run-label" className="rounded border border-accent/40 px-1.5 py-0.5 text-xs text-accent">
+              {runLabel}
+            </span>
+          )}
           {sampleLabel && (
             <span data-testid="batch-sample-label" className="rounded border border-flag/40 px-1.5 py-0.5 text-xs text-flag">
               {sampleLabel}

@@ -38,13 +38,20 @@ function metric(key: string) {
 }
 
 /** A fake API. `stats` is what /api/dashboard-stats returns after a batch has run. */
-function fakeApi(mode: "live" | "replay", stats: DashboardStats, stream?: () => Response) {
-  let ran = false;
+function fakeApi(mode: "live" | "replay", stats: DashboardStats, stream?: () => Response, alreadyRan = false) {
+  let ran = alreadyRan;
   const calls: string[] = [];
   const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
     const path = new URL(url).pathname;
     calls.push(`${init?.method ?? "GET"} ${path}`);
     if (path === "/api/dashboard-stats") return json(ran ? stats : NO_RUN(mode));
+    if (path === "/api/batch" && (init?.method ?? "GET") === "GET") {
+      return json(
+        ran
+          ? { mode, sample_data: mode === "replay", has_run: true, ran_at: "2026-11-14T12:00:00+00:00", items: SAMPLES, counts: countItems(SAMPLES) }
+          : { mode, sample_data: mode === "replay", has_run: false, ran_at: null, items: [], counts: null },
+      );
+    }
     if (path === "/api/batch") {
       ran = true;
       const body: BatchResponse = { mode, sample_data: mode === "replay", ran_at: "2026-11-14T12:00:00+00:00", items: SAMPLES, counts: countItems(SAMPLES) };
@@ -202,6 +209,29 @@ describe("Console with a live model", () => {
     fireEvent.change(screen.getByLabelText(/Paste the listing text/), { target: { value: "hello" } });
     fireEvent.click(screen.getByRole("button", { name: /Check listing/ }));
     await waitFor(() => expect(screen.getByTestId("listing-error")).toHaveTextContent("could not be read into claims"));
+  });
+
+  it("opens with a batch that was run ahead of time, labelled as pre-run with its time", async () => {
+    const calls = fakeApi("live", stats, undefined, true);
+    render(<Console />);
+
+    await waitFor(() => expect(screen.getAllByTestId("feed-item")).toHaveLength(9));
+    expect(calls).toEqual(["GET /api/dashboard-stats", "GET /api/batch"]); // nothing was run
+    expect(metric("listings_checked")).toHaveTextContent("9");
+    expect(screen.getByTestId("prerun-label")).toHaveTextContent("Pre-run");
+    expect(screen.getByTestId("metrics-caption")).toHaveTextContent("Counted from a pre-run batch");
+    expect(screen.queryByTestId("sample-label")).toBeNull();
+
+    fireEvent.click(screen.getByRole("tab", { name: "Batch" }));
+    const label = screen.getByTestId("batch-run-label");
+    expect(label).toHaveTextContent("Pre-run batch");
+    expect(label).toHaveTextContent(new Date("2026-11-14T12:00:00+00:00").toLocaleString());
+    expect(screen.getAllByTestId("batch-row")).toHaveLength(9);
+
+    // running it again replaces the pre-run label
+    fireEvent.click(screen.getByRole("button", { name: "Run batch" }));
+    await waitFor(() => expect(screen.getByTestId("batch-run-label")).toHaveTextContent(/^Ran, /));
+    expect(screen.queryByTestId("prerun-label")).toBeNull();
   });
 
   it("runs the batch on request and fills the counts", async () => {

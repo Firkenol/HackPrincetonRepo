@@ -8,6 +8,7 @@ the three subagents and the checks.
 from __future__ import annotations
 
 import json
+import shutil
 from pathlib import Path
 
 import pytest
@@ -38,9 +39,24 @@ def expected_json(fixture_id: str) -> dict:
     return json.loads((REPO_FIXTURES / "expected" / f"{fixture_id}.json").read_text(encoding="utf-8"))
 
 
+@pytest.fixture(scope="session")
+def nine_fixtures(tmp_path_factory) -> Path:
+    """A fixtures folder with only the nine text listings and their expected reports.
+
+    The real folder may also hold screenshots that are not in the repo, so the tests
+    do not read it directly.
+    """
+    root = tmp_path_factory.mktemp("fixtures")
+    (root / "expected").mkdir()
+    for fixture_id in FIXTURE_IDS:
+        shutil.copyfile(REPO_FIXTURES / f"{fixture_id}.txt", root / f"{fixture_id}.txt")
+        shutil.copyfile(REPO_FIXTURES / "expected" / f"{fixture_id}.json", root / "expected" / f"{fixture_id}.json")
+    return root
+
+
 @pytest.fixture(autouse=True)
-def _clean(monkeypatch):
-    monkeypatch.delenv(fixtures.FIXTURES_ENV, raising=False)
+def _clean(monkeypatch, nine_fixtures):
+    monkeypatch.setenv(fixtures.FIXTURES_ENV, str(nine_fixtures))
     monkeypatch.delenv(service.REPLAY_ENV, raising=False)
     app_module.latest_batch.clear()
     yield
@@ -285,6 +301,7 @@ def check_batch(body: dict, mode: str):
         assert item["source"] == "text" and item["listing_text"] and item["image_url"] is None
     assert body["counts"] == {"total": 9, "errors": 0, **EXPECTED_COUNTS}
     assert set(body["counts"]["by_verdict"]) == VERDICTS and set(body["counts"]["by_routing"]) == ROUTINGS
+    assert body["has_run"] is True
 
 
 def test_replay_batch_serves_every_expected_report_with_counts(replay):
@@ -374,3 +391,82 @@ def test_cors_allows_the_local_web_app(replay):
     response = replay.get("/api/health", headers={"Origin": "http://localhost:3000"})
     assert response.headers["access-control-allow-origin"] == "http://localhost:3000"
     assert app_module.MODE_HEADER.lower() in response.headers["access-control-expose-headers"].lower()
+
+
+# ------------------------------------------------------------- the latest batch again
+
+
+def test_latest_batch_is_empty_before_any_run(replay):
+    body = replay.get("/api/batch").json()
+    assert body["has_run"] is False and body["items"] == [] and body["counts"] is None and body["ran_at"] is None
+    assert body["sample_data"] is True
+
+
+def test_latest_batch_returns_the_run_without_running_again(monkeypatch, live):
+    ran = live.post("/api/batch").json()
+
+    def must_not_run(listing):
+        raise AssertionError("GET /api/batch must not run a listing")
+
+    monkeypatch.setattr(service, "run_listing", must_not_run)
+    again = live.get("/api/batch").json()
+    assert again == ran
+    assert again["has_run"] is True and again["ran_at"] == ran["ran_at"] and len(again["items"]) == 9
+
+
+# ---------------------------------------------------- listings captured in two screenshots
+
+
+def _png(width: int, height: int, colour: str) -> bytes:
+    import io
+
+    from PIL import Image
+
+    out = io.BytesIO()
+    Image.new("RGB", (width, height), colour).save(out, format="PNG")
+    return out.getvalue()
+
+
+def test_two_screenshots_of_one_listing_are_stitched_top_to_bottom(replay, tmp_path, monkeypatch):
+    import io
+
+    from PIL import Image
+
+    (tmp_path / "fixture_11a.png").write_bytes(_png(40, 10, "red"))
+    (tmp_path / "fixture_11b.png").write_bytes(_png(60, 20, "blue"))
+    (tmp_path / "fixture_12.png").write_bytes(_png(8, 8, "green"))
+    monkeypatch.setenv(fixtures.FIXTURES_ENV, str(tmp_path))
+
+    found = {f.id: f for f in fixtures.list_fixtures()}
+    assert sorted(found) == ["fixture_11", "fixture_12"]
+    assert [p.name for p in found["fixture_11"].image_parts] == ["fixture_11a.png", "fixture_11b.png"]
+    assert found["fixture_11"].source == "image" and found["fixture_12"].image_parts == ()
+
+    stitched = Image.open(io.BytesIO(found["fixture_11"].image_bytes())).convert("RGB")
+    assert stitched.size == (60, 30)
+    assert stitched.getpixel((5, 5)) == (255, 0, 0)  # first part on top
+    assert stitched.getpixel((5, 25)) == (0, 0, 255)  # second part below
+    assert stitched.getpixel((55, 5)) == (255, 255, 255)  # the narrower part is padded with white
+
+    served = replay.get("/api/fixtures/fixture_11.png")
+    assert served.status_code == 200 and Image.open(io.BytesIO(served.content)).size == (60, 30)
+    samples = {s["id"]: s for s in replay.get("/api/samples").json()["samples"]}
+    assert samples["fixture_11"]["image_url"] == "/api/fixtures/fixture_11.png"
+    assert replay.get("/api/fixtures/fixture_11a.png").status_code == 404
+
+
+def test_a_live_batch_sends_the_stitched_image_as_one_listing(monkeypatch, live, tmp_path):
+    (tmp_path / "fixture_11a.png").write_bytes(_png(40, 10, "red"))
+    (tmp_path / "fixture_11b.png").write_bytes(_png(40, 10, "blue"))
+    monkeypatch.setenv(fixtures.FIXTURES_ENV, str(tmp_path))
+    seen = []
+
+    def runner(listing):
+        seen.append(listing)
+        return agent.run_listing(listing, model=ScriptedChatModel(script=full_script(BY_ID[3].claims)))
+
+    monkeypatch.setattr(service, "run_listing", runner)
+    body = live.post("/api/batch").json()
+    assert len(seen) == 1 and isinstance(seen[0], bytes) and seen[0][:4] == b"\x89PNG"
+    assert [item["id"] for item in body["items"]] == ["fixture_11"]
+    assert body["items"][0]["source"] == "image" and body["items"][0]["report"]["verdict"] == "Flag"

@@ -2,6 +2,7 @@
 
     POST /api/verify-listing    check one listing; streams the contract's events (SSE)
     POST /api/batch             run every listing in fixtures/; reports and counts
+    GET  /api/batch             the latest batch run again, without running anything
     GET  /api/dashboard-stats   counts from the latest batch run
     GET  /api/samples           the fixture listings, for the sample picker
     GET  /api/fixtures/{name}   a fixture screenshot
@@ -24,7 +25,7 @@ from collections.abc import Iterator
 from dotenv import load_dotenv
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
+from fastapi.responses import JSONResponse, Response, StreamingResponse
 
 from api import fixtures, service
 from claimcheck.events import ErrorEvent, StreamEvent, to_sse
@@ -120,6 +121,16 @@ def batch() -> JSONResponse:
     return _json(run.as_json(), mode)
 
 
+@app.get("/api/batch")
+def latest_batch_run() -> JSONResponse:
+    """The latest batch run, as POST /api/batch returned it. Lets a batch be run ahead of time and shown later."""
+    mode = service.current_mode()
+    run = latest_batch.get()
+    if run is None:
+        return _json({**service.mode_fields(mode), "has_run": False, "ran_at": None, "items": [], "counts": None}, mode)
+    return _json({**run.as_json(), "has_run": True}, mode)
+
+
 @app.get("/api/dashboard-stats")
 def dashboard_stats() -> JSONResponse:
     mode = service.current_mode()
@@ -133,7 +144,7 @@ def samples() -> JSONResponse:
         {
             "id": fixture.id,
             "source": fixture.source,
-            "listing_text": None if fixture.image_path else fixture.text,
+            "listing_text": None if fixture.has_image else fixture.text,
             "image_url": service.image_url(fixture),
             "has_expected_report": fixture.expected_path is not None,
         }
@@ -143,10 +154,15 @@ def samples() -> JSONResponse:
 
 
 @app.get("/api/fixtures/{name}")
-def fixture_image(name: str) -> FileResponse:
+def fixture_image(name: str) -> Response:
+    """A fixture's screenshot. For a listing captured in parts, fixture_NN.png is the stitched image."""
     stem, dot, suffix = name.rpartition(".")
     suffix = f"{dot}{suffix}".lower()
     fixture = fixtures.get_fixture(stem) if suffix in fixtures.IMAGE_SUFFIXES else None
-    if fixture is None or fixture.image_path is None or fixture.image_path.name.lower() != name.lower():
+    if fixture is None or not fixture.has_image:
         raise HTTPException(status_code=404, detail="No such fixture image.")
-    return FileResponse(fixture.image_path, media_type=fixtures.MEDIA_TYPES[suffix])
+    if fixture.image_path is not None and fixture.image_path.name.lower() != name.lower():
+        raise HTTPException(status_code=404, detail="No such fixture image.")
+    data = fixture.image_bytes()
+    media_type = "image/jpeg" if data[:3] == b"\xff\xd8\xff" else fixtures.MEDIA_TYPES[suffix] if fixture.image_path else "image/png"
+    return Response(content=data, media_type=media_type)

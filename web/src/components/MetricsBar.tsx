@@ -17,7 +17,21 @@ export function sampleLabel(source: DataSource): string | null {
   return null;
 }
 
-export function MetricsBar({ stats, source }: { stats: DashboardStats | null; source: DataSource }) {
+/** "11/14/2026, 2:53 PM" for an API timestamp, or an empty string. */
+export function formatRanAt(ranAt: string | null | undefined): string {
+  return ranAt ? new Date(ranAt).toLocaleString() : "";
+}
+
+export function MetricsBar({
+  stats,
+  source,
+  preRun = false,
+}: {
+  stats: DashboardStats | null;
+  source: DataSource;
+  /** True when the counts come from a batch that was run before this page was opened. */
+  preRun?: boolean;
+}) {
   const label = sampleLabel(source);
   const hasRun = Boolean(stats?.has_run);
   return (
@@ -37,8 +51,13 @@ export function MetricsBar({ stats, source }: { stats: DashboardStats | null; so
       </dl>
       <p className="border-t border-line-soft px-5 py-1.5 text-xs text-faint" data-testid="metrics-caption">
         {hasRun
-          ? `Counted from the latest batch run${stats?.ran_at ? `, ${new Date(stats.ran_at).toLocaleString()}` : ""}.`
+          ? `Counted from ${preRun ? "a pre-run batch" : "the latest batch run"}${stats?.ran_at ? `, ${formatRanAt(stats.ran_at)}` : ""}.`
           : "No batch has run yet. Run the batch to fill these counts."}
+        {hasRun && preRun && (
+          <span data-testid="prerun-label" className="ml-2 rounded border border-accent/40 px-1.5 py-0.5 text-accent">
+            Pre-run
+          </span>
+        )}
         {label && (
           <span data-testid="sample-label" className="ml-2 rounded border border-flag/40 px-1.5 py-0.5 text-flag">
             {label}

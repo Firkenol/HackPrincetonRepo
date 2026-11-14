@@ -150,6 +150,16 @@ export interface BatchResponse {
   counts: Counts;
 }
 
+/** GET /api/batch: the latest batch run, or has_run false when none has run. */
+export interface LatestBatch {
+  mode: Mode;
+  sample_data: boolean;
+  has_run: boolean;
+  ran_at: string | null;
+  items: BatchItem[];
+  counts: Counts | null;
+}
+
 export interface DashboardStats {
   mode: Mode;
   sample_data: boolean;
