@@ -29,8 +29,40 @@ def calls(*names_and_args: tuple[str, dict]) -> AIMessage:
     )
 
 
+_UNIT_FIELDS = (
+    ("nominal_voltage_v", "nominal_voltage", "V"),
+    ("capacity_mah", "capacity", "mAh"),
+    ("energy_wh", "energy", "Wh"),
+    ("output_capacity_mah", "output_capacity", "mAh"),
+    ("shelf_life_years", "shelf_life", "years"),
+)
+_SAME_FIELDS = ("product_type", "chemistry", "form_factors", "cell_count", "printed_codes", "printed_terms")
+
+
+def as_extraction(claims: Claims) -> dict:
+    """Claims written the way a model passes them to record_claims: each value with its unit."""
+    data = claims.model_dump(mode="json", exclude_none=True)
+    out = {key: data[key] for key in _SAME_FIELDS if key in data}
+    for source, target, unit in _UNIT_FIELDS:
+        if source in data:
+            out[target] = {**data[source], "unit": unit}
+    if "weight" in data:
+        weight = dict(data["weight"])
+        out["weight"] = {"value": weight.pop("value_g"), "unit": "g", **weight}
+    if "dimensions" in data:
+        dims = dict(data["dimensions"])
+        out["dimensions"] = {
+            "length": dims.pop("length_mm"),
+            "width": dims.pop("width_mm"),
+            "height": dims.pop("height_mm"),
+            "unit": "mm",
+            **dims,
+        }
+    return out
+
+
 def record(claims: Claims) -> AIMessage:
-    return calls((RECORD_CLAIMS, {"claims": claims.model_dump(mode="json", exclude_none=True)}))
+    return calls((RECORD_CLAIMS, {"claims": as_extraction(claims)}))
 
 
 def all_checks() -> AIMessage:

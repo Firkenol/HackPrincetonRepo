@@ -18,8 +18,9 @@ from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import AIMessage, BaseMessage, ToolMessage
 
 from agent.graph import build_agent
+from agent.images import ImageError, image_block, read_image
 from agent.model import ModelNotConfigured, load_model
-from agent.prompts import USER_TEMPLATE
+from agent.prompts import IMAGE_USER_TEXT, USER_TEMPLATE
 from agent.tools import ASSEMBLE_REPORT, CHECK_TOOL_NAMES, LOOKUP_FORM_FACTOR, RECORD_CLAIMS, RunState
 from claimcheck.events import (
     AgentStepEvent,
@@ -46,7 +47,6 @@ _STEP_BEFORE_TOOL = {
     ASSEMBLE_REPORT: "Assembling the evidence report.",
 }
 
-MSG_IMAGE = "Image input is not available yet. Paste the listing text instead."
 MSG_EMPTY = "The listing text is empty."
 MSG_NO_MODEL = "No model is configured. Set MODEL_PROVIDER and MODEL_ID."
 MSG_FAILED = "The listing could not be checked because the model run failed."
@@ -119,13 +119,21 @@ def run_listing(
     """
     emit = _Emitter(uuid.uuid4().hex)
 
-    if not isinstance(image_or_text, str):
-        yield emit(ErrorEvent, message=MSG_IMAGE)
-        return None
-    listing = image_or_text.strip()
-    if not listing:
-        yield emit(ErrorEvent, message=MSG_EMPTY)
-        return None
+    if isinstance(image_or_text, str):
+        listing = image_or_text.strip()
+        if not listing:
+            yield emit(ErrorEvent, message=MSG_EMPTY)
+            return None
+        content: str | list[dict] = USER_TEMPLATE.format(listing=listing)
+        first_step = "Reading the listing text."
+    else:
+        try:
+            data, mime_type = read_image(image_or_text)
+        except ImageError as error:
+            yield emit(ErrorEvent, message=str(error))
+            return None
+        content = [{"type": "text", "text": IMAGE_USER_TEXT}, image_block(data, mime_type)]
+        first_step = "Reading the listing image."
 
     state = RunState()
     try:
@@ -138,12 +146,12 @@ def run_listing(
         yield emit(ErrorEvent, message=MSG_FAILED)
         return None
 
-    yield emit(AgentStepEvent, message="Reading the listing.")
+    yield emit(AgentStepEvent, message=first_step)
     tool_by_call: dict[str, str] = {}
     announced: set[str] = set()
     try:
         stream = agent.stream(
-            {"messages": [{"role": "user", "content": USER_TEMPLATE.format(listing=listing)}]},
+            {"messages": [{"role": "user", "content": content}]},
             config={"recursion_limit": RECURSION_LIMIT},
             stream_mode="updates",
         )

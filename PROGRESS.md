@@ -6,7 +6,7 @@ Read this first. Update it before stopping. Phases are the build order in SPEC.m
 
 - [x] **1. Check functions and constants file with unit tests.** Done in commit `02da030` (contract frozen in `64ae171`).
 - [x] **2. deepagents agent with tools, text input from the command line.** Merged to main on 2026-11-14 (branch `phase-2-agent`). Passes with a scripted fake model; the live run on a real model is still open (see below).
-- [ ] **3. Image input.**
+- [ ] **3. Image input.** Built and tested with the scripted model on branch `phase-3-image` (not merged). Open: live extraction from real screenshots (see below).
 - [ ] **4. Subagents, skills, evidence report.**
 - [ ] **5. Web UI and batch mode.**
 - [ ] **6. README and demo script.**
@@ -34,6 +34,24 @@ Open:
 4. The `api` and `web` branches are not merged; nothing on main depends on them.
 
 Closed on 2026-11-14: `error-event-replay` rebased and merged (`684e4e6`); `run_listing` return type is `EvidenceReport | None`, recorded under "Contract changes" in CONTRACT.md.
+
+## Phase 3 status (2026-11-14, branch `phase-3-image`)
+
+Done:
+
+- `run_listing` accepts `bytes` or a `Path`. The image type is taken from the bytes (PNG, JPEG, WebP), the limit is 3.5 MB, and the picture goes to the model as a LangChain standard image block. Command line: `python -m agent --image screenshot.png`.
+- `record_claims` now takes a `ListingExtraction` (`backend/agent/extraction.py`): the same claims as the contract's `Claims`, but each value carries the unit shown (mAh or Ah, g or kg or oz or lb, mm or cm or in, and so on) and `found_in` and `confidence` are required for every claim. The tool converts in Python (`backend/agent/units.py`) and stores a contract `Claims`. The contract models are unchanged.
+- Codes and grade wording printed on the product go into `printed_codes` and `printed_terms` with `found_in: "product photo"`. No field exists for a seller, store or brand name, and unknown fields are rejected.
+- Low confidence (below 0.8) routes to a person, through the Phase 1 routing policy.
+- Tests in `agent/tests/test_image.py` (scripted model): fixtures 3, 4 and 5 from an image, image block wiring, confidence routing, unit conversion, bad images.
+- Live tests in `agent/tests/test_live.py` cover all nine fixtures from screenshots, with an extra test that fixture 3's printed codes are read. They skip without a model, and each fixture skips without its screenshot.
+
+Open:
+
+1. **No screenshots yet.** Live image tests look for `fixtures/fixture_NN.png` (or `.jpg`, `.jpeg`, `.webp`), seller names blurred. None are in the repo.
+2. **No live run yet**, for the same account reason as Phase 2. Extraction quality on real screenshots, and whether 0.8 is the right confidence threshold, are untested.
+3. **Conversion factors live in `backend/agent/units.py`**, not in `claimcheck/constants.py`. They are exact definitions (SI prefixes, inch, pound), cited in the module docstring, and `backend/claimcheck/` was closed to changes in this phase. Move them if the owner prefers one file.
+4. Images are not resized. A screenshot over 3.5 MB is refused with a clear message.
 
 ## Environment notes
 

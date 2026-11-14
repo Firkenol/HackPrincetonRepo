@@ -1,12 +1,12 @@
 ---
 name: reading-battery-listings
-description: Use when turning a battery listing's text into the Claims object for record_claims. Covers which field each stated value belongs in, package versus product measurements, power banks, and what to leave out.
+description: Use when turning a battery listing, pasted text or an image (screenshot or product photo), into the claims for record_claims. Covers which field each stated value belongs in, units, codes printed on the product, confidence, package versus product measurements, and what to leave out.
 ---
 
 # Reading a battery listing into claims
 
-Record what the listing states, in the listing's own numbers. Never calculate, convert
-or estimate. A field the listing is silent on is left out.
+Record what the listing states, in the listing's own numbers and units. Never calculate,
+convert or estimate. A field the listing is silent on is left out.
 
 ## Field by field
 
@@ -20,25 +20,52 @@ or estimate. A field the listing is silent on is left out.
 | Lithium (non-rechargeable), Li-FeS2, CR-series | `"lithium-primary"` | |
 | 18650, 21700, AA, AAA | `form_factors` | One entry per size code. |
 | 2S, 3S, "2 cell pack" | `cell_count` | The number of cells the stated capacity covers. A multipack of loose cells each rated on its own is 1, or left out. |
-| 3.7 V, 7.4 V, 1.2 V | `nominal_voltage_v` | Battery nominal voltage only. Never a USB, output or charging voltage such as 5 V / 9 V / 12 V on a power bank. |
-| 5200 mAh | `capacity_mah` | The labeled cell or pack capacity. |
-| 38.48 Wh | `energy_wh` | Only if a Wh figure is printed. Never work it out. |
-| "Rated capacity", "usable output" on a power bank | `output_capacity_mah` | Recorded, never compared. |
+| 3.7 V, 7.4 V, 1.2 V | `nominal_voltage` | Battery nominal voltage only. Never a USB, output or charging voltage such as 5 V / 9 V / 12 V on a power bank. |
+| 5200 mAh, 5.2 Ah | `capacity` | The labeled cell or pack capacity. |
+| 38.48 Wh | `energy` | Only if a Wh figure is shown. Never work it out. |
+| "Rated capacity", "usable output" on a power bank | `output_capacity` | Recorded, never compared. |
 | Weight | `weight` with `kind` | See below. |
 | L x W x H | `dimensions` with `kind` | For diameter x length, repeat the diameter as length and width. |
-| "10-year shelf life" | `shelf_life_years` | |
-| Codes printed on the product: R6, LR03 | `printed_codes` | Only when the text says the code is printed on the cell or pack. |
-| Wording printed on the product: Heavy Duty | `printed_terms` | Same condition. |
+| "10-year shelf life" | `shelf_life` | |
+| Codes printed on the product: R6, LR03 | `printed_codes` | See "Images" below. |
+| Wording printed on the product: Heavy Duty | `printed_terms` | Same. |
 
 `product_type`: `loose_cell` for single cells sold loose, `battery_pack` for assembled
 packs such as hobby LiPo packs, `power_bank` for USB power banks, otherwise `unknown`.
 
 ## Units
 
-Each field has a fixed unit: mAh, Wh, V, g, mm, years. Copy the number when the listing
-uses that unit. If the listing gives the value only in another unit (Ah, kg, cm, inches,
-ounces), leave the field out rather than converting, and do not put a converted number
-in any field. The check will then report that property as not assessed.
+Give the number and the unit exactly as shown. `record_claims` converts in Python and
+returns the stored value in standard units, so you never convert.
+
+| Field | Units accepted |
+|---|---|
+| `capacity`, `output_capacity` | mAh, Ah |
+| `energy` | Wh, mWh |
+| `nominal_voltage` | V, mV |
+| `weight` | g, kg, mg, oz, lb |
+| `dimensions` | mm, cm, m, in (one unit for all three sides) |
+| `shelf_life` | years, months |
+
+If the listing uses a unit that is not in the table, or mixes units in one measurement
+(for example pounds and ounces together), leave the field out. Do not convert it
+yourself. When the same value is shown in two units, record the one in the left-most
+unit of the table.
+
+## Images
+
+The listing may arrive as a screenshot of a product page or a photo of the product.
+
+- Read the page text (title, bullet points, spec table) exactly as you would pasted text.
+- Then look at the product itself in the picture. Small print on the cell jacket or the
+  pack label is evidence: designation codes such as R6, R03, LR6, LR03, FR6, HR6, 6F22
+  go in `printed_codes`, one entry per code, and grade wording such as "Heavy Duty" or
+  "Super Heavy Duty" goes in `printed_terms`. Use `found_in: "product photo"`.
+- Record the chemistry the title or description states in `chemistry`, even if the
+  codes on the product suggest another. Do not reconcile them; a check compares them.
+- Do not guess characters you cannot read. Leave the claim out, or record it with low
+  confidence if most of it is legible.
+- Ignore store names, logos, brand marks, prices, ratings and reviews.
 
 ## Package versus product
 
@@ -49,13 +76,15 @@ than the number.
 
 ## Provenance
 
-For every claim set:
+Every claim needs:
 
-- `found_in`: title, bullet points, spec table, description or label.
+- `found_in`: title, bullet points, spec table, description, label or product photo.
 - `quote`: the few characters that state the claim, such as `12000mAh`.
-- `confidence`: 1.0 when the text states the value plainly. Lower it (below 0.8) when
-  the value is ambiguous, for example two different capacities appear, or it is unclear
-  whether a voltage is nominal or an output.
+- `confidence`: 1.0 when the text states the value plainly and is sharp. Below 0.8 when
+  the value is ambiguous (two different capacities appear, or it is unclear whether a
+  voltage is nominal or an output) or hard to read (small, blurred, cropped, glare).
+  Anything below 0.8 sends the listing to a person, which is the right outcome when
+  you are unsure.
 
 ## Never record
 

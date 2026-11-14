@@ -97,7 +97,7 @@ It yields stream events as the run proceeds. A run ends in exactly one of two wa
 
 `run_listing` does not raise for a failed run: a missing model setting, a model error and an unreadable listing all end with the `error` event. A caller that only streams can ignore the return value and should treat `error` as the end of the stream.
 
-`run_listing` runs the agent, so it needs a model: set `MODEL_PROVIDER` and `MODEL_ID` (see `.env.example`). Text input works; a screenshot gives an `error` event until Phase 3.
+`run_listing` runs the agent, so it needs a model: set `MODEL_PROVIDER` and `MODEL_ID` (see `.env.example`). Text and image input both work. An image that is not PNG, JPEG or WebP, or is larger than 3.5 MB, ends with an `error` event.
 
 `replay_claims(claims)` yields the same event types for claims that are already extracted, without calling a model. Use it to build and test the API and the UI without a key:
 

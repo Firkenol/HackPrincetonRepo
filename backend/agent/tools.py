@@ -1,7 +1,8 @@
 """The agent's tools. Every number in a report comes from here, never from the model.
 
-The model's only job is to read the listing into a Claims object and pass it to
-record_claims. The check tools take no arguments: they run the Phase 1 check
+The model's only job is to read the listing, text or image, into a ListingExtraction
+and pass it to record_claims, which converts units in Python and stores the contract's
+Claims object. The check tools take no arguments: they run the Phase 1 check
 functions on the recorded claims, so the model cannot alter a value between
 extraction and arithmetic.
 
@@ -15,6 +16,7 @@ from dataclasses import dataclass, field
 
 from langchain_core.tools import BaseTool, StructuredTool, ToolException
 
+from agent.extraction import ListingExtraction
 from claimcheck import constants
 from claimcheck.checks import ALL_CHECKS
 from claimcheck.models import CheckResult, Claims, EvidenceReport
@@ -53,11 +55,12 @@ def _require_claims(state: RunState) -> Claims:
 
 
 def build_tools(state: RunState) -> list[BaseTool]:
-    def record_claims(claims: Claims) -> str:
-        state.claims = claims
+    def record_claims(claims: ListingExtraction) -> str:
+        converted = claims.to_claims()
+        state.claims = converted
         state.checks.clear()
         state.report = None
-        return json.dumps({"recorded": True, "claims": claims.model_dump(mode="json", exclude_none=True)})
+        return json.dumps({"recorded": True, "claims": converted.model_dump(mode="json", exclude_none=True)})
 
     def lookup_form_factor(code: str) -> str:
         form_factor = constants.FORM_FACTORS.get(code.strip().upper())
@@ -105,9 +108,10 @@ def build_tools(state: RunState) -> list[BaseTool]:
             record_claims,
             name=RECORD_CLAIMS,
             description=(
-                "Save what the listing states. Call this once, before any check. Leave out every field the "
-                "listing does not state. Never include a seller, store or brand name. Calling it again replaces "
-                "the saved claims."
+                "Save what the listing text or image states. Call this once, before any check. Give each value "
+                "in the unit shown; conversion happens inside the tool. Leave out every field the listing does "
+                "not state. Never include a seller, store or brand name. Calling it again replaces the saved "
+                "claims. Returns the claims as stored, in standard units."
             ),
             handle_tool_error=True,
         ),

@@ -10,7 +10,7 @@ from langchain_core.messages import AIMessage
 
 import agent.model as model_module
 from agent import run_listing
-from agent.runner import MSG_EMPTY, MSG_FAILED, MSG_IMAGE, MSG_NO_CLAIMS, MSG_NO_MODEL
+from agent.runner import MSG_EMPTY, MSG_FAILED, MSG_NO_CLAIMS, MSG_NO_MODEL
 from agent.tests.fake_model import ScriptedChatModel, all_checks, assemble, calls, full_script, record
 from agent.tests.listings import LISTING_TEXT
 from agent.tools import ASSEMBLE_REPORT, CHECK_TOOL_NAMES, LOOKUP_FORM_FACTOR, RECORD_CLAIMS, TOOL_NAMES
@@ -186,7 +186,7 @@ def test_check_before_claims_is_rejected_then_recovers():
 
 
 def test_invalid_claims_are_rejected_by_the_schema_then_corrected():
-    bad = calls((RECORD_CLAIMS, {"claims": {"capacity_mah": {"value": -700}, "seller": "Some Store"}}))
+    bad = calls((RECORD_CLAIMS, {"claims": {"capacity": {"value": -700, "unit": "mAh", "found_in": "title", "confidence": 1}, "seller": "Some Store"}}))
     _, events, report = run(2, [bad, *full_script(BY_ID[2].claims)])
 
     first = next(e for e in events if e.type == "tool_result")
@@ -224,12 +224,6 @@ def test_model_failure_ends_with_a_generic_error():
     events, report = drain(run_listing(LISTING_TEXT[1], model=model))
     _only_error(events, report, MSG_FAILED)
     assert "script" not in events[-1].message
-
-
-@pytest.mark.parametrize("image", [b"\x89PNG\r\n", Path("screenshot.png")])
-def test_image_input_is_not_available_yet(image):
-    events, report = drain(run_listing(image, model=ScriptedChatModel(script=[])))
-    _only_error(events, report, MSG_IMAGE)
 
 
 def test_empty_text_is_an_error():
