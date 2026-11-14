@@ -47,7 +47,7 @@ def final_report(listing):
     return last.report
 
 
-@pytest.mark.parametrize("fixture_id", [1, 2, 6, 7, 8, 9])
+@pytest.mark.parametrize("fixture_id", sorted(LISTING_TEXT))
 def test_live_text_fixture(fixture_id):
     report = final_report(LISTING_TEXT[fixture_id])
     assert report.verdict is BY_ID[fixture_id].verdict

@@ -1,7 +1,9 @@
-"""Text versions of the fixtures Phase 2 covers (1, 2 and 6 to 9).
+"""Text versions of all nine fixtures.
 
 Written as a pasted listing would read. No seller, store or brand names.
-Fixtures 3, 4 and 5 depend on the product photo and arrive with image input.
+Fixtures 3, 4 and 5 are about what is printed on the product, so their text versions
+include a line giving the print on the cells, as a person pasting the listing might
+type it. The image path is still how the demo catches fixture 3.
 """
 
 LISTING_TEXT: dict[int, str] = {
@@ -56,5 +58,22 @@ Weight: 307 g
 2S LiPo Battery 7.4V 5200mAh Hard Case for RC Car
 
 Label on pack: 7.4V 5200mAh 38.48Wh 2S
+""",
+    3: """Alkaline Batteries Combo Pack, AA and AAA, 24 Count
+
+- Alkaline AA and AAA batteries for everyday devices
+
+Printed on the cells in the product photo: R6 Heavy Duty (AA cells), R03 Heavy Duty (AAA cells)
+""",
+    4: """Carbon Zinc Batteries AA and AAA Value Pack
+
+- Carbon zinc AA and AAA cells for clocks and remote controls
+- 10-year shelf life
+""",
+    5: """Heavy Duty Batteries AA and AAA Multipack, Carbon Zinc
+
+- Carbon zinc AA and AAA cells for low-drain devices
+
+Printed on the cells in the product photo: R6 Heavy Duty (AA cells), R03 Heavy Duty (AAA cells)
 """,
 }
