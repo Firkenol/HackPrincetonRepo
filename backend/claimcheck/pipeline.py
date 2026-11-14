@@ -27,12 +27,17 @@ def run_listing(image_or_text: ListingInput) -> Generator[StreamEvent, None, Evi
     """Check one listing. Yields stream events, then returns the evidence report.
 
     The last event yielded is a FinalReportEvent carrying the same report that is
-    returned, or an ErrorEvent if the run failed. Callers that only stream can
-    ignore the return value.
+    returned, or an ErrorEvent if the run failed, in which case the return value is
+    None. Callers that only stream can ignore the return value.
 
-    Implemented in Phase 2 (text) and Phase 3 (image) by the deepagents agent.
+    Implemented by the deepagents agent in backend/agent/. Text input works; image
+    input arrives in Phase 3.
     """
-    raise NotImplementedError("run_listing arrives in Phase 2. Until then use replay_claims().")
+    # Imported here, not at the top: the agent package imports claimcheck, and this
+    # keeps `import claimcheck` free of the agent's dependencies until a run starts.
+    from agent.runner import run_listing as agent_run_listing
+
+    return (yield from agent_run_listing(image_or_text))
 
 
 def replay_claims(claims: Claims, run_id: str | None = None) -> Generator[StreamEvent, None, EvidenceReport]:

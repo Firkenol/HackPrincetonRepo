@@ -23,7 +23,7 @@ Not frozen: constants, policy thresholds, check wording, anything inside the age
 | Part | Folder |
 |---|---|
 | Checks, constants, models (done) | `backend/claimcheck/` |
-| Agent: deepagents setup, tools, subagents, `run_listing` implementation | `backend/claimcheck/agent/` |
+| Agent: deepagents setup, tools, subagents, `run_listing` implementation | `backend/agent/` |
 | Skills, one folder per skill with a `SKILL.md` | `backend/skills/` |
 | API (FastAPI) | `backend/api/` |
 | Web frontend (Next.js) | `frontend/` |
@@ -81,7 +81,9 @@ def run_listing(image_or_text: str | bytes | Path) -> Generator[StreamEvent, Non
 
 It yields stream events as the run proceeds and returns the evidence report when it finishes. The last event yielded is always either `final_report`, carrying the same report that is returned, or `error`. A caller that only streams can ignore the return value.
 
-`run_listing` raises `NotImplementedError` until Phase 2. Until then, `replay_claims(claims)` yields the same event types for claims that are already extracted, without calling a model. Use it to build the API and the UI now:
+`run_listing` runs the agent, so it needs a model: set `MODEL_PROVIDER` and `MODEL_ID` (see `.env.example`). Text input works; a screenshot gives an `error` event until Phase 3. When a run ends in `error`, the return value is `None`.
+
+`replay_claims(claims)` yields the same event types for claims that are already extracted, without calling a model. Use it to build and test the API and the UI without a key:
 
 ```python
 from claimcheck import replay_claims
