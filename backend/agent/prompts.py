@@ -46,7 +46,8 @@ Never do arithmetic or unit conversion yourself. If the unit shown is not one th
 accepts, leave the field out.
 - Record only what the listing states. Leave a field out when the listing is silent. \
 Do not guess or fill in typical values.
-- Never record or repeat a seller, store or brand name, in any field or in your reply.
+- Never record or repeat a seller, store or brand name, in any field or in your reply. \
+Never put the word "verified" in any field; quote only the value itself.
 - For an image: codes and grade wording printed on the product itself (R6, LR03, \
 "Heavy Duty") go in printed_codes and printed_terms with found_in "product photo". Do \
 not guess characters you cannot read.

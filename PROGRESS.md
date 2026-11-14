@@ -7,7 +7,7 @@ Read this first. Update it before stopping. Phases are the build order in SPEC.m
 - [x] **1. Check functions and constants file with unit tests.** Done in commit `02da030` (contract frozen in `64ae171`).
 - [x] **2. deepagents agent with tools, text input from the command line.** Merged to main on 2026-11-14 (branch `phase-2-agent`). Passes with a scripted fake model; the live run on a real model is still open (see below).
 - [ ] **3. Image input.** Built and tested with the scripted model on branch `phase-3-image` (not merged). Open: live extraction from real screenshots (see below).
-- [ ] **4. Subagents, skills, evidence report.**
+- [ ] **4. Subagents, skills, evidence report.** Built and tested with the scripted model on branch `phase-4-subagents` (not merged). Open: a live run, and LangSmith showing the subagent and tool calls.
 - [ ] **5. Web UI and batch mode.**
 - [ ] **6. README and demo script.**
 
@@ -52,6 +52,36 @@ Open:
 2. **No live run yet**, for the same account reason as Phase 2. Extraction quality on real screenshots, and whether 0.8 is the right confidence threshold, are untested.
 3. **Conversion factors live in `backend/agent/units.py`**, not in `claimcheck/constants.py`. They are exact definitions (SI prefixes, inch, pound), cited in the module docstring, and `backend/claimcheck/` was closed to changes in this phase. Move them if the owner prefers one file.
 4. Images are not resized. A screenshot over 3.5 MB is refused with a clear message.
+
+## Phase 4 status (2026-11-14, branch `phase-4-subagents`)
+
+Done:
+
+- The agent is an orchestrator with three deepagents subagents, called through the `task` tool: `listing-reader` (only `record_claims`), `physics-checker` (the six check tools and `lookup_form_factor`), `report-writer` (only `assemble_report`). The orchestrator has none of these tools. No subagent can delegate.
+- Each subagent has its own system prompt (`backend/agent/prompts.py`) and its own skills folder: `backend/skills/listing-reader/reading-battery-listings/`, `backend/skills/physics-checker/running-claim-checks/`, `backend/skills/report-writer/assembling-evidence-reports/`.
+- Stream events carry the agent name. Each delegation shows as a `task` tool call by the orchestrator followed by an `agent_step` from the subagent.
+- All nine fixtures pass through `run_listing()` with the scripted model, from text and from an image (`agent/tests/test_fixtures_end_to_end.py`). Text versions of fixtures 3, 4 and 5 were added. Every report matches its file in `fixtures/expected/` and round-trips strictly through the contract models.
+- Hard-rule tests in `agent/tests/test_hard_rules.py`: only the four verdicts and three routings appear; "verified" never appears; seller and store names; low confidence routes to a person; a check that raises ends with an `error` event and `None`.
+- Test count: 365 passed, 19 skipped (the skips are the live-model tests).
+
+Open:
+
+1. **No live run.** Same account reason as Phase 2. The subagent prompts are untested on a real model, and the LangSmith part of the acceptance line is not checked.
+2. **A seller name inside a free-text field cannot be ruled out mechanically.** There is no seller, store or brand field, unknown fields are rejected at every level, the orchestrator never sees the listing, and no model prose reaches an event. What remains is `quote`, `found_in` and the text values (`form_factors`, `printed_codes`, `printed_terms`): a model that ignored its prompt could put a name there. Only the prompt and the skill guard this.
+3. **CONTRACT.md says "one folder per skill" under `backend/skills/`.** Skills now sit one level deeper, grouped by subagent, because deepagents gives a subagent a folder of skills. CONTRACT.md was not edited; that row needs a one-line update by the owner.
+4. The `task` tool also offers deepagents' built-in `general-purpose` subagent (see decisions).
+
+## Decisions made while unattended
+
+2026-11-14, Phase 4:
+
+1. **The listing goes to the listing reader directly, not through the orchestrator.** A deepagents subagent only receives the task text its caller writes, so an image could not reach it, and text would be retyped by a model. A small middleware (`ListingMiddleware` in `agent/graph.py`) adds the listing to the reader's model requests. The orchestrator is only told "a listing was submitted as text" or "as an image".
+2. **The built-in `general-purpose` subagent is left in place.** Removing it needs a harness profile registered per model provider, which would tie the code to a provider. It has no claim, check or report tools, so it cannot change a result, and the orchestrator prompt says to use only the three subagents.
+3. **Delegation events hide model-written text.** A `task` tool call shows only `{"subagent_type": ...}`; its result shows a fixed summary and no data. Calls to deepagents' file tools show no arguments and no result.
+4. **The report is still computed by `claimcheck.verdict.evaluate`.** The report writer's tool calls it; if a model skips the checks or the report writer, `run_listing` computes the same report itself.
+5. **`record_claims` rejects a claim whose `quote`, `found_in` or text value contains "verified"** (`agent/extraction.py`). Otherwise a listing that uses the word could carry it into a report. The model gets an error naming the field and retries.
+6. **Text versions of fixtures 3, 4 and 5** include a line giving the print on the cells, as a person pasting the listing might type it.
+7. **A check tool that raises ends the run with the generic `error` event.** Nothing was changed to make this so; the tests now pin it.
 
 ## Environment notes
 

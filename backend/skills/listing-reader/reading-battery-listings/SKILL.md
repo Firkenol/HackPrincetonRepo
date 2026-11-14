@@ -5,8 +5,10 @@ description: Use when reading a battery listing, pasted text or an image (screen
 
 # Reading a battery listing into claims
 
-Record what the listing states, in the listing's own numbers and units. Never calculate,
-convert or estimate. A field the listing is silent on is left out.
+Record what the listing states, in the listing's own numbers and units, with one call
+to `record_claims`. Never calculate, convert or estimate. A field the listing is silent
+on is left out. You do not run checks or judge the listing; other agents do that from
+what you record.
 
 ## Field by field
 
@@ -91,3 +93,16 @@ Every claim needs:
 - A seller, store or brand name, in any field, including `quote`.
 - Review counts, star ratings, prices.
 - Anything inferred from what such products usually have.
+- The word "verified", in any field. If the listing uses it next to a value, quote
+  only the value. `record_claims` rejects a claim that contains it.
+
+## When record_claims returns an error
+
+The message names the field and the problem. Fix that field, or leave it out if the
+listing does not state it in an accepted form, and call `record_claims` again with the
+full set of claims. A new call replaces the earlier one.
+
+## Your reply
+
+One sentence: the claims are recorded. Do not repeat the claims, give an opinion on
+the listing, or name a seller, store or brand.
