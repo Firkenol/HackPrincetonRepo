@@ -24,7 +24,7 @@ from claimcheck.verdict import evaluate
 ListingInput = str | bytes | Path
 
 
-def run_listing(image_or_text: ListingInput) -> Generator[StreamEvent, None, EvidenceReport]:
+def run_listing(image_or_text: ListingInput) -> Generator[StreamEvent, None, EvidenceReport | None]:
     """Check one listing. Yields stream events, then returns the evidence report.
 
     The last event yielded is a FinalReportEvent carrying the same report that is

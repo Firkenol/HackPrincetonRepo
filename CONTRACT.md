@@ -4,6 +4,15 @@ This is the interface between the four parts of the project: the checks, the age
 
 The source of truth is the code. If this document and the code disagree, the code wins and this document has a bug.
 
+## Contract changes
+
+Newest first. API and frontend owners: check this list when you pull.
+
+| Date | Change | What to do |
+|---|---|---|
+| 2026-11-14 | `run_listing` returns `EvidenceReport | None` (was `EvidenceReport`). A failed run ends with one `error` event and returns `None`; it does not raise. Approved by the project owner. | Handle `error` as a terminal event. Do not assume the return value is a report. |
+| 2026-11-14 | `run_listing` is implemented (it used to raise `NotImplementedError`) and the agent lives in `backend/agent/`. `replay_claims` also ends with an `error` event and returns `None` if a check fails. | Nothing, unless you caught `NotImplementedError`. |
+
 ## What is frozen
 
 | Item | File |
@@ -70,7 +79,7 @@ High confidence means 0.8 or more.
 ```python
 from claimcheck import run_listing
 
-def run_listing(image_or_text: str | bytes | Path) -> Generator[StreamEvent, None, EvidenceReport]
+def run_listing(image_or_text: str | bytes | Path) -> Generator[StreamEvent, None, EvidenceReport | None]
 ```
 
 | Input type | Meaning |
@@ -79,9 +88,16 @@ def run_listing(image_or_text: str | bytes | Path) -> Generator[StreamEvent, Non
 | `bytes` | The bytes of a screenshot (PNG, JPEG or WebP) |
 | `pathlib.Path` | A screenshot file on disk |
 
-It yields stream events as the run proceeds and returns the evidence report when it finishes. The last event yielded is always either `final_report`, carrying the same report that is returned, or `error`. A caller that only streams can ignore the return value.
+It yields stream events as the run proceeds. A run ends in exactly one of two ways:
 
-`run_listing` runs the agent, so it needs a model: set `MODEL_PROVIDER` and `MODEL_ID` (see `.env.example`). Text input works; a screenshot gives an `error` event until Phase 3. When a run ends in `error`, the return value is `None`.
+| Outcome | Last event | Return value |
+|---|---|---|
+| Success | `final_report`, carrying the report | the same `EvidenceReport` |
+| Failure | `error`, with a message that is safe to display | `None` |
+
+`run_listing` does not raise for a failed run: a missing model setting, a model error and an unreadable listing all end with the `error` event. A caller that only streams can ignore the return value and should treat `error` as the end of the stream.
+
+`run_listing` runs the agent, so it needs a model: set `MODEL_PROVIDER` and `MODEL_ID` (see `.env.example`). Text input works; a screenshot gives an `error` event until Phase 3.
 
 `replay_claims(claims)` yields the same event types for claims that are already extracted, without calling a model. Use it to build and test the API and the UI without a key:
 

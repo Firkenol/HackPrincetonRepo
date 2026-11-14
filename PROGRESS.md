@@ -24,14 +24,20 @@ Done:
 
 Open:
 
-1. **Live acceptance not run.** SPEC's Phase 2 acceptance (fixtures 1, 2, 6 to 9 end to end on a real model, Bedrock for the Amazon track) is covered by `agent/tests/test_live.py`, which skips until `MODEL_PROVIDER` and `MODEL_ID` are set. A local `.env` (git-ignored) holds an AWS access key id, but the secret access key, region and model id are still missing, and `langchain-aws` is not installed or pinned yet. The prompt and skills have not been tried on a real model.
-2. **Return type on failure.** `claimcheck.run_listing` now runs the agent (the import is inside the function so `import claimcheck` stays light). When a run ends in `error` it returns `None`, but the frozen signature still says `EvidenceReport`. Changing the annotation to `EvidenceReport | None` needs the owner's approval.
-3. **Events are all labelled `orchestrator`.** The three subagent names arrive in Phase 4.
-4. **`error-event-replay` branch** (commit `0cda500`) is local only: not merged, not pushed, waiting for the owner's answer. It makes `replay_claims` end with an `error` event and return `None` when a check raises, and adds a test. It edits `pipeline.py` and `test_contract.py`, which main has since changed, so merging it will need a small conflict fix.
-5. `backend/pyproject.toml` `testpaths` now includes `agent/tests`. `packs-docs` edits the same line, so expect a small merge conflict.
-6. The `api` and `web` branches are not merged; nothing on main depends on them.
+1. **Live acceptance blocked by the AWS account, not by code.** Credentials in the local `.env` (git-ignored) authenticate, and `langchain-aws` 1.9.3 is installed and pinned. On 2026-11-14 a one-word test call was sent to 30 vision-capable models and inference profiles in us-east-2 and none could be invoked:
+   - Amazon Nova (Pro, Lite, 2 Lite), Claude Haiku 4.5, Pixtral Large, Llama 4, and the on-demand open models: `ThrottlingException: Too many tokens per day` on the first call, which means the account's daily token quota for them is zero.
+   - Claude Sonnet 4.6: "Model use case details have not been submitted for this account."
+   - Claude 5 family, OpenAI, xAI, Kimi K3: "not available for this account."
+   `MODEL_ID` is left empty in `.env` so the live tests skip instead of failing. Once the account has quota, the suggested model is `us.anthropic.claude-haiku-4-5-20251001-v1:0` (vision, tool calling), with `us.amazon.nova-pro-v1:0` as the Amazon-native alternative. Any other provider works by changing `MODEL_PROVIDER`, `MODEL_ID` and the key.
+2. **Events are all labelled `orchestrator`.** The three subagent names arrive in Phase 4.
+3. `backend/pyproject.toml` `testpaths` now includes `agent/tests`. `packs-docs` edits the same line, so expect a small merge conflict.
+4. The `api` and `web` branches are not merged; nothing on main depends on them.
+
+Closed on 2026-11-14: `error-event-replay` rebased and merged (`684e4e6`); `run_listing` return type is `EvidenceReport | None`, recorded under "Contract changes" in CONTRACT.md.
 
 ## Environment notes
 
 - Python 3.14 works. No 3.12 environment was needed.
 - Windows Smart App Control blocked the native builds of `xxhash` 4.1.0 and `ormsgpack` 1.13.1. `requirements.txt` pins `xxhash` 4.0.2 and `ormsgpack` 1.13.0, which load.
+- boto3 reads the region from `AWS_DEFAULT_REGION`; `langchain-aws` also accepts `AWS_REGION`, which is what `.env.example` uses.
+- The AWS key in use belongs to the account root user. An IAM user limited to Bedrock would be safer.
