@@ -120,16 +120,14 @@ All 20 fixtures pass the check tests and the scripted-model agent tests. There i
 training step: the model is a hosted one and fine-tuning is out of scope; these are the
 acceptance set for Phase 3 image extraction.
 
-Two things to decide:
+Decided and fixed:
 
-1. **Honest alkaline listings route to human review because of shelf life.** Fixtures 11,
-   12 and 13 state 7, 10 and 12-year shelf lives. `constants.py` deliberately has no alkaline
-   shelf-life limit, so check 6 is not assessed, and the routing rule for "a numeric claim
-   that could not be tested" sends them to a person. Three of five honest alkaline listings
-   in this batch go that way. Options: treat a shelf-life claim as not counting toward
-   "missing data" when the chemistry has no reference on file (change in `verdict.py`,
-   which is not frozen), or add a cited alkaline shelf-life ceiling. The expected files
-   record the current behaviour; change the fixtures' routing if the policy changes.
+1. **Honest alkaline listings with a shelf-life claim route to human review. Decided by the
+   project owner on 2026-11-14: keep it.** Fixtures 11, 12 and 13 state 7, 10 and 12-year shelf
+   lives; `constants.py` has no alkaline shelf-life limit, so check 6 is not assessed and the
+   routing rule for "a numeric claim that could not be tested" sends them to a person. The
+   owner considers a shelf-life claim important enough to warrant that. The expected files
+   record this behaviour.
 2. (Fixed 2026-11-14) `test_lookup_form_factor_reads_the_constants_file` failed about half
    the time: it unpacked two parallel tool results in a fixed order. It now matches them by
    the `known` field.
