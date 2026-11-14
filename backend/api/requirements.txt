@@ -1,0 +1,14 @@
+# API dependencies. Every version is pinned, including transitive ones.
+# Install together with the core package: pip install -r requirements.txt -r api/requirements.txt
+fastapi==0.162.7
+uvicorn==0.54.0
+python-multipart==0.0.33
+
+# transitive
+annotated-doc==0.0.6
+anyio==4.16.0
+click==8.5.1
+h11==0.16.0
+idna==3.20
+opentelemetry-api==1.45.2
+starlette==1.10.0

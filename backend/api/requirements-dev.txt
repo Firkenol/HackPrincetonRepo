@@ -1,0 +1,8 @@
+-r ../requirements-dev.txt
+-r requirements.txt
+# The FastAPI test client runs on httpx2.
+httpx2==2.16.0
+
+# transitive
+httpcore2==2.16.0
+truststore==0.10.5
