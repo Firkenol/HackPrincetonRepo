@@ -9,6 +9,7 @@ from pathlib import Path
 from claimcheck.checks import ALL_CHECKS
 from claimcheck.events import (
     AgentStepEvent,
+    ErrorEvent,
     FinalReportEvent,
     StreamEvent,
     ToolCallEvent,
@@ -40,34 +41,46 @@ def run_listing(image_or_text: ListingInput) -> Generator[StreamEvent, None, Evi
     return (yield from agent_run_listing(image_or_text))
 
 
-def replay_claims(claims: Claims, run_id: str | None = None) -> Generator[StreamEvent, None, EvidenceReport]:
+def replay_claims(claims: Claims, run_id: str | None = None) -> Generator[StreamEvent, None, EvidenceReport | None]:
     """Development helper, not part of the frozen contract.
 
     Emits the same event types as run_listing for claims that are already
     extracted, using only the Phase 1 check functions. No model is called. It lets
     the API and the web UI be built and tested before the agent exists.
+
+    If a check raises, the stream ends with one ErrorEvent and the return value is
+    None. The error text is generic on purpose: exception messages are not shown.
     """
     run_id = run_id or uuid.uuid4().hex
     seq = 0
 
     yield AgentStepEvent(run_id=run_id, seq=seq, agent="physics-checker", message="Running the six checks on the extracted claims.")
-    for index, check in enumerate(ALL_CHECKS):
-        call_id = f"{run_id}-{index}"
+    try:
+        for index, check in enumerate(ALL_CHECKS):
+            call_id = f"{run_id}-{index}"
+            seq += 1
+            yield ToolCallEvent(run_id=run_id, seq=seq, agent="physics-checker", call_id=call_id, tool=check.__name__)
+            result = check(claims)
+            seq += 1
+            yield ToolResultEvent(
+                run_id=run_id,
+                seq=seq,
+                agent="physics-checker",
+                call_id=call_id,
+                tool=check.__name__,
+                summary=f"{result.status.value}: {result.summary}",
+                result=result.model_dump(mode="json"),
+            )
+        report = evaluate(claims)
+    except Exception:
         seq += 1
-        yield ToolCallEvent(run_id=run_id, seq=seq, agent="physics-checker", call_id=call_id, tool=check.__name__)
-        result = check(claims)
-        seq += 1
-        yield ToolResultEvent(
+        yield ErrorEvent(
             run_id=run_id,
             seq=seq,
             agent="physics-checker",
-            call_id=call_id,
-            tool=check.__name__,
-            summary=f"{result.status.value}: {result.summary}",
-            result=result.model_dump(mode="json"),
+            message="The checks could not be completed for this listing.",
         )
-
-    report = evaluate(claims)
+        return None
     seq += 1
     yield AgentStepEvent(run_id=run_id, seq=seq, agent="report-writer", message="Assembling the evidence report.")
     seq += 1

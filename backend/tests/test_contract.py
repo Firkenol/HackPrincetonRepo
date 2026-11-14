@@ -46,6 +46,22 @@ def test_replay_yields_ordered_events_and_returns_the_report():
     assert events[-1].report == report == evaluate(BY_ID[1].claims)
 
 
+def test_a_failing_check_ends_the_stream_with_one_error_event(monkeypatch):
+    import claimcheck.pipeline as pipeline
+
+    def broken(claims):
+        raise RuntimeError("internal detail that must not reach the browser")
+
+    monkeypatch.setattr(pipeline, "ALL_CHECKS", (broken,))
+    events, report = _drain(replay_claims(BY_ID[1].claims, run_id="run-err"))
+    assert report is None
+    assert isinstance(events[-1], ErrorEvent)
+    assert [e.type for e in events].count("error") == 1
+    assert [e.type for e in events].count("final_report") == 0
+    assert [e.seq for e in events] == list(range(len(events)))
+    assert "internal detail" not in events[-1].message
+
+
 def test_every_event_round_trips_through_json():
     events, _ = _drain(replay_claims(BY_ID[6].claims))
     events.append(ErrorEvent(run_id="r", seq=99, message="Model call failed."))
