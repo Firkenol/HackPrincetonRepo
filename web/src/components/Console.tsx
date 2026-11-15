@@ -22,6 +22,7 @@ import { Intake } from "./Intake";
 import { MathModule } from "./MathModule";
 import { MetricsBar, formatRanAt, sampleLabel } from "./MetricsBar";
 import { TracePanel } from "./TracePanel";
+import { FeedSkeleton, MathSkeleton, MetricsSkeleton } from "./states/Skeletons";
 import { VerdictCard } from "./VerdictCard";
 
 const MSG_OFFLINE_CHECK =
@@ -170,7 +171,8 @@ export function Console() {
   return (
     <MotionConfig reducedMotion="user">
       <div className="flex min-h-screen flex-col">
-        <header className="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-panel px-5 py-3">
+        <header className="relative flex flex-wrap items-center justify-between gap-3 border-b border-line bg-panel px-6 py-4">
+          <span aria-hidden className="pointer-events-none absolute inset-x-0 -bottom-px h-px bg-gradient-to-r from-accent/70 via-accent/10 to-transparent" />
           <div className="flex items-baseline gap-3">
             <h1 className="text-xl font-semibold tracking-tight text-text">Carnot</h1>
             <p className="text-sm text-muted">Checks product claims against physics and shows the math</p>
@@ -184,23 +186,31 @@ export function Console() {
           )}
         </header>
 
-        <MetricsBar stats={stats} source={source ?? "live"} preRun={Boolean(batchRun?.preRun)} />
+        {stats === null && source === null ? (
+          <MetricsSkeleton />
+        ) : (
+          <MetricsBar stats={stats} source={source ?? "live"} preRun={Boolean(batchRun?.preRun)} />
+        )}
 
         <div className="grid flex-1 lg:grid-cols-[19rem_1fr]">
           <aside className="max-h-72 border-b border-line bg-panel lg:sticky lg:top-0 lg:h-screen lg:max-h-screen lg:self-start lg:border-b-0 lg:border-r">
             <div className="flex h-full max-h-72 flex-col lg:max-h-screen">
-              <AuditFeed
-                listings={listings}
-                selectedKey={selectedKey}
-                onSelect={(key) => {
-                  setSelectedKey(key);
-                  setView("listings");
-                }}
-              />
+              {listings.length === 0 && (busy || batchRunning) ? (
+                <FeedSkeleton />
+              ) : (
+                <AuditFeed
+                  listings={listings}
+                  selectedKey={selectedKey}
+                  onSelect={(key) => {
+                    setSelectedKey(key);
+                    setView("listings");
+                  }}
+                />
+              )}
             </div>
           </aside>
 
-          <main className="min-w-0 space-y-5 p-5">
+          <main className="min-w-0 space-y-6 p-5 lg:p-6">
             <div role="tablist" aria-label="View" className="inline-flex rounded-md border border-line bg-panel p-0.5 text-sm">
               {(["listings", "batch"] as const).map((tab) => (
                 <button
@@ -247,16 +257,17 @@ export function Console() {
                 {selected ? (
                   <>
                     <VerdictCard listing={selected} />
-                    <div className="grid items-start gap-5 xl:grid-cols-[1fr_24rem]">
-                      {selected.report ? (
-                        <MathModule key={selected.key} report={selected.report} />
-                      ) : (
-                        <p className="rounded-lg border border-line bg-panel px-4 py-6 text-sm text-muted">
-                          The math appears here once the checks have run.
-                        </p>
-                      )}
-                      <TracePanel events={selected.events} running={selected.running} />
-                    </div>
+                    {/* The live trace is a core part of the view: full width, directly under the verdict. */}
+                    <TracePanel events={selected.events} running={selected.running} />
+                    {selected.report ? (
+                      <MathModule key={selected.key} report={selected.report} />
+                    ) : selected.running ? (
+                      <MathSkeleton />
+                    ) : (
+                      <p className="rounded-lg border border-line bg-panel px-4 py-6 text-sm text-muted">
+                        The math appears here once the checks have run.
+                      </p>
+                    )}
                   </>
                 ) : (
                   <p className="rounded-lg border border-line bg-panel px-4 py-8 text-sm leading-6 text-muted">

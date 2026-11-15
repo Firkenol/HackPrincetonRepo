@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { Download, LoaderCircle } from "lucide-react";
 import { describeProduct } from "@/lib/describe";
 import type { EvidenceReport, Listing } from "@/lib/types";
@@ -44,7 +45,13 @@ export function VerdictCard({ listing }: { listing: Listing }) {
       <div className="grid lg:grid-cols-2">
         <ListingPane listing={listing} />
 
-        <div className="flex flex-col gap-4 p-5">
+        <motion.div
+          key={report ? "report" : listing.running ? "running" : "idle"}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          className="flex flex-col gap-4 p-5"
+        >
           {report ? (
             <>
               <p className="text-sm text-muted">{describeProduct(report.claims)}</p>
@@ -96,7 +103,7 @@ export function VerdictCard({ listing }: { listing: Listing }) {
               </p>
             </div>
           )}
-        </div>
+        </motion.div>
       </div>
     </article>
   );

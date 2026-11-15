@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { StreamEvent } from "@/lib/types";
 import { SAMPLES } from "@/samples";
 import { TracePanel, checkChips, pipeline, traceLine } from "./TracePanel";
@@ -172,5 +172,34 @@ describe("TracePanel", () => {
     expect(text).not.toContain("verif");
     expect(text).not.toMatch(/seller|store\b|brand/);
     within(screen.getByRole("list", { name: "Events" })).getAllByRole("button").forEach((b) => expect(b).toHaveAttribute("aria-expanded"));
+  });
+});
+
+describe("TracePanel auto-scroll", () => {
+  it("moves the trace list to its bottom as events arrive, and only the list", () => {
+    const { rerender } = render(<TracePanel events={START} running />);
+    const list = screen.getByRole("list", { name: "Events" });
+    Object.defineProperty(list, "scrollHeight", { value: 1200, configurable: true });
+    const scrollTo = vi.fn();
+    Object.defineProperty(list, "scrollTo", { value: scrollTo, configurable: true });
+
+    rerender(<TracePanel events={[...START, ...CHECKS]} running />);
+    expect(scrollTo).toHaveBeenLastCalledWith({ top: 1200, behavior: "smooth" });
+  });
+
+  it("does not follow the stream after the person has scrolled up", () => {
+    const { rerender } = render(<TracePanel events={START} running />);
+    const list = screen.getByRole("list", { name: "Events" });
+    Object.defineProperty(list, "scrollHeight", { value: 1000, configurable: true });
+    Object.defineProperty(list, "clientHeight", { value: 300, configurable: true });
+    const scrollTo = vi.fn();
+    Object.defineProperty(list, "scrollTo", { value: scrollTo, configurable: true });
+
+    list.scrollTop = 100;
+    fireEvent.scroll(list);
+    scrollTo.mockClear();
+    rerender(<TracePanel events={[...START, ...CHECKS]} running />);
+    expect(scrollTo).not.toHaveBeenCalled();
+    expect(screen.getByTestId("trace-jump")).toBeInTheDocument();
   });
 });

@@ -317,7 +317,6 @@ export function TracePanel({ events, running }: { events: StreamEvent[]; running
 function TraceRun({ events, running, runKey }: { events: StreamEvent[]; running: boolean; runKey: string }) {
   const reduced = useReducedMotion();
   const list = useRef<HTMLOListElement>(null);
-  const end = useRef<HTMLLIElement>(null);
   const [openKeys, setOpenKeys] = useState<Set<string>>(() => new Set());
   const [hidden, setHidden] = useState<Set<AgentName>>(() => new Set());
   // null: following the stream. A number: how many events there were when the person
@@ -326,16 +325,23 @@ function TraceRun({ events, running, runKey }: { events: StreamEvent[]; running:
   const pinned = pausedAt === null;
   const behind = pausedAt === null ? 0 : Math.max(0, events.length - pausedAt);
 
+  // Follow the stream by moving the list itself to its bottom. scrollIntoView would also
+  // scroll the page, which pulls the reader away from the verdict above the trace.
+  const followEnd = useCallback(() => {
+    const el = list.current;
+    if (!el) return;
+    el.scrollTo?.({ top: el.scrollHeight, behavior: reduced ? "auto" : "smooth" });
+    if (typeof el.scrollTo !== "function") el.scrollTop = el.scrollHeight;
+  }, [reduced]);
+
   useEffect(() => {
-    if (pinned && (running || events.length)) {
-      end.current?.scrollIntoView?.({ block: "nearest", behavior: reduced ? "auto" : "smooth" });
-    }
-  }, [events.length, running, pinned, reduced]);
+    if (pinned && (running || events.length)) followEnd();
+  }, [events.length, running, pinned, followEnd]);
 
   const jump = useCallback(() => {
     setPausedAt(null);
-    end.current?.scrollIntoView?.({ block: "nearest", behavior: reduced ? "auto" : "smooth" });
-  }, [reduced]);
+    followEnd();
+  }, [followEnd]);
 
   const pause = useCallback(() => setPausedAt((current) => current ?? events.length), [events.length]);
 
@@ -451,14 +457,13 @@ function TraceRun({ events, running, runKey }: { events: StreamEvent[]; running:
               onMouseEnter={pause}
               onMouseLeave={onScroll}
               aria-label="Events"
-              className="pane-scroll max-h-80 space-y-0.5 overflow-y-auto border-t border-line-soft px-2 py-2"
+              className="pane-scroll max-h-[32rem] min-h-40 space-y-0.5 overflow-y-auto border-t border-line-soft px-2 py-2"
             >
               {shown.map((event) => {
                 const key = `${event.run_id}-${event.seq}`;
                 return <EventRow key={key} event={event} open={openKeys.has(key)} onToggle={() => toggle(key)} />;
               })}
               {shown.length === 0 && <li className="px-2 py-2 text-xs text-faint">Every agent is filtered out.</li>}
-              <li ref={end} aria-hidden />
             </ol>
             <AnimatePresence>
               {!pinned && behind > 0 && (

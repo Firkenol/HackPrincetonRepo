@@ -10,7 +10,8 @@
   --color-line-soft: #1e2838;
   --color-text: #e7ecf3;
   --color-muted: #93a0b4;
-  --color-faint: #66738a;
+  /* Lifted from #66738a so the faintest labels still pass 4.5:1 on the panel colour. */
+  --color-faint: #7b889e;
   --color-accent: #7cc4ff;
 
   --color-impossible: #f26d78;
