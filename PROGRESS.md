@@ -9,7 +9,7 @@ Read this first. Update it before stopping. Phases are the build order in SPEC.m
 - [ ] **3. Image input.** Built and tested with the scripted model on branch `phase-3-image` (not merged). Open: live extraction from real screenshots (see below).
 - [ ] **4. Subagents, skills, evidence report.** Built and tested with the scripted model on branch `phase-4-subagents` (not merged). Open: a live run, and LangSmith showing the subagent and tool calls.
 - [ ] **5. Web UI and batch mode.** Built on branch `console` (not merged) as the OffSpec console: FastAPI in `backend/api/`, Next.js in `web/`. Tested in sample data mode and with the scripted model. Open: a live run, screenshots in `fixtures/`.
-- [ ] **6. README and demo script.** `README.md` is written (setup, both servers, modes, limits). `DEMO.md` is not written.
+- [ ] **6. README and demo script.** `README.md` and `DEMO.md` are written. Open: a clean-clone run from the README alone, and step 6 of the demo needs a configured model.
 
 ## Phase 2 status (2026-11-14)
 
@@ -200,6 +200,20 @@ to `main`.
 - Not included: branch `web-extras` (How it works page, printable report). Its report page
   assumes battery reports and needs work for the check packs first.
 - README has a Deploy section. It has not been tried against a hosting provider.
+
+## Demo and deployment (2026-11-15, branch `offspec-demo`)
+
+- **Hosted console:** https://benmorxles.github.io/offspec-demo/ (GitHub Pages, repo
+  `benmorxles/offspec-demo`, static files only). No API behind it: it shows the bundled samples
+  and says so. `web/next.config.ts` has an opt-in `STATIC_EXPORT=1` mode for this; the
+  normal build is unchanged.
+- **The API is not deployed.** No hosting account is logged in on the machine this was done
+  from. README "Deploy" has the settings; once it is up, rebuild the static console with
+  `NEXT_PUBLIC_API_URL` set to it.
+- **Walkthrough video:** `demo/offspec-walkthrough.mp4` (70 s, captioned), recorded by
+  `demo/record.mjs` from the real console against a local API in sample data mode. Not
+  committed (git-ignored).
+- `DEMO.md` has the six-step script and what is live versus staged.
 
 ## Environment notes
 

@@ -109,6 +109,11 @@ Run one instance: the dashboard counts are kept in memory. Check it with
 If the API is down or the variable is wrong, the console still opens and shows the
 bundled sample reports, labelled "Sample data: the API is offline".
 
+**Static hosting.** `STATIC_EXPORT=1 npm run build` in `web/` writes plain static files to
+`web/out` for hosts such as GitHub Pages (`BASE_PATH=/name` if it is served under a
+path). A static demo with no API is live at https://benmorxles.github.io/offspec-demo/;
+`DEMO.md` has the demo script and how that site is updated.
+
 ## API
 
 | Route | What it does |
