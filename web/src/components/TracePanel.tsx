@@ -4,6 +4,8 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowDownToLine, Check, ChevronDown } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AGENTS, AGENT_ORDER, STATUS_HEX, VERDICT_HEX, agentOf, type AgentName } from "@/lib/agents";
+import { SETTLE, SNAP, UNFOLD } from "@/lib/motion";
+import { markScrollEdges } from "@/lib/scroll";
 import type { CheckStatus, StreamEvent } from "@/lib/types";
 
 // The live trace. Everything on screen is read from the stream events: which agent is
@@ -159,24 +161,36 @@ function PipelineStrip({ events, running }: { events: StreamEvent[]; running: bo
               data-agent={name}
               data-stage={stage}
               title={`${agent.label}: ${agent.role}`}
-              className="relative flex min-w-0 items-center gap-2 rounded-md border px-2 py-1.5 text-xs transition-colors"
+              className="relative flex min-w-0 items-center gap-2 rounded-lg border px-2.5 py-2 text-xs transition-[color,background-color,border-color,box-shadow] duration-300"
               style={{
                 borderColor: stage === "idle" ? "var(--color-line)" : agent.hex,
                 color: stage === "idle" ? "var(--color-faint)" : agent.hex,
                 background: stage === "idle" ? "transparent" : `color-mix(in srgb, ${agent.hex} 10%, transparent)`,
+                boxShadow: stage === "active" ? `0 0 22px -6px ${agent.hex}` : "none",
               }}
             >
               {stage === "active" && !reduced && (
                 <motion.span
                   aria-hidden
-                  className="absolute inset-0 rounded-md"
+                  className="absolute inset-0 rounded-lg"
                   style={{ boxShadow: `0 0 0 1px ${agent.hex}` }}
-                  animate={{ opacity: [0.9, 0.2, 0.9] }}
-                  transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+                  animate={{ opacity: [0.9, 0.15, 0.9] }}
+                  transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
                 />
               )}
               <span className="relative grid size-5 shrink-0 place-items-center">
-                {stage === "done" ? <Check size={14} aria-hidden /> : <Icon size={14} aria-hidden />}
+                <AnimatePresence mode="popLayout" initial={false}>
+                  <motion.span
+                    key={stage === "done" ? "done" : "icon"}
+                    initial={{ opacity: 0, scale: 0.4, rotate: -30 }}
+                    animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                    exit={{ opacity: 0, scale: 0.4 }}
+                    transition={SNAP}
+                    className="grid place-items-center"
+                  >
+                    {stage === "done" ? <Check size={14} aria-hidden /> : <Icon size={14} aria-hidden />}
+                  </motion.span>
+                </AnimatePresence>
               </span>
               <span className="relative truncate font-medium">{agent.label}</span>
               <span className="sr-only">{stage === "active" ? ", working" : stage === "done" ? ", done" : ", waiting"}</span>
@@ -188,12 +202,12 @@ function PipelineStrip({ events, running }: { events: StreamEvent[]; running: bo
                   style={{ background: AGENTS[next].hex }}
                   initial={false}
                   animate={{ width: linkLit ? "100%" : "0%" }}
-                  transition={{ duration: reduced ? 0 : 0.45, ease: "easeOut" }}
+                  transition={{ duration: reduced ? 0 : 0.5, ease: [0.22, 1, 0.36, 1] }}
                 />
                 {stages[next] === "active" && !reduced && (
                   <motion.span
                     className="absolute top-1/2 size-1.5 -translate-y-1/2 rounded-full"
-                    style={{ background: AGENTS[next].hex }}
+                    style={{ background: AGENTS[next].hex, boxShadow: `0 0 8px ${AGENTS[next].hex}` }}
                     animate={{ left: ["0%", "100%"], opacity: [0, 1, 0] }}
                     transition={{ duration: 1.1, repeat: Infinity, ease: "linear" }}
                   />
@@ -226,9 +240,9 @@ function CheckChips({ events }: { events: StreamEvent[] }) {
                 data-testid="check-chip"
                 data-check-id={chip.id}
                 data-status={chip.status ?? "unknown"}
-                initial={{ opacity: 0, scale: 0.85, y: 4 }}
+                initial={{ opacity: 0, scale: 0.8, y: 6 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ type: "spring", stiffness: 420, damping: 28 }}
+                transition={SNAP}
                 className="inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs"
                 style={{ borderColor: hex, color: hex, background: `color-mix(in srgb, ${hex} 12%, transparent)` }}
               >
@@ -247,13 +261,11 @@ function CheckChips({ events }: { events: StreamEvent[] }) {
 function EventRow({ event, open, onToggle }: { event: StreamEvent; open: boolean; onToggle: () => void }) {
   const line = traceLine(event);
   const agent = agentOf(event.agent);
-  const reduced = useReducedMotion();
   return (
     <motion.li
-      layout={!reduced}
-      initial={{ opacity: 0, x: -8 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.18 }}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={SNAP}
       className="rounded-md border-l-2"
       style={{ borderLeftColor: agent.hex }}
     >
@@ -264,7 +276,7 @@ function EventRow({ event, open, onToggle }: { event: StreamEvent; open: boolean
         data-kind={line.kind}
         aria-expanded={open}
         onClick={onToggle}
-        className={`grid w-full grid-cols-[7.5rem_4rem_1fr_1rem] items-start gap-x-2 rounded-md px-2 py-1 text-left text-xs leading-5 hover:bg-raised/70 ${open ? "bg-raised/60" : ""}`}
+        className={`grid w-full grid-cols-[7.5rem_4rem_1fr_1rem] items-start gap-x-2 rounded-md px-2 py-1.5 text-left text-xs leading-5 transition-colors hover:bg-raised/70 ${open ? "bg-raised/60" : ""}`}
       >
         <span className="truncate" style={{ color: agent.hex }}>
           {AGENT[event.agent] ?? event.agent}
@@ -282,10 +294,10 @@ function EventRow({ event, open, onToggle }: { event: StreamEvent; open: boolean
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.16 }}
+            transition={UNFOLD}
             className="overflow-hidden"
           >
-            <dl className="mx-2 mb-2 space-y-1.5 rounded-md bg-ink/70 px-3 py-2 text-xs">
+            <dl className="well mx-2 mb-2 mt-1 space-y-1.5 px-3 py-2 text-xs">
               <div className="flex gap-2 text-faint">
                 <dt>Event</dt>
                 <dd className="font-mono">
@@ -336,6 +348,7 @@ function TraceRun({ events, running, runKey }: { events: StreamEvent[]; running:
 
   useEffect(() => {
     if (pinned && (running || events.length)) followEnd();
+    markScrollEdges(list.current);
   }, [events.length, running, pinned, followEnd]);
 
   const jump = useCallback(() => {
@@ -348,6 +361,7 @@ function TraceRun({ events, running, runKey }: { events: StreamEvent[]; running:
   const onScroll = useCallback(() => {
     const el = list.current;
     if (!el) return;
+    markScrollEdges(el);
     const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 24;
     if (atBottom) setPausedAt(null);
     else pause();
@@ -382,7 +396,7 @@ function TraceRun({ events, running, runKey }: { events: StreamEvent[]; running:
   const live = running && !verdict && !failed;
 
   return (
-    <section aria-labelledby="trace-heading" className="rounded-lg border border-line bg-panel">
+    <section aria-labelledby="trace-heading" className="surface overflow-hidden">
       <div className="flex items-center justify-between gap-3 border-b border-line-soft px-4 py-2.5">
         <h2 id="trace-heading" className="text-sm font-semibold text-text">
           Trace
@@ -394,9 +408,9 @@ function TraceRun({ events, running, runKey }: { events: StreamEvent[]; running:
                 key={`${runKey}-verdict`}
                 data-testid="trace-verdict"
                 role="status"
-                initial={{ opacity: 0, scale: 0.8, filter: "blur(4px)" }}
+                initial={{ opacity: 0, scale: 1.15, filter: "blur(4px)" }}
                 animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-                transition={{ type: "spring", stiffness: 300, damping: 22 }}
+                transition={SETTLE}
                 className="rounded-md border px-2 py-0.5 font-semibold"
                 style={{ color: VERDICT_HEX[verdict], borderColor: VERDICT_HEX[verdict], background: `color-mix(in srgb, ${VERDICT_HEX[verdict]} 12%, transparent)` }}
               >
@@ -439,7 +453,7 @@ function TraceRun({ events, running, runKey }: { events: StreamEvent[]; running:
                   data-testid="trace-filter"
                   data-agent={name}
                   onClick={() => toggleAgent(name)}
-                  className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] transition-colors ${on ? "" : "border-line text-faint line-through"}`}
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] transition-[color,border-color,transform] active:scale-95 ${on ? "" : "border-line text-faint line-through"}`}
                   style={on ? { borderColor: agent.hex, color: agent.hex } : undefined}
                 >
                   <span aria-hidden className="size-1.5 rounded-full" style={{ background: on ? agent.hex : "var(--color-line)" }} />
@@ -457,7 +471,7 @@ function TraceRun({ events, running, runKey }: { events: StreamEvent[]; running:
               onMouseEnter={pause}
               onMouseLeave={onScroll}
               aria-label="Events"
-              className="pane-scroll max-h-[32rem] min-h-40 space-y-0.5 overflow-y-auto border-t border-line-soft px-2 py-2"
+              className="pane-scroll scroll-fade max-h-[32rem] min-h-40 space-y-0.5 overflow-y-auto border-t border-line-soft px-2 py-2"
             >
               {shown.map((event) => {
                 const key = `${event.run_id}-${event.seq}`;
@@ -472,10 +486,11 @@ function TraceRun({ events, running, runKey }: { events: StreamEvent[]; running:
                   type="button"
                   data-testid="trace-jump"
                   onClick={jump}
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 6 }}
-                  className="absolute bottom-2 right-3 inline-flex items-center gap-1.5 rounded-full border border-accent/50 bg-panel px-2.5 py-1 text-xs text-accent shadow"
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  transition={SNAP}
+                  className="absolute bottom-3 right-4 inline-flex items-center gap-1.5 rounded-full border border-accent/50 bg-panel/90 px-3 py-1.5 text-xs text-accent shadow-lg shadow-black/50 backdrop-blur"
                 >
                   <ArrowDownToLine size={12} aria-hidden /> Jump to latest ({behind} new)
                 </motion.button>

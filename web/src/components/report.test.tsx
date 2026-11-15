@@ -4,7 +4,7 @@ import { VERDICTS, type Listing, type Verdict } from "@/lib/types";
 import { SAMPLES } from "@/samples";
 import { AuditFeed } from "./AuditFeed";
 import { BatchView } from "./BatchView";
-import { MathModule } from "./MathModule";
+import { MathModule, stepParts } from "./MathModule";
 import { VerdictBadge } from "./VerdictBadge";
 import { VerdictCard } from "./VerdictCard";
 import { countItems } from "@/lib/counts";
@@ -162,5 +162,29 @@ describe("BatchView", () => {
   it("says so when nothing has run", () => {
     render(<BatchView items={[]} counts={null} running={false} canRun sampleLabel={null} onRun={() => {}} onOpen={() => {}} />);
     expect(screen.getByText(/No batch has run yet/)).toBeInTheDocument();
+  });
+});
+
+describe("the arithmetic display", () => {
+  const steps = SAMPLES.flatMap((sample) => sample.report!.checks.flatMap((check) => check.steps));
+
+  it("cuts a step into label, working and result without changing a character", () => {
+    expect(steps.length).toBeGreaterThan(0);
+    for (const step of steps) {
+      const { label, working, result } = stepParts(step);
+      const joined = `${label === null ? "" : `${label}: `}${working}${result === null ? "" : ` = ${result}`}`;
+      expect(joined).toBe(step.text);
+    }
+  });
+
+  it("draws the comparison against its limit, with the two values the report gives", () => {
+    const report = SAMPLES[0].report!; // 44.4 Wh against a 23.19 Wh cap
+    render(<MathModule report={report} />);
+    const gauge = screen.getByTestId("check-gauge");
+    const comparison = report.checks.flatMap((c) => c.steps).find((s) => s.label === "Comparison")!;
+    expect(gauge).toHaveAccessibleName(comparison.text);
+    expect(gauge).toHaveTextContent("44.4 Wh");
+    expect(gauge).toHaveTextContent("23.19 Wh");
+    expect(gauge).toHaveTextContent("the cap");
   });
 });

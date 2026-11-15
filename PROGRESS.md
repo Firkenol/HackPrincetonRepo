@@ -95,6 +95,18 @@ Open:
 7. `npm audit` reports 7 moderate advisories in the Next.js toolchain as scaffolded. Not changed, to keep the versions the scaffold chose.
 8. On Windows, `npm test` must be started from a path with an upper-case drive letter (see README).
 
+## Console motion and styling pass (2026-11-14, branch `console`, not committed)
+
+Web only; no engine, API or contract file was touched.
+
+- Shared motion settings in `web/src/lib/motion.ts` (springs that settle without bouncing) and scroll helpers in `web/src/lib/scroll.ts`.
+- **Scrolling**: starting a check, or picking a listing from the feed or batch table while scrolled away, brings the verdict card to the top smoothly. "See the math" on the card scrolls to the checks. Scrolling panes (trace, feed, listing) fade at an edge while more content lies past it. Reduced-motion settings turn all of this off.
+- **Results**: the verdict badge lands with a line and a soft light in the verdict colour; the card's text follows in order. While a check runs, a light sweeps the listing and the verdict side shows placeholder bars.
+- **Math**: each step is on a numbered rail with its label, working, result and the step's symbolic formula as a margin note, revealed in order when scrolled into view. A check that has a comparison step shows a gauge against its limit. The step pieces are slices of `step.text` and the gauge length is the ratio in `step.result`; the browser still shows no number it worked out itself (`stepParts` and the gauge are tested).
+- Feed and tab selection markers slide between items; metric counts roll in when they change; batch rows arrive in order; buttons, panels and inputs share one depth style in `globals.css`.
+- The test setup gained an `IntersectionObserver` stub (jsdom has none). Web: 99 passed; `eslint` and `next build` clean.
+- Checked in a headless browser against the offline samples and against the API in sample data mode (a pasted fixture streaming its trace). Open: sample data mode streams at once, so the running state (sweep, placeholder bars, pipeline pulse) has only been seen in code, not on a slow live run.
+
 ## Decisions made while unattended
 
 2026-11-14, Phase 4:
