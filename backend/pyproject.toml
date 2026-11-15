@@ -1,5 +1,5 @@
 [project]
-name = "claimcheck"
+name = "offspec"
 version = "0.1.0"
 description = "Checks whether a battery listing's own claims are physically possible and shows the math."
 requires-python = ">=3.11"

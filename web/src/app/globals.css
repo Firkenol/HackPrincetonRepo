@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Carnot palette. A cold slate-blue base; the only saturated colours on screen are
+/* OffSpec palette. A cold slate-blue base; the only saturated colours on screen are
    the four verdict colours, so a verdict is never competing with decoration. */
 @theme inline {
   --color-ink: #0c121b;

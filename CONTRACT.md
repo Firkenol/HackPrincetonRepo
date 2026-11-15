@@ -1,4 +1,4 @@
-# ClaimCheck contract
+# OffSpec contract
 
 This is the interface between the four parts of the project: the checks, the agent, the API and the web frontend. **It is frozen. Any change to the items listed under "What is frozen" needs the project owner's approval.**
 
@@ -172,7 +172,7 @@ Every frame after it is one stream event, with the SSE `event` name equal to the
 | `GET /api/fixtures/{name}` | A fixture screenshot. |
 | `GET /api/health` | `status`, `mode`, `sample_data`. |
 
-**Modes.** `live` when `MODEL_PROVIDER` and `MODEL_ID` are set, otherwise `replay` (or when `CARNOT_REPLAY=1`). In replay mode the API serves the reports in `fixtures/expected/`: a listing that is one of the fixtures streams its checks through `replay_claims`; any other listing ends with an `error` event saying it was not checked. Every JSON body carries `mode` and `sample_data`, and every response has the `X-Carnot-Mode` header.
+**Modes.** `live` when `MODEL_PROVIDER` and `MODEL_ID` are set, otherwise `replay` (or when `OFFSPEC_REPLAY=1`). In replay mode the API serves the reports in `fixtures/expected/`: a listing that is one of the fixtures streams its checks through `replay_claims`; any other listing ends with an `error` event saying it was not checked. Every JSON body carries `mode` and `sample_data`, and every response has the `X-OffSpec-Mode` header.
 
 The batch view in the web app calls `POST /api/batch`.
 

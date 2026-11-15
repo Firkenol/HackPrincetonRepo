@@ -1,4 +1,4 @@
-# ClaimCheck specification
+# OffSpec specification
 
 This file holds the original build prompt, word for word, followed by the decisions made since. Where a decision in the "Amendments" section differs from the original text, the amendment wins.
 
@@ -129,3 +129,7 @@ verdicts, the three routings, no seller names, package dimensions set aside.
    routed to "needs human review", as amendment 1 already defines.
 6. **The contract change** is recorded in CONTRACT.md: `PackEvidenceReport` is added and
    a run can end with either report type.
+
+### 2026-11-14, name
+
+The product is called **OffSpec**. The original build prompt above says "ClaimCheck (rename freely)" and is kept word for word; an earlier console branch used "Carnot". Display names, API metadata, the `OFFSPEC_REPLAY` and `OFFSPEC_FIXTURES_DIR` variables and the `X-OffSpec-Mode` header use the new name (the old `CARNOT_*` variable names are still honoured). The Python import package stays `claimcheck`: it is named in the frozen contract, and renaming it is the project owner's call.

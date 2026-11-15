@@ -1,7 +1,7 @@
-# Carnot
+# OffSpec
 
 A trust and safety console that checks whether a product listing's own claims are
-physically possible, and shows the math. Paste a listing or upload a screenshot; Carnot
+physically possible, and shows the math. Paste a listing or upload a screenshot; OffSpec
 extracts the claims, runs the physical checks for that kind of product in plain Python,
 and returns an evidence report a reviewer can reproduce with a calculator.
 
@@ -23,13 +23,13 @@ claim`. Routing is `auto-resolvable`, `needs human review` or `no action needed`
 
 | Folder | What it is |
 |---|---|
-| `backend/claimcheck/` | The engine: the six battery checks, the cited constants, the report and event models |
+| `backend/claimcheck/` | The engine: the six battery checks, the cited constants, the report and event models. The folder keeps its original import name; it is part of the frozen contract in `CONTRACT.md` |
 | `backend/packs/` | Check packs for other categories: projector, magnifying glass, monocular (and power budget, not wired into the agent). Each has its own claims model, cited constants and checks |
 | `backend/agent/` | A deepagents orchestrator with three subagents: listing reader, physics checker, report writer |
 | `backend/skills/` | One `SKILL.md` per subagent |
 | `backend/api/` | FastAPI server over `run_listing()` |
-| `web/` | The Carnot console: Next.js App Router, TypeScript, Tailwind, Lucide, Recharts, Framer Motion |
-| `fixtures/` | Nine battery listings (`fixture_NN.txt`), the pack listings (`pack_<pack>_<case>.txt`) and their expected reports (`expected/`) |
+| `web/` | The OffSpec console: Next.js App Router, TypeScript, Tailwind, Lucide, Recharts, Framer Motion |
+| `fixtures/` | Twenty battery listings (`fixture_NN.txt`, with screenshots for 8 to 20, see `fixtures/README.md`), the pack listings (`pack_<pack>_<case>.txt`) and their expected reports (`expected/`) |
 
 `SPEC.md` is the specification, `CONTRACT.md` the interface between the parts, and
 `PROGRESS.md` the current state and open items.
@@ -69,11 +69,45 @@ not checked, never a sample report.
 
 For **live mode**, copy `.env.example` to `.env` in the repo root and set
 `MODEL_PROVIDER`, `MODEL_ID` and that provider's credentials. The model must support
-tool calling, and vision for screenshots. Restart the API. Set `CARNOT_REPLAY=1` to
+tool calling, and vision for screenshots. Restart the API. Set `OFFSPEC_REPLAY=1` to
 force sample data mode even with a model configured.
 
 If the web console cannot reach the API at all, it falls back to sample reports bundled
 with the web app and says "Sample data: the API is offline".
+
+## Deploy
+
+Two services: the API (Python) and the web console (Next.js). Deploy the API first, then
+point the web console at it. These steps follow from how the two parts are configured;
+they have not been run against a hosting provider from this repo.
+
+**API.** Any host that runs a Python web process (Render, Railway, Fly.io, AWS App
+Runner or Elastic Beanstalk). Deploy the whole repository, not only `backend/`: the API
+reads `fixtures/` from the repo root and the agent reads `backend/skills/`.
+
+| Setting | Value |
+|---|---|
+| Root directory | `backend` |
+| Build command | `pip install -r requirements.txt` |
+| Start command | `uvicorn api.app:app --host 0.0.0.0 --port $PORT` |
+| Python | 3.11 or newer |
+| `CORS_ORIGINS` | The web console's URL, for example `https://offspec.example.com` |
+| `MODEL_PROVIDER`, `MODEL_ID`, provider credentials | Only for live mode. Leave them unset to serve sample data. Set them as secrets on the host, never in the repo |
+
+Run one instance: the dashboard counts are kept in memory. Check it with
+`GET /api/health`, which answers `{"status":"ok","mode":"replay"|"live",...}`.
+
+**Web console.** Vercel, or any host that runs `next build` and `next start`.
+
+| Setting | Value |
+|---|---|
+| Root directory | `web` |
+| Build command | `npm run build` |
+| Start command | `npm run start` (Vercel needs none) |
+| `NEXT_PUBLIC_API_URL` | The API's public URL, for example `https://offspec-api.example.com`. It is read at build time, so rebuild after changing it |
+
+If the API is down or the variable is wrong, the console still opens and shows the
+bundled sample reports, labelled "Sample data: the API is offline".
 
 ## API
 
@@ -86,7 +120,7 @@ with the web app and says "Sample data: the API is offline".
 | `GET /api/health` | Whether the server is in `live` or `replay` mode. |
 
 Every JSON body carries `mode` and `sample_data`, and every response has an
-`X-Carnot-Mode` header.
+`X-OffSpec-Mode` header.
 
 ## Tests
 
@@ -122,10 +156,13 @@ Every version is pinned in `backend/requirements.txt` and `web/package.json`.
 
 ## Known limits
 
-- Batteries only: loose cells, hobby lithium packs and power banks.
-- No live model run has been made yet (see `PROGRESS.md`), so extraction quality on
-  real screenshots is untested. Everything is tested with a scripted model.
-- `fixtures/` has no screenshots yet, so the batch runs the text versions.
+- Four categories: batteries (loose cells, hobby lithium packs, power banks), projectors,
+  magnifying glasses and monoculars. Anything else is out of scope.
+- Live runs are few (see `PROGRESS.md`), so extraction quality on real screenshots is
+  largely untested. The test suites use a scripted model.
+- Fixtures 8 to 20 have screenshots with seller names, store links and the delivery
+  address covered. In sample data mode the batch serves their expected reports; a live
+  batch reads the screenshots.
 - Dashboard counts come from the latest batch run and are kept in memory; they reset
   when the API restarts.
 - The listing pane shows the text or screenshot exactly as you submitted it. Blur seller

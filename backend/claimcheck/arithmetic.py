@@ -1,4 +1,4 @@
-"""Plain numeric helpers. All math in ClaimCheck happens here, never in the model."""
+"""Plain numeric helpers. All math in OffSpec happens here, never in the model."""
 
 from __future__ import annotations
 

@@ -5,7 +5,7 @@ export const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:800
 /** Thrown when the API cannot be reached at all, as opposed to answering with an error. */
 export class ApiUnreachable extends Error {
   constructor() {
-    super("The Carnot API could not be reached.");
+    super("The OffSpec API could not be reached.");
     this.name = "ApiUnreachable";
   }
 }

@@ -1,4 +1,4 @@
-"""Routes of the Carnot API.
+"""Routes of the OffSpec API.
 
     POST /api/verify-listing    check one listing; streams the contract's events (SSE)
     POST /api/batch             run every listing in fixtures/; reports and counts
@@ -9,7 +9,7 @@
     GET  /api/health            mode of the server
 
 Every response says whether it is sample data: JSON bodies carry "mode" and
-"sample_data", and every response has the X-Carnot-Mode header. The event stream also
+"sample_data", and every response has the X-OffSpec-Mode header. The event stream also
 opens with one "meta" frame carrying the same two fields; the frames after it are the
 contract's stream events, unchanged.
 """
@@ -35,11 +35,11 @@ log = logging.getLogger(__name__)
 # backend/.env or the repo root .env, whichever exists. Real variables win.
 load_dotenv()
 
-MODE_HEADER = "X-Carnot-Mode"
+MODE_HEADER = "X-OffSpec-Mode"
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024
 MSG_STREAM_FAILED = "The listing could not be checked because the run failed."
 
-app = FastAPI(title="Carnot API", version="0.1.0")
+app = FastAPI(title="OffSpec API", version="0.1.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[o.strip() for o in os.environ.get("CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000").split(",") if o.strip()],

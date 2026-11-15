@@ -159,7 +159,7 @@ export function VerdictCard({ listing }: { listing: Listing }) {
                   <button type="button" onClick={() => scrollToElement(document.getElementById("math-heading"))} className="btn btn-quiet group">
                     <ArrowDown size={15} aria-hidden className="transition-transform group-hover:translate-y-0.5" /> See the math
                   </button>
-                  <button type="button" onClick={() => downloadReport(report, `carnot-report-${listing.key}`)} className="btn btn-quiet">
+                  <button type="button" onClick={() => downloadReport(report, `offspec-report-${listing.key}`)} className="btn btn-quiet">
                     <Download size={15} aria-hidden /> Download report JSON
                   </button>
                   {listing.sample && (

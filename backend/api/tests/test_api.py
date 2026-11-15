@@ -1,4 +1,4 @@
-"""The Carnot API, tested through FastAPI's test client. No network, no real model.
+"""The OffSpec API, tested through FastAPI's test client. No network, no real model.
 
 Replay mode needs no model at all. Live mode is tested with the real agent driven by
 the scripted model from agent/tests, so a request goes through the routes, run_listing,

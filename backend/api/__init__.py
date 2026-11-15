@@ -1,4 +1,4 @@
-"""The Carnot HTTP API: a thin FastAPI layer over claimcheck.run_listing.
+"""The OffSpec HTTP API: a thin FastAPI layer over claimcheck.run_listing.
 
 - fixtures.py  the fixture listings in fixtures/ and the expected reports in fixtures/expected/
 - service.py   live and replay runs, the batch run, and the counts taken from it

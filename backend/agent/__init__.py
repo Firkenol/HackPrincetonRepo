@@ -1,4 +1,4 @@
-"""The ClaimCheck agent: a deepagents orchestrator with three subagents (listing
+"""The OffSpec agent: a deepagents orchestrator with three subagents (listing
 reader, physics checker, report writer) that reads a listing and calls the checks.
 
 - model.py    loads the chat model from MODEL_PROVIDER and MODEL_ID

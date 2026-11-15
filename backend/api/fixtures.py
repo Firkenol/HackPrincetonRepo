@@ -4,7 +4,7 @@
     fixtures/fixture_NN.png | .jpg | .jpeg | .webp   a listing screenshot, seller names blurred
     fixtures/expected/fixture_NN.json           the report the checks give for it
 
-The nine fixture_NN listings are batteries. Listings for the check packs (projector,
+The fixture_NN listings (twenty of them) are batteries. Listings for the check packs (projector,
 magnifying glass, monocular) use the same layout under another name:
 
     fixtures/pack_<pack>_<case>.txt             a listing as pasted text
@@ -32,7 +32,8 @@ from pathlib import Path
 from claimcheck.models import AnyReport, EvidenceReport, PackEvidenceReport
 from packs.registry import PACKS
 
-FIXTURES_ENV = "CARNOT_FIXTURES_DIR"
+FIXTURES_ENV = "OFFSPEC_FIXTURES_DIR"
+LEGACY_FIXTURES_ENV = "CARNOT_FIXTURES_DIR"  # the name before the rename; still honoured
 IMAGE_SUFFIXES = (".png", ".jpg", ".jpeg", ".webp")
 MEDIA_TYPES = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp"}
 _ID = re.compile(r"^(?:fixture_\d{2}|pack_(?:" + "|".join(map(re.escape, PACKS)) + r")_[a-z0-9]+)$")
@@ -61,7 +62,7 @@ def stitch_vertical(paths: list[Path]) -> bytes:
 
 
 def fixtures_dir() -> Path:
-    override = os.environ.get(FIXTURES_ENV, "").strip()
+    override = os.environ.get(FIXTURES_ENV, "").strip() or os.environ.get(LEGACY_FIXTURES_ENV, "").strip()
     return Path(override) if override else Path(__file__).resolve().parents[2] / "fixtures"
 
 

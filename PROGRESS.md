@@ -8,7 +8,7 @@ Read this first. Update it before stopping. Phases are the build order in SPEC.m
 - [x] **2. deepagents agent with tools, text input from the command line.** Merged to main on 2026-11-14 (branch `phase-2-agent`). Passes with a scripted fake model; the live run on a real model is still open (see below).
 - [ ] **3. Image input.** Built and tested with the scripted model on branch `phase-3-image` (not merged). Open: live extraction from real screenshots (see below).
 - [ ] **4. Subagents, skills, evidence report.** Built and tested with the scripted model on branch `phase-4-subagents` (not merged). Open: a live run, and LangSmith showing the subagent and tool calls.
-- [ ] **5. Web UI and batch mode.** Built on branch `console` (not merged) as the Carnot console: FastAPI in `backend/api/`, Next.js in `web/`. Tested in sample data mode and with the scripted model. Open: a live run, screenshots in `fixtures/`.
+- [ ] **5. Web UI and batch mode.** Built on branch `console` (not merged) as the OffSpec console: FastAPI in `backend/api/`, Next.js in `web/`. Tested in sample data mode and with the scripted model. Open: a live run, screenshots in `fixtures/`.
 - [ ] **6. README and demo script.** `README.md` is written (setup, both servers, modes, limits). `DEMO.md` is not written.
 
 ## Phase 2 status (2026-11-14)
@@ -73,12 +73,12 @@ Open:
 
 ## Console status (2026-11-14, branch `console`, created from `phase-4-subagents`)
 
-The product is now called Carnot. The engine (`claimcheck`, `agent`, `skills`) is unchanged on this branch: no check, rule or constant was added or altered.
+The product is now called OffSpec. The engine (`claimcheck`, `agent`, `skills`) is unchanged on this branch: no check, rule or constant was added or altered.
 
 Done:
 
 - **API** (`backend/api/`): `POST /api/verify-listing` (image, text or sample id; streams the contract's events), `POST /api/batch` (every listing in `fixtures/`, reports and counts), `GET /api/dashboard-stats` (counts from the latest batch run, null before one), plus `/api/samples`, `/api/fixtures/{name}`, `/api/health`.
-- **Replay mode** when `MODEL_PROVIDER` or `MODEL_ID` is empty, or `CARNOT_REPLAY=1`: serves the reports in `fixtures/expected/`, and every response is marked (`mode`, `sample_data`, the `X-Carnot-Mode` header, a `meta` frame at the start of a stream).
+- **Replay mode** when `MODEL_PROVIDER` or `MODEL_ID` is empty, or `OFFSPEC_REPLAY=1`: serves the reports in `fixtures/expected/`, and every response is marked (`mode`, `sample_data`, the `X-OffSpec-Mode` header, a `meta` frame at the start of a stream).
 - **Fixture listing texts are files**: `fixtures/fixture_01.txt` to `fixture_09.txt`, the same text the agent tests use (a test compares them).
 - **Web console** (`web/`): metrics bar, audit feed, verdict card with the listing beside the verdict badge and routing label, "Show the math" (inputs, formula, steps, constants with sources, not-assessed reasons), paste and upload with drag and drop, live trace, JSON download, batch view with a summary table and a routing chart. Falls back to bundled sample reports when the API is unreachable, labelled.
 - Both servers were started and the console was checked in a browser in sample data mode: the nine fixtures, a pasted fixture streaming its trace, and the batch view.
@@ -175,6 +175,31 @@ Decided and fixed:
 2. (Fixed 2026-11-14) `test_lookup_form_factor_reads_the_constants_file` failed about half
    the time: it unpacked two parallel tool results in a fixed order. It now matches them by
    the `known` field.
+
+## Merge and rename to OffSpec (2026-11-14, branch `offspec-demo`)
+
+`console` (julianlichen's new UI, Firkenol's check packs, the live trace) and `main` (the
+fixtures from real screenshots) are merged on branch `offspec-demo`, opened as a pull request
+to `main`.
+
+- Git reported no textual conflicts. The real conflict: the console's bundled samples and
+  tests assumed 9 battery + 9 pack fixtures, and `main` added battery fixtures 10 to 20.
+  `web/src/samples/samples.json` was regenerated (29 samples) and the sample, audit feed,
+  batch and console tests now use the counts the fixtures give: 2 Impossible, 4 Flag,
+  13 No red flags, 10 No checkable claim; 2 auto-resolvable, 10 needs human review,
+  17 no action needed.
+- The product name is OffSpec everywhere a person or a client sees it: UI, page title, icon,
+  API title, `X-OffSpec-Mode`, `OFFSPEC_REPLAY`, `OFFSPEC_FIXTURES_DIR`, docs. The old
+  `CARNOT_REPLAY` and `CARNOT_FIXTURES_DIR` are still read as fallbacks.
+- **Not renamed, on purpose:** the Python package `backend/claimcheck/` and its imports. It
+  is named in the frozen contract and in every teammate branch; renaming it needs the
+  owner's go-ahead (CLAUDE.md rule 4).
+- Checked: backend 844 passed; web 179 passed, eslint, tsc and `next build` clean; API and
+  web started locally in sample data mode, 29 listings served, a headless-browser
+  screenshot of the console looked right.
+- Not included: branch `web-extras` (How it works page, printable report). Its report page
+  assumes battery reports and needs work for the check packs first.
+- README has a Deploy section. It has not been tried against a hosting provider.
 
 ## Environment notes
 

@@ -1,4 +1,4 @@
-"""ClaimCheck: checks whether a battery listing's own claims are physically possible.
+"""OffSpec: checks whether a battery listing's own claims are physically possible.
 
 Module map (each file has one job, so people can work in parallel):
 
