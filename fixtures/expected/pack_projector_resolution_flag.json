@@ -1,0 +1,138 @@
+{
+  "schema_version": "1.0",
+  "pack": "projector_resolution",
+  "claims": {
+    "claimed_resolution": {
+      "found_in": "title",
+      "quote": "4K",
+      "confidence": 1.0,
+      "value": "4k"
+    },
+    "native_pixels": {
+      "found_in": "spec table",
+      "quote": "1280 x 720",
+      "confidence": 1.0,
+      "width_px": 1280.0,
+      "height_px": 720.0
+    },
+    "native_name": null
+  },
+  "checks": [
+    {
+      "check_id": "native_resolution",
+      "title": "Headline resolution against native resolution",
+      "status": "flag",
+      "summary": "The headline names 4K (8,294,400 pixels) and the listing gives a native resolution of 1,280 × 720 (921,600 pixels). The headline figure is 9× the native pixel count. A projector can accept an input signal at a higher resolution than it displays, so this is reported as a flag rather than a hard result.",
+      "inputs": [
+        {
+          "name": "Headline resolution",
+          "value": "4K",
+          "unit": "",
+          "origin": "claim",
+          "found_in": "title",
+          "confidence": 1.0
+        },
+        {
+          "name": "Width of 4K in pixels",
+          "value": 3840.0,
+          "unit": "px",
+          "origin": "constant",
+          "found_in": null,
+          "confidence": null
+        },
+        {
+          "name": "Height of 4K in pixels",
+          "value": 2160.0,
+          "unit": "px",
+          "origin": "constant",
+          "found_in": null,
+          "confidence": null
+        },
+        {
+          "name": "Native width",
+          "value": 1280.0,
+          "unit": "px",
+          "origin": "claim",
+          "found_in": "spec table",
+          "confidence": 1.0
+        },
+        {
+          "name": "Native height",
+          "value": 720.0,
+          "unit": "px",
+          "origin": "claim",
+          "found_in": "spec table",
+          "confidence": 1.0
+        }
+      ],
+      "formula": "ratio = headline pixels ÷ native pixels, where pixels = width × height",
+      "steps": [
+        {
+          "label": "Pixels in the headline resolution",
+          "formula": "P_headline = width × height",
+          "substitution": "3,840 × 2,160",
+          "result": 8294400.0,
+          "unit": "pixels",
+          "text": "Pixels in the headline resolution: 3,840 × 2,160 = 8,294,400 pixels"
+        },
+        {
+          "label": "Pixels in the native resolution",
+          "formula": "P_native = width × height",
+          "substitution": "1,280 × 720",
+          "result": 921600.0,
+          "unit": "pixels",
+          "text": "Pixels in the native resolution: 1,280 × 720 = 921,600 pixels"
+        },
+        {
+          "label": "Headline pixels divided by native pixels",
+          "formula": "ratio = P_headline ÷ P_native",
+          "substitution": "8,294,400 ÷ 921,600",
+          "result": 9.0,
+          "unit": "(> 1)",
+          "text": "Headline pixels divided by native pixels: 8,294,400 ÷ 921,600 = 9 (> 1)"
+        }
+      ],
+      "constants": [
+        {
+          "key": "resolution_4k_width_px",
+          "value": 3840.0,
+          "unit": "px",
+          "description": "Width of 4K in pixels",
+          "source_title": "Ultra-high-definition television",
+          "source_publisher": "Wikipedia (revision 1384353681)",
+          "source_url": "https://en.wikipedia.org/wiki/Ultra-high-definition_television",
+          "locator": "Technical details, Resolution section",
+          "quote": "UHDTV-1 is 3840 pixels wide by 2160 pixels tall (8.3 megapixels)",
+          "accessed": "2026-11-14",
+          "note": "A definition of the name, not a physical ceiling.",
+          "hard_bound": false
+        },
+        {
+          "key": "resolution_4k_height_px",
+          "value": 2160.0,
+          "unit": "px",
+          "description": "Height of 4K in pixels",
+          "source_title": "Ultra-high-definition television",
+          "source_publisher": "Wikipedia (revision 1384353681)",
+          "source_url": "https://en.wikipedia.org/wiki/Ultra-high-definition_television",
+          "locator": "Technical details, Resolution section",
+          "quote": "UHDTV-1 is 3840 pixels wide by 2160 pixels tall (8.3 megapixels)",
+          "accessed": "2026-11-14",
+          "note": "A definition of the name, not a physical ceiling.",
+          "hard_bound": false
+        }
+      ],
+      "assumptions": [],
+      "notes": [
+        "A projector can accept an input signal at a higher resolution than it displays, so this is reported as a flag rather than a hard result."
+      ],
+      "not_assessed_reason": null
+    }
+  ],
+  "verdict": "Flag",
+  "verdict_reason": "The headline names 4K (8,294,400 pixels) and the listing gives a native resolution of 1,280 × 720 (921,600 pixels). The headline figure is 9× the native pixel count. A projector can accept an input signal at a higher resolution than it displays, so this is reported as a flag rather than a hard result.",
+  "routing": "needs human review",
+  "routing_reason": "A contradiction or unusual claim needs a person's judgment.",
+  "assumptions": [],
+  "not_assessed": []
+}

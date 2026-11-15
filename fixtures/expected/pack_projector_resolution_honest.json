@@ -1,0 +1,136 @@
+{
+  "schema_version": "1.0",
+  "pack": "projector_resolution",
+  "claims": {
+    "claimed_resolution": {
+      "found_in": "title",
+      "quote": "1080P",
+      "confidence": 1.0,
+      "value": "1080p"
+    },
+    "native_pixels": {
+      "found_in": "spec table",
+      "quote": "1920 x 1080",
+      "confidence": 1.0,
+      "width_px": 1920.0,
+      "height_px": 1080.0
+    },
+    "native_name": null
+  },
+  "checks": [
+    {
+      "check_id": "native_resolution",
+      "title": "Headline resolution against native resolution",
+      "status": "pass",
+      "summary": "The headline names 1080p (2,073,600 pixels), which is not above the stated native resolution of 1,920 × 1,080 (2,073,600 pixels).",
+      "inputs": [
+        {
+          "name": "Headline resolution",
+          "value": "1080p",
+          "unit": "",
+          "origin": "claim",
+          "found_in": "title",
+          "confidence": 1.0
+        },
+        {
+          "name": "Width of 1080p in pixels",
+          "value": 1920.0,
+          "unit": "px",
+          "origin": "constant",
+          "found_in": null,
+          "confidence": null
+        },
+        {
+          "name": "Height of 1080p in pixels",
+          "value": 1080.0,
+          "unit": "px",
+          "origin": "constant",
+          "found_in": null,
+          "confidence": null
+        },
+        {
+          "name": "Native width",
+          "value": 1920.0,
+          "unit": "px",
+          "origin": "claim",
+          "found_in": "spec table",
+          "confidence": 1.0
+        },
+        {
+          "name": "Native height",
+          "value": 1080.0,
+          "unit": "px",
+          "origin": "claim",
+          "found_in": "spec table",
+          "confidence": 1.0
+        }
+      ],
+      "formula": "ratio = headline pixels ÷ native pixels, where pixels = width × height",
+      "steps": [
+        {
+          "label": "Pixels in the headline resolution",
+          "formula": "P_headline = width × height",
+          "substitution": "1,920 × 1,080",
+          "result": 2073600.0,
+          "unit": "pixels",
+          "text": "Pixels in the headline resolution: 1,920 × 1,080 = 2,073,600 pixels"
+        },
+        {
+          "label": "Pixels in the native resolution",
+          "formula": "P_native = width × height",
+          "substitution": "1,920 × 1,080",
+          "result": 2073600.0,
+          "unit": "pixels",
+          "text": "Pixels in the native resolution: 1,920 × 1,080 = 2,073,600 pixels"
+        },
+        {
+          "label": "Headline pixels divided by native pixels",
+          "formula": "ratio = P_headline ÷ P_native",
+          "substitution": "2,073,600 ÷ 2,073,600",
+          "result": 1.0,
+          "unit": "(≤ 1)",
+          "text": "Headline pixels divided by native pixels: 2,073,600 ÷ 2,073,600 = 1 (≤ 1)"
+        }
+      ],
+      "constants": [
+        {
+          "key": "resolution_1080p_width_px",
+          "value": 1920.0,
+          "unit": "px",
+          "description": "Width of 1080p in pixels",
+          "source_title": "1080p",
+          "source_publisher": "Wikipedia (revision 1356574563)",
+          "source_url": "https://en.wikipedia.org/wiki/1080p",
+          "locator": "Lead section",
+          "quote": "characterized by 1,920 pixels displayed across the screen horizontally and 1,080 pixels down the screen vertically",
+          "accessed": "2026-11-14",
+          "note": "A definition of the name, not a physical ceiling.",
+          "hard_bound": false
+        },
+        {
+          "key": "resolution_1080p_height_px",
+          "value": 1080.0,
+          "unit": "px",
+          "description": "Height of 1080p in pixels",
+          "source_title": "1080p",
+          "source_publisher": "Wikipedia (revision 1356574563)",
+          "source_url": "https://en.wikipedia.org/wiki/1080p",
+          "locator": "Lead section",
+          "quote": "characterized by 1,920 pixels displayed across the screen horizontally and 1,080 pixels down the screen vertically",
+          "accessed": "2026-11-14",
+          "note": "A definition of the name, not a physical ceiling.",
+          "hard_bound": false
+        }
+      ],
+      "assumptions": [],
+      "notes": [],
+      "not_assessed_reason": null
+    }
+  ],
+  "verdict": "No red flags",
+  "verdict_reason": "The claims that could be tested are physically plausible (Headline resolution against native resolution). This does not confirm that the claims are true.",
+  "routing": "no action needed",
+  "routing_reason": "The claims that could be tested are plausible and were read with high confidence.",
+  "assumptions": [],
+  "not_assessed": []
+}

@@ -1,6 +1,8 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { FileText, ImageIcon, Play, Upload } from "lucide-react";
+import { SNAP } from "@/lib/motion";
 import { useRef, useState } from "react";
 
 // Where a listing comes in: pasted text or a screenshot. Nothing is fetched from a
@@ -24,7 +26,7 @@ export function Intake({
   }
 
   return (
-    <section aria-labelledby="intake-heading" className="rounded-lg border border-line bg-panel">
+    <section aria-labelledby="intake-heading" className="surface overflow-hidden">
       <h2 id="intake-heading" className="border-b border-line-soft px-4 py-2.5 text-sm font-semibold text-text">
         Check a listing
       </h2>
@@ -45,21 +47,23 @@ export function Intake({
             onChange={(e) => setText(e.target.value)}
             rows={5}
             placeholder={"18650 Rechargeable Battery 12000mAh 3.7V Li-ion\nPackage weight: 0.600 kg"}
-            className="pane-scroll resize-y rounded-md border border-line bg-ink px-3 py-2 font-mono text-[13px] leading-6 text-text placeholder:text-faint"
+            className="pane-scroll well resize-y px-3 py-2 font-mono text-[13px] leading-6 text-text transition-[border-color,box-shadow] placeholder:text-faint/70 focus:border-accent/60 focus:shadow-[inset_0_1px_3px_rgb(0_0_0/0.45),0_0_0_3px_rgb(124_196_255/0.12)] focus:outline-none"
           />
           <div>
             <button
               type="submit"
               disabled={busy || !text.trim()}
-              className="inline-flex items-center gap-2 rounded-md bg-accent px-3.5 py-1.5 text-sm font-medium text-ink disabled:cursor-not-allowed disabled:opacity-40"
+              className="btn btn-primary"
             >
               <Play size={14} aria-hidden /> Check listing
             </button>
           </div>
         </form>
 
-        <div
+        <motion.div
           data-testid="dropzone"
+          animate={{ scale: dragging ? 1.02 : 1 }}
+          transition={SNAP}
           onDragOver={(e) => {
             e.preventDefault();
             setDragging(true);
@@ -70,12 +74,15 @@ export function Intake({
             setDragging(false);
             takeFile(e.dataTransfer.files?.[0]);
           }}
-          className={`flex flex-col items-center justify-center gap-2 rounded-md border border-dashed px-4 py-5 text-center transition-colors ${
-            dragging ? "border-accent bg-accent/10" : "border-line"
+          className={`flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed px-4 py-5 text-center transition-[background-color,border-color,box-shadow] duration-200 ${
+            dragging ? "border-accent bg-accent/10 shadow-[0_0_0_4px_rgb(124_196_255/0.12)]" : "border-line hover:border-faint"
           }`}
         >
-          <ImageIcon size={20} className="text-faint" aria-hidden />
-          <p className="text-sm text-muted">Drop a screenshot here</p>
+          {/* The icon lifts while a file is held over the zone, as if ready to catch it. */}
+          <motion.span animate={{ y: dragging ? -5 : 0, scale: dragging ? 1.15 : 1 }} transition={SNAP} aria-hidden>
+            <ImageIcon size={22} className={dragging ? "text-accent" : "text-faint"} />
+          </motion.span>
+          <p className="text-sm text-muted">{dragging ? "Let go to check it" : "Drop a screenshot here"}</p>
           <p className="text-xs text-faint">PNG, JPEG or WebP, under 3.5 MB</p>
           <input
             ref={fileInput}
@@ -92,11 +99,11 @@ export function Intake({
             type="button"
             disabled={busy}
             onClick={() => fileInput.current?.click()}
-            className="inline-flex items-center gap-2 rounded-md border border-line bg-raised px-3 py-1.5 text-sm text-text hover:border-accent disabled:opacity-40"
+            className="btn btn-quiet"
           >
             <Upload size={14} aria-hidden /> Upload screenshot
           </button>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

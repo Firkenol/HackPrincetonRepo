@@ -10,6 +10,7 @@ Newest first. API and frontend owners: check this list when you pull.
 
 | Date | Change | What to do |
 |---|---|---|
+| 2026-11-14 | Check packs for projectors, magnifying glasses and monoculars are wired in. Approved by the project owner. New model `PackEvidenceReport` in `models.py` (additive: nothing existing changed). `final_report.report` and the return value of `run_listing` are now `PackEvidenceReport` or `EvidenceReport`. New helper `replay_pack_claims`. Fixture ids may also be `pack_<pack>_<case>`. | Tell the two reports apart by the `pack` field: only a pack report has it. Do not assume six checks or battery claims when `pack` is present. See "Check packs" below. |
 | 2026-11-14 | HTTP transport replaced on the project owner's instruction: `POST /api/verify-listing` (was `/api/check`), plus `POST /api/batch`, `GET /api/dashboard-stats`, `GET /api/samples`, `GET /api/health`. The stream opens with one `meta` frame before the contract events. Replay mode serves `fixtures/expected/` and marks responses as sample data. The frontend folder is `web/`. | See "HTTP transport" below. The event and report models are unchanged. |
 | 2026-11-14 | Skills are grouped by subagent: `backend/skills/<subagent>/<skill>/SKILL.md`. | Nothing outside the agent reads them. |
 | 2026-11-14 | `run_listing` returns `EvidenceReport | None` (was `EvidenceReport`). A failed run ends with one `error` event and returns `None`; it does not raise. Approved by the project owner. | Handle `error` as a terminal event. Do not assume the return value is a report. |
@@ -19,13 +20,13 @@ Newest first. API and frontend owners: check this list when you pull.
 
 | Item | File |
 |---|---|
-| Data models: `Claims`, `CheckResult`, `EvidenceReport` and their parts | `backend/claimcheck/models.py` |
+| Data models: `Claims`, `CheckResult`, `EvidenceReport`, `PackEvidenceReport` and their parts | `backend/claimcheck/models.py` |
 | Stream events | `backend/claimcheck/events.py` |
 | Entry point signature `run_listing(image_or_text)` | `backend/claimcheck/pipeline.py` |
 | The verdict strings, routing strings and check ids below | `backend/claimcheck/models.py`, `backend/claimcheck/checks.py` |
 | HTTP transport: the routes under "HTTP transport" | this document |
 
-Not frozen: constants, policy thresholds, check wording, anything inside the agent, `replay_claims`.
+Not frozen: constants, policy thresholds, check wording, anything inside the agent, `replay_claims`, `replay_pack_claims`, and each pack's own claims model.
 
 `backend/tests/test_contract.py` fails if the expected reports in `fixtures/expected/` drift from what the code produces, so a contract change shows up as a failing test.
 
@@ -38,7 +39,7 @@ Not frozen: constants, policy thresholds, check wording, anything inside the age
 | Skills, one folder per subagent, then one folder per skill with a `SKILL.md` | `backend/skills/` |
 | API (FastAPI) | `backend/api/` |
 | Web frontend (Next.js) | `web/` |
-| Extra check packs | `backend/claimcheck/packs/` |
+| Extra check packs | `backend/packs/` |
 | Screenshots for the fixtures | `fixtures/` |
 | Expected report per fixture | `fixtures/expected/fixture_NN.json` |
 
@@ -47,7 +48,7 @@ Rules that keep the parts independent:
 - The API imports only `run_listing`, `replay_claims`, the event and report models and `to_sse`. It does not import checks or the agent.
 - The frontend depends only on the event JSON and the report JSON described here.
 - The agent calls the check functions as tools. It never does arithmetic itself.
-- A check pack is a module that exposes `CHECKS`, a tuple of functions `Claims -> CheckResult`. Any physical constant it needs goes in `backend/claimcheck/constants.py` with a citation, not in the pack.
+- A check pack is a folder under `backend/packs/` with `models.py` (its claims), `constants.py` (its cited constants) and `checks.py` (`CHECKS`, a tuple of functions from its claims to a `CheckResult`, and `evaluate`). `backend/packs/registry.py` lists the packs the agent, the API and the console know.
 
 ## Fixed strings
 
@@ -74,6 +75,8 @@ High confidence means 0.8 or more.
 
 `label_consistency`, `form_factor_bound`, `dimension_bound`, `weight_bound`, `label_contradiction`, `chemistry_mismatch`
 
+A `PackEvidenceReport` carries its pack's checks instead (see "Check packs").
+
 **Check status**: `pass`, `violated` (hard bound exceeded), `flag` (soft), `not_assessed`.
 
 ## Entry point
@@ -81,7 +84,7 @@ High confidence means 0.8 or more.
 ```python
 from claimcheck import run_listing
 
-def run_listing(image_or_text: str | bytes | Path) -> Generator[StreamEvent, None, EvidenceReport | None]
+def run_listing(image_or_text: str | bytes | Path) -> Generator[StreamEvent, None, PackEvidenceReport | EvidenceReport | None]
 ```
 
 | Input type | Meaning |
@@ -94,7 +97,7 @@ It yields stream events as the run proceeds. A run ends in exactly one of two wa
 
 | Outcome | Last event | Return value |
 |---|---|---|
-| Success | `final_report`, carrying the report | the same `EvidenceReport` |
+| Success | `final_report`, carrying the report | the same report: an `EvidenceReport` for a battery listing, a `PackEvidenceReport` for a projector, magnifying glass or monocular listing |
 | Failure | `error`, with a message that is safe to display | `None` |
 
 `run_listing` does not raise for a failed run: a missing model setting, a model error and an unreadable listing all end with the `error` event. A caller that only streams can ignore the return value and should treat `error` as the end of the stream.
@@ -127,7 +130,7 @@ Every event is a JSON object with these common fields:
 | `agent_step` | `message` (string) | An agent starts a step. One line for the live trace. |
 | `tool_call` | `call_id`, `tool` (strings), `args` (object) | An agent calls a tool. |
 | `tool_result` | `call_id`, `tool`, `ok` (boolean), `summary` (string), `result` (any JSON) | A tool returns. `call_id` matches the `tool_call`. For a check tool, `result` is a `CheckResult`. |
-| `final_report` | `report` (`EvidenceReport`) | Once, as the last event of a successful run. |
+| `final_report` | `report` (`EvidenceReport` or `PackEvidenceReport`) | Once, as the last event of a successful run. |
 | `error` | `message` (string, safe to display) | Once, as the last event of a failed run. |
 
 Example:
@@ -254,5 +257,37 @@ Claim types:
 | `routing_reason` | string | |
 | `assumptions` | list of strings | All assumptions across checks, without duplicates. |
 | `not_assessed` | list of strings | One line per check that did not run, with the reason. |
+
+### PackEvidenceReport and check packs
+
+A listing that is not a battery is checked by a pack. The listing reader decides the
+category by the record tool it calls; anything that fits no pack is recorded as a
+battery listing, as before.
+
+`PackEvidenceReport` has every field of `EvidenceReport`, with two differences:
+
+| Field | Type | Meaning |
+|---|---|---|
+| `pack` | string | The pack id. Only a pack report has this field. |
+| `claims` | object | That pack's own claims, as JSON. Each claim carries `found_in`, `quote` and `confidence`, as battery claims do. |
+
+`checks` holds the pack's checks, in the pack's order. `CheckResult`, the four
+verdicts, the three routings and the routing rules are the same as for batteries.
+
+| Pack id | Category | Claims fields | Check ids | Worst verdict |
+|---|---|---|---|---|
+| `projector_resolution` | projector | `claimed_resolution`, `native_pixels` (`width_px`, `height_px`), `native_name` | `native_resolution` | `Flag` |
+| `magnifier_lens` | magnifying glass | `magnification`, `lens_diameter_mm`, `lens_type` | `lens_diameter` | `Impossible` |
+| `monocular_optics` | monocular | `magnification`, `objective_mm`, `body_dimensions`, `fine_print_magnification`, `fine_print_objective_mm` | `objective_fits_body`, `fine_print_consistency` | `Flag` |
+
+When a claim is stated but the data to test it is missing (no native resolution, no
+lens diameter, no body dimensions), the check is `not_assessed`, the verdict is
+`No checkable claim` and the routing is `needs human review`.
+
+`replay_pack_claims(pack, claims)` is `replay_claims` for a pack: the same event types,
+no model. Pack fixtures are `fixtures/pack_<pack>_<case>.txt` with expected reports in
+`fixtures/expected/pack_<pack>_<case>.json`; regenerate them with
+`python packs/write_expected_reports.py` from `backend/`. `power_budget` is a pack with
+checks and tests that is not in the registry, so the agent and the API do not use it.
 
 Real examples: `fixtures/expected/fixture_01.json` (Impossible), `fixture_03.json` (Flag), `fixture_05.json` (No checkable claim), `fixture_06.json` (No red flags). Regenerate them with `python scripts/write_expected_reports.py` from `backend/`.

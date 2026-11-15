@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0",
+  "pack": "projector_resolution",
+  "claims": {
+    "claimed_resolution": {
+      "found_in": "title",
+      "quote": "4K",
+      "confidence": 1.0,
+      "value": "4k"
+    },
+    "native_pixels": null,
+    "native_name": null
+  },
+  "checks": [
+    {
+      "check_id": "native_resolution",
+      "title": "Headline resolution against native resolution",
+      "status": "not_assessed",
+      "summary": "Not assessed. The listing does not state a native resolution.",
+      "inputs": [
+        {
+          "name": "Headline resolution",
+          "value": "4K",
+          "unit": "",
+          "origin": "claim",
+          "found_in": "title",
+          "confidence": 1.0
+        }
+      ],
+      "formula": null,
+      "steps": [],
+      "constants": [],
+      "assumptions": [],
+      "notes": [],
+      "not_assessed_reason": "The listing does not state a native resolution."
+    }
+  ],
+  "verdict": "No checkable claim",
+  "verdict_reason": "The listing states nothing numeric or testable, so no check could run.",
+  "routing": "needs human review",
+  "routing_reason": "The listing states a numeric claim, but the data needed to test it is missing or unusable.",
+  "assumptions": [],
+  "not_assessed": [
+    "Headline resolution against native resolution: The listing does not state a native resolution."
+  ]
+}

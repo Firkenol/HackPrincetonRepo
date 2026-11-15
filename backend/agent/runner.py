@@ -2,8 +2,8 @@
 
 Translates the messages of the orchestrator and its three subagents into the
 contract's stream events, each labelled with the agent it came from. The report is
-always built by claimcheck.verdict.evaluate from the claims the listing reader
-recorded; no prose a model writes reaches an event or the report.
+always built in Python (claimcheck.verdict.evaluate, or a check pack's evaluate) from
+the claims the listing reader recorded; no prose a model writes reaches an event or the report.
 """
 
 from __future__ import annotations
@@ -31,7 +31,18 @@ from agent.prompts import (
     SUBAGENT_NAMES,
     USER_TEMPLATE,
 )
-from agent.tools import ASSEMBLE_REPORT, CHECK_TOOL_NAMES, LOOKUP_FORM_FACTOR, RECORD_CLAIMS, TOOL_NAMES, RunState
+from agent.tools import (
+    ASSEMBLE_REPORT,
+    CHECK_TOOL_NAMES,
+    LIST_CHECKS,
+    LOOKUP_FORM_FACTOR,
+    PACK_CHECK_TOOL_NAMES,
+    PACK_RECORD_TOOL_NAMES,
+    RECORD_CLAIMS,
+    TOOL_NAMES,
+    RunState,
+    pack_report,
+)
 from claimcheck.events import (
     AgentStepEvent,
     ErrorEvent,
@@ -40,7 +51,7 @@ from claimcheck.events import (
     ToolCallEvent,
     ToolResultEvent,
 )
-from claimcheck.models import EvidenceReport
+from claimcheck.models import AnyReport
 from claimcheck.verdict import evaluate
 
 log = logging.getLogger(__name__)
@@ -57,7 +68,7 @@ TASK = "task"
 # Trace lines are fixed text. Model-written text is never shown.
 _STEP_ON_DELEGATION = {
     LISTING_READER: "Recording what the listing states.",
-    PHYSICS_CHECKER: "Running the six checks on the recorded claims.",
+    PHYSICS_CHECKER: "Running the checks on the recorded claims.",
     REPORT_WRITER: "Assembling the evidence report.",
 }
 
@@ -117,10 +128,12 @@ def _summary(tool: str, ok: bool, result: Any) -> str:
         return "The subagent finished."
     if not isinstance(result, dict):
         return "Done."
-    if tool in CHECK_TOOL_NAMES:
+    if tool in CHECK_TOOL_NAMES or tool in PACK_CHECK_TOOL_NAMES:
         return f"{result.get('status')}: {result.get('summary')}"
-    if tool == RECORD_CLAIMS:
+    if tool == RECORD_CLAIMS or tool in PACK_RECORD_TOOL_NAMES:
         return "Claims recorded."
+    if tool == LIST_CHECKS:
+        return "Checks listed."
     if tool == ASSEMBLE_REPORT:
         return f"{result.get('verdict')}, {result.get('routing')}."
     if tool == LOOKUP_FORM_FACTOR:
@@ -145,8 +158,11 @@ def _messages(chunk: Any) -> Iterator[BaseMessage]:
 
 def run_listing(
     image_or_text: ListingInput, *, model: BaseChatModel | None = None
-) -> Generator[StreamEvent, None, EvidenceReport | None]:
+) -> Generator[StreamEvent, None, AnyReport | None]:
     """Check one listing. Yields stream events, then returns the evidence report.
+
+    A battery listing gives an EvidenceReport. A listing the reader recorded with a
+    pack's record tool gives that pack's PackEvidenceReport.
 
     The last event is a FinalReportEvent carrying the returned report, or an
     ErrorEvent, in which case the return value is None.
@@ -233,14 +249,14 @@ def run_listing(
         yield emit(ErrorEvent, message=MSG_FAILED)
         return None
 
-    if state.claims is None:
+    if not state.has_claims:
         yield emit(ErrorEvent, message=MSG_NO_CLAIMS)
         return None
 
     try:
         # Deterministic whatever the models did: if a check or the report writer was
         # skipped, the report is still complete and computed in Python.
-        report = state.report or evaluate(state.claims)
+        report = state.report or (pack_report(state) if state.pack_claims is not None else evaluate(state.claims))
     except Exception:
         log.exception("report assembly failed")
         yield emit(ErrorEvent, message=MSG_CHECKS_FAILED)

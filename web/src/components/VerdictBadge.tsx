@@ -18,11 +18,11 @@ export function VerdictBadge({ verdict, size = "md" }: { verdict: Verdict; size?
   const Icon = style.icon;
   const sizing =
     size === "lg"
-      ? "gap-2.5 px-4 py-2 text-xl font-semibold"
+      ? "gap-3 rounded-lg px-4 py-2.5 text-2xl font-semibold tracking-tight shadow-[inset_0_1px_0_rgb(255_255_255/0.08),0_10px_30px_-14px_currentColor]"
       : size === "sm"
         ? "gap-1.5 px-2 py-0.5 text-xs font-medium"
         : "gap-2 px-3 py-1 text-sm font-medium";
-  const icon = size === "lg" ? 22 : size === "sm" ? 13 : 16;
+  const icon = size === "lg" ? 26 : size === "sm" ? 13 : 16;
   return (
     <span
       data-testid="verdict-badge"
@@ -44,23 +44,23 @@ const ROUTING_NOTE: Record<Routing, string> = {
 export function RoutingLabel({ routing, withNote = false }: { routing: Routing; withNote?: boolean }) {
   return (
     <span data-testid="routing-label" className="inline-flex items-baseline gap-2 text-sm">
-      <span className="rounded border border-line bg-raised px-2 py-0.5 font-medium text-text">{routing}</span>
+      <span className="rounded-md border border-line bg-raised px-2 py-0.5 font-medium text-text shadow-[inset_0_1px_0_rgb(255_255_255/0.05)]">{routing}</span>
       {withNote && <span className="text-muted">{ROUTING_NOTE[routing]}</span>}
     </span>
   );
 }
 
 const STATUS: Record<CheckStatus, { label: string; cls: string }> = {
-  pass: { label: "Pass", cls: "text-clear border-clear/40" },
-  violated: { label: "Bound exceeded", cls: "text-impossible border-impossible/40" },
-  flag: { label: "Flag", cls: "text-flag border-flag/40" },
+  pass: { label: "Pass", cls: "text-clear border-clear/40 bg-clear/10" },
+  violated: { label: "Bound exceeded", cls: "text-impossible border-impossible/40 bg-impossible/10" },
+  flag: { label: "Flag", cls: "text-flag border-flag/40 bg-flag/10" },
   not_assessed: { label: "Not assessed", cls: "text-quiet border-line" },
 };
 
 export function StatusChip({ status }: { status: CheckStatus }) {
   const s = STATUS[status] ?? STATUS.not_assessed;
   return (
-    <span data-testid="check-status" className={`shrink-0 rounded border px-2 py-0.5 text-xs font-medium ${s.cls}`}>
+    <span data-testid="check-status" className={`shrink-0 rounded-md border px-2 py-0.5 text-xs font-medium ${s.cls}`}>
       {s.label}
     </span>
   );

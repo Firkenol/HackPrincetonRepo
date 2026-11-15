@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.0",
+  "pack": "monocular_optics",
+  "claims": {
+    "magnification": {
+      "found_in": "title",
+      "quote": "80x100",
+      "confidence": 1.0,
+      "value": 80.0
+    },
+    "objective_mm": {
+      "found_in": "title",
+      "quote": "80x100",
+      "confidence": 1.0,
+      "value": 100.0
+    },
+    "body_dimensions": null,
+    "fine_print_magnification": null,
+    "fine_print_objective_mm": null
+  },
+  "checks": [
+    {
+      "check_id": "objective_fits_body",
+      "title": "Objective lens against body width",
+      "status": "not_assessed",
+      "summary": "Not assessed. The listing does not state the dimensions of the monocular.",
+      "inputs": [
+        {
+          "name": "Claimed objective diameter",
+          "value": 100.0,
+          "unit": "mm",
+          "origin": "claim",
+          "found_in": "title",
+          "confidence": 1.0
+        }
+      ],
+      "formula": null,
+      "steps": [],
+      "constants": [],
+      "assumptions": [],
+      "notes": [],
+      "not_assessed_reason": "The listing does not state the dimensions of the monocular."
+    },
+    {
+      "check_id": "fine_print_consistency",
+      "title": "Headline figures against the fine print",
+      "status": "not_assessed",
+      "summary": "Not assessed. The listing states no separate 'actual' magnification or objective size to compare with the headline.",
+      "inputs": [],
+      "formula": null,
+      "steps": [],
+      "constants": [],
+      "assumptions": [],
+      "notes": [],
+      "not_assessed_reason": "The listing states no separate 'actual' magnification or objective size to compare with the headline."
+    }
+  ],
+  "verdict": "No checkable claim",
+  "verdict_reason": "The listing states nothing numeric or testable, so no check could run.",
+  "routing": "needs human review",
+  "routing_reason": "The listing states a numeric claim, but the data needed to test it is missing or unusable.",
+  "assumptions": [],
+  "not_assessed": [
+    "Objective lens against body width: The listing does not state the dimensions of the monocular.",
+    "Headline figures against the fine print: The listing states no separate 'actual' magnification or objective size to compare with the headline."
+  ]
+}
