@@ -109,7 +109,8 @@ Done:
 - **Web**: a report may carry `pack`; product descriptions for the three categories; the bundled samples are the nine battery fixtures plus nine pack fixtures.
 - **Fixtures**: three per pack (trips the rule, honest, missing data), as hand-entered claims in `packs/fixtures_data.py`, with listing text and expected reports.
 - Tests: backend 601 passed without the live tests (was 423 on this branch before the merge and the packs). Web 133 passed; `tsc`, `eslint` and `next build` are clean.
-- One live run from the command line: the projector fixture went through `record_projector_claims`, `list_checks` and `check_native_resolution` on the configured model and gave Flag, needs human review.
+- **First live acceptance run (2026-11-14, 22 min):** `pytest -m live` gave 19 passed, 9 skipped on the model in the local `.env`. Passed: all nine battery text fixtures, the one battery screenshot on disk (`fixture_08`), and all nine pack listings, each read by the real model into the right category and given the expected verdict and routing. Skipped: the eight battery fixtures without a screenshot, and the fixture-3 printed-codes test. This run started before the monocular body check became a flag; the three monocular tests were rerun afterwards against the current code: 3 passed (Flag, needs human review for the body-width case).
+- Committed on `console`: `01307a9` (merge of `packs-docs`) and `09af980` (the packs and wiring). Not pushed.
 
 Open, for the physics teammate:
 
