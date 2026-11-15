@@ -79,7 +79,7 @@ export function VerdictCard({ listing }: { listing: Listing }) {
               <div className="mt-auto flex flex-wrap items-center gap-3 pt-2">
                 <button
                   type="button"
-                  onClick={() => downloadReport(report, `carnot-report-${listing.key}`)}
+                  onClick={() => downloadReport(report, `offspec-report-${listing.key}`)}
                   className="inline-flex items-center gap-2 rounded-md border border-line bg-raised px-3 py-1.5 text-sm text-text hover:border-accent"
                 >
                   <Download size={15} aria-hidden /> Download report JSON

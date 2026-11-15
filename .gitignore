@@ -19,3 +19,6 @@ out/
 # OS / editor
 .DS_Store
 Thumbs.db
+
+# Demo video (27 MB); the thumbnail is kept
+demo/*.mp4

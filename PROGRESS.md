@@ -8,8 +8,8 @@ Read this first. Update it before stopping. Phases are the build order in SPEC.m
 - [x] **2. deepagents agent with tools, text input from the command line.** Merged to main on 2026-11-14 (branch `phase-2-agent`). Passes with a scripted fake model; the live run on a real model is still open (see below).
 - [ ] **3. Image input.** Built and tested with the scripted model on branch `phase-3-image` (not merged). Open: live extraction from real screenshots (see below).
 - [ ] **4. Subagents, skills, evidence report.** Built and tested with the scripted model on branch `phase-4-subagents` (not merged). Open: a live run, and LangSmith showing the subagent and tool calls.
-- [ ] **5. Web UI and batch mode.** Built on branch `console` (not merged) as the Carnot console: FastAPI in `backend/api/`, Next.js in `web/`. Tested in sample data mode and with the scripted model. Open: a live run, screenshots in `fixtures/`.
-- [ ] **6. README and demo script.** `README.md` is written (setup, both servers, modes, limits). `DEMO.md` is not written.
+- [ ] **5. Web UI and batch mode.** Built on branch `console` (not merged) as the OffSpec console: FastAPI in `backend/api/`, Next.js in `web/`. Tested in sample data mode and with the scripted model. Open: a live run, screenshots in `fixtures/`.
+- [x] **6. README and demo script.** `README.md` is written (setup, both servers, modes, limits). `DEMO.md` is the timed voiceover for `demo/offspec_demo.mp4` (2:55, recorded 2026-11-15 in replay mode; git-ignored) with `demo/offspec_thumbnail.png` committed.
 
 ## Phase 2 status (2026-11-14)
 
@@ -73,12 +73,12 @@ Open:
 
 ## Console status (2026-11-14, branch `console`, created from `phase-4-subagents`)
 
-The product is now called Carnot. The engine (`claimcheck`, `agent`, `skills`) is unchanged on this branch: no check, rule or constant was added or altered.
+The product is now called OffSpec (renamed from Carnot on 2026-11-15: UI title, API title, `X-OffSpec-Mode` header, `OFFSPEC_REPLAY` and `OFFSPEC_FIXTURES_DIR` variables, `offspec-web` package). The engine (`claimcheck`, `agent`, `skills`) is unchanged on this branch: no check, rule or constant was added or altered.
 
 Done:
 
 - **API** (`backend/api/`): `POST /api/verify-listing` (image, text or sample id; streams the contract's events), `POST /api/batch` (every listing in `fixtures/`, reports and counts), `GET /api/dashboard-stats` (counts from the latest batch run, null before one), plus `/api/samples`, `/api/fixtures/{name}`, `/api/health`.
-- **Replay mode** when `MODEL_PROVIDER` or `MODEL_ID` is empty, or `CARNOT_REPLAY=1`: serves the reports in `fixtures/expected/`, and every response is marked (`mode`, `sample_data`, the `X-Carnot-Mode` header, a `meta` frame at the start of a stream).
+- **Replay mode** when `MODEL_PROVIDER` or `MODEL_ID` is empty, or `OFFSPEC_REPLAY=1`: serves the reports in `fixtures/expected/`, and every response is marked (`mode`, `sample_data`, the `X-OffSpec-Mode` header, a `meta` frame at the start of a stream).
 - **Fixture listing texts are files**: `fixtures/fixture_01.txt` to `fixture_09.txt`, the same text the agent tests use (a test compares them).
 - **Web console** (`web/`): metrics bar, audit feed, verdict card with the listing beside the verdict badge and routing label, "Show the math" (inputs, formula, steps, constants with sources, not-assessed reasons), paste and upload with drag and drop, live trace, JSON download, batch view with a summary table and a routing chart. Falls back to bundled sample reports when the API is unreachable, labelled.
 - Both servers were started and the console was checked in a browser in sample data mode: the nine fixtures, a pasted fixture streaming its trace, and the batch view.
@@ -160,3 +160,8 @@ Open, other:
 16. **Dashboard stats count only the latest batch run**, as instructed. Listings checked one at a time do not change them.
 17. **New dependencies**, all pinned: fastapi, uvicorn, python-multipart (backend); next, react, tailwindcss, lucide-react, recharts, framer-motion, vitest, Testing Library, jsdom (web). The scaffold came from `create-next-app` 16.4.6 and its config was kept.
 18. **Verdict colours**: Impossible red `#f26d78`, Flag amber `#f2b441`, No red flags green `#4fcf8e`, No checkable claim gray `#9aa4b2`.
+
+## Demo video (2026-11-15, branch `console`)
+
+- `demo/offspec_demo.mp4` (2:55, 1080p, silent) and `demo/offspec_thumbnail.png`, with the voiceover in `DEMO.md`. Recorded with Playwright against a second API on port 8001 in replay mode (`OFFSPEC_REPLAY=1`, `CORS_ORIGINS` widened to port 3001) and a copy of `web/` on port 3001. The MP4 is git-ignored; the recording scripts were scratch files, and `DEMO.md` says how to redo it.
+- Observed while preparing: one live run of `pack_magnifier_lens_impossible.txt` through the port-8000 API took 53 s, had the reader record it as a battery with `product_type: unknown`, and ended in an `error` event. The acceptance run on 2026-11-14 passed this fixture, so this looks like model variance; worth a second live look before the demo.

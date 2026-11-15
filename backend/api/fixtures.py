@@ -32,7 +32,7 @@ from pathlib import Path
 from claimcheck.models import AnyReport, EvidenceReport, PackEvidenceReport
 from packs.registry import PACKS
 
-FIXTURES_ENV = "CARNOT_FIXTURES_DIR"
+FIXTURES_ENV = "OFFSPEC_FIXTURES_DIR"
 IMAGE_SUFFIXES = (".png", ".jpg", ".jpeg", ".webp")
 MEDIA_TYPES = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp"}
 _ID = re.compile(r"^(?:fixture_\d{2}|pack_(?:" + "|".join(map(re.escape, PACKS)) + r")_[a-z0-9]+)$")

@@ -36,10 +36,10 @@ describe("Spinner", () => {
 describe("ErrorState", () => {
   it("says what went wrong and what to do next, and offers a retry", () => {
     const retry = vi.fn();
-    render(<ErrorState kind="offline" detail="The Carnot API could not be reached." onRetry={retry} />);
+    render(<ErrorState kind="offline" detail="The OffSpec API could not be reached." onRetry={retry} />);
     const alert = screen.getByRole("alert");
     expect(alert).toHaveTextContent("The API could not be reached");
-    expect(alert).toHaveTextContent("The Carnot API could not be reached.");
+    expect(alert).toHaveTextContent("The OffSpec API could not be reached.");
     expect(alert).toHaveTextContent(/What to do next: Start the API/);
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
     expect(retry).toHaveBeenCalledOnce();

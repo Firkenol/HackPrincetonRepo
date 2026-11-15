@@ -24,7 +24,7 @@ from claimcheck import replay_claims, replay_pack_claims, run_listing
 from claimcheck.events import ErrorEvent, StreamEvent
 from claimcheck.models import AnyReport, PackEvidenceReport, Routing, Verdict
 
-REPLAY_ENV = "CARNOT_REPLAY"
+REPLAY_ENV = "OFFSPEC_REPLAY"
 LIVE, REPLAY = "live", "replay"
 
 MSG_REPLAY_ONLY = (
@@ -39,7 +39,7 @@ Runner = Callable[[Any], Iterator[StreamEvent]]
 
 
 def current_mode() -> str:
-    """replay when no model is configured, or when CARNOT_REPLAY asks for it."""
+    """replay when no model is configured, or when OFFSPEC_REPLAY asks for it."""
     forced = os.environ.get(REPLAY_ENV, "").strip().lower() in ("1", "true", "yes", "on")
     configured = bool(os.environ.get("MODEL_PROVIDER", "").strip() and os.environ.get("MODEL_ID", "").strip())
     return REPLAY if forced or not configured else LIVE

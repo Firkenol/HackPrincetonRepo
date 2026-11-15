@@ -1,7 +1,7 @@
-# Carnot
+# OffSpec
 
 A trust and safety console that checks whether a product listing's own claims are
-physically possible, and shows the math. Paste a listing or upload a screenshot; Carnot
+physically possible, and shows the math. Paste a listing or upload a screenshot; OffSpec
 extracts the claims, runs the physical checks for that kind of product in plain Python,
 and returns an evidence report a reviewer can reproduce with a calculator.
 
@@ -28,7 +28,7 @@ claim`. Routing is `auto-resolvable`, `needs human review` or `no action needed`
 | `backend/agent/` | A deepagents orchestrator with three subagents: listing reader, physics checker, report writer |
 | `backend/skills/` | One `SKILL.md` per subagent |
 | `backend/api/` | FastAPI server over `run_listing()` |
-| `web/` | The Carnot console: Next.js App Router, TypeScript, Tailwind, Lucide, Recharts, Framer Motion |
+| `web/` | The OffSpec console: Next.js App Router, TypeScript, Tailwind, Lucide, Recharts, Framer Motion |
 | `fixtures/` | Nine battery listings (`fixture_NN.txt`), the pack listings (`pack_<pack>_<case>.txt`) and their expected reports (`expected/`) |
 
 `SPEC.md` is the specification, `CONTRACT.md` the interface between the parts, and
@@ -69,7 +69,7 @@ not checked, never a sample report.
 
 For **live mode**, copy `.env.example` to `.env` in the repo root and set
 `MODEL_PROVIDER`, `MODEL_ID` and that provider's credentials. The model must support
-tool calling, and vision for screenshots. Restart the API. Set `CARNOT_REPLAY=1` to
+tool calling, and vision for screenshots. Restart the API. Set `OFFSPEC_REPLAY=1` to
 force sample data mode even with a model configured.
 
 If the web console cannot reach the API at all, it falls back to sample reports bundled
@@ -86,7 +86,7 @@ with the web app and says "Sample data: the API is offline".
 | `GET /api/health` | Whether the server is in `live` or `replay` mode. |
 
 Every JSON body carries `mode` and `sample_data`, and every response has an
-`X-Carnot-Mode` header.
+`X-OffSpec-Mode` header.
 
 ## Tests
 

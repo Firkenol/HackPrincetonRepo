@@ -174,7 +174,7 @@ export function Console() {
         <header className="relative flex flex-wrap items-center justify-between gap-3 border-b border-line bg-panel px-6 py-4">
           <span aria-hidden className="pointer-events-none absolute inset-x-0 -bottom-px h-px bg-gradient-to-r from-accent/70 via-accent/10 to-transparent" />
           <div className="flex items-baseline gap-3">
-            <h1 className="text-xl font-semibold tracking-tight text-text">Carnot</h1>
+            <h1 className="text-xl font-semibold tracking-tight text-text">OffSpec</h1>
             <p className="text-sm text-muted">Checks product claims against physics and shows the math</p>
           </div>
           {pill ? (
