@@ -95,6 +95,38 @@ Open:
 7. `npm audit` reports 7 moderate advisories in the Next.js toolchain as scaffolded. Not changed, to keep the versions the scaffold chose.
 8. On Windows, `npm test` must be started from a path with an upper-case drive letter (see README).
 
+## Check packs status (2026-11-14, branch `console`, with `packs-docs` merged in, not committed)
+
+Three categories beyond batteries, approved by the owner (see the last amendment in SPEC.md and the top row of "Contract changes" in CONTRACT.md).
+
+Done:
+
+- **`packs-docs` is merged into the working tree of `console`.** The merge is not committed: the one conflict (`backend/pyproject.toml` `testpaths`) is resolved in the file, and `git status` still shows the merge in progress.
+- **Three packs** in `backend/packs/`, each with `models.py`, `constants.py`, `checks.py`: `projector_resolution` (flag at most), `magnifier_lens` (flag between 1x and 2x the limit, hard above), `monocular_optics` (objective against body width, and headline against fine print; both flags). `packs/registry.py` lists them.
+- **Contract change** (additive): `PackEvidenceReport` in `claimcheck/models.py`; `final_report.report` and `run_listing` can carry either report; `replay_pack_claims` in `pipeline.py`. The battery models, the six checks and their expected reports are unchanged.
+- **Agent**: the listing reader has one record tool per pack beside `record_claims`, and the tool it calls decides the category. The physics checker has `list_checks`, which names the checks for the recorded category, and the four pack check tools. `assemble_report` builds the pack's report. New skill `reading-optics-listings`; the checker and writer skills are updated.
+- **API**: pack fixtures (`fixtures/pack_<pack>_<case>.txt` and `expected/…json`) are listed, replayed and batched beside the nine battery fixtures.
+- **Web**: a report may carry `pack`; product descriptions for the three categories; the bundled samples are the nine battery fixtures plus nine pack fixtures.
+- **Fixtures**: three per pack (trips the rule, honest, missing data), as hand-entered claims in `packs/fixtures_data.py`, with listing text and expected reports.
+- Tests: backend 601 passed without the live tests (was 423 on this branch before the merge and the packs). Web 133 passed; `tsc`, `eslint` and `next build` are clean.
+- One live run from the command line: the projector fixture went through `record_projector_claims`, `list_checks` and `check_native_resolution` on the configured model and gave Flag, needs human review.
+
+Open, for the physics teammate:
+
+1. **Magnifier: the refractive index of 1.5 has no citation.** It is shown in every report as an assumption, not as a constant. The only source found (OpenStax) works its example with 1.55. See the TODO in `packs/magnifier_lens/constants.py`.
+2. **Magnifier: the 2x margin before a hard result is a team choice.** It covers glass up to index 2.0. Confirm it also covers the M = 250/f + 1 convention and thick lenses.
+3. **Magnifier: the "no wider than 2 x f" rule is a derivation** (lens maker's equation plus geometry), not a cited value. Confirm it.
+4. **Projector: the resolution definitions cite Wikipedia at fixed revisions.** The primary documents (ITU-R BT.2020, BT.709, SMPTE ST 296) were not read. Replace the citations, and read the quotes against the pages: they were fetched by a tool, not by a person.
+5. **Monocular: the 3% rounding tolerance is a team choice**, copied from the battery label check. The check uses no physical constant.
+6. ~~Monocular hard result from listed dimensions~~ Decided by the owner on 2026-11-14: a flag, because listed dimensions can be wrong.
+
+Open, other:
+
+7. `power_budget` (from `packs-docs`) has checks and tests but is not in the registry, so the agent, API and console do not use it.
+8. The local `.env` now has a model configured, so plain `pytest` runs the live tests against it. Use `pytest -m "not live"` to skip them.
+9. No screenshots exist for the pack fixtures; they are text only.
+10. CLAUDE.md still describes the project as batteries only and was not edited.
+
 ## Decisions made while unattended
 
 2026-11-14, Phase 4:

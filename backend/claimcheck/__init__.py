@@ -16,7 +16,7 @@ See CONTRACT.md at the repo root before changing them.
 """
 
 from claimcheck.models import Claims, EvidenceReport, Routing, Verdict
-from claimcheck.pipeline import replay_claims, run_listing
+from claimcheck.pipeline import replay_claims, replay_pack_claims, run_listing
 from claimcheck.verdict import evaluate
 
-__all__ = ["Claims", "EvidenceReport", "Routing", "Verdict", "evaluate", "replay_claims", "run_listing"]
+__all__ = ["Claims", "EvidenceReport", "Routing", "Verdict", "evaluate", "replay_claims", "replay_pack_claims", "run_listing"]

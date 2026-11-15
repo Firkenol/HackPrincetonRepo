@@ -1,9 +1,16 @@
 # Carnot
 
-A trust and safety console that checks whether a battery listing's own claims are
+A trust and safety console that checks whether a product listing's own claims are
 physically possible, and shows the math. Paste a listing or upload a screenshot; Carnot
-extracts the claims, runs six physical checks in plain Python, and returns an evidence
-report a reviewer can reproduce with a calculator.
+extracts the claims, runs the physical checks for that kind of product in plain Python,
+and returns an evidence report a reviewer can reproduce with a calculator.
+
+| Category | Checks |
+|---|---|
+| Batteries (loose cells, packs, power banks) | Six: label consistency, form-factor bound, dimension bound, weight bound, label contradiction, chemistry mismatch |
+| Projectors | Headline resolution ("4K") against the native pixel count. A flag at most. |
+| Magnifying glasses | Claimed power against the lens diameter |
+| Monoculars | An "80x100" figure against the listed body width, and against any "actual" figure in the fine print. A flag at most. |
 
 It reads only what you give it. It never scrapes or wraps a marketplace site, and it
 never outputs, stores or displays seller or store names. A verdict is about the claim,
@@ -16,12 +23,13 @@ claim`. Routing is `auto-resolvable`, `needs human review` or `no action needed`
 
 | Folder | What it is |
 |---|---|
-| `backend/claimcheck/` | The engine: the six checks, the cited constants, the report and event models |
+| `backend/claimcheck/` | The engine: the six battery checks, the cited constants, the report and event models |
+| `backend/packs/` | Check packs for other categories: projector, magnifying glass, monocular (and power budget, not wired into the agent). Each has its own claims model, cited constants and checks |
 | `backend/agent/` | A deepagents orchestrator with three subagents: listing reader, physics checker, report writer |
 | `backend/skills/` | One `SKILL.md` per subagent |
 | `backend/api/` | FastAPI server over `run_listing()` |
 | `web/` | The Carnot console: Next.js App Router, TypeScript, Tailwind, Lucide, Recharts, Framer Motion |
-| `fixtures/` | Nine test listings (`fixture_NN.txt`) and their expected reports (`expected/`) |
+| `fixtures/` | Nine battery listings (`fixture_NN.txt`), the pack listings (`pack_<pack>_<case>.txt`) and their expected reports (`expected/`) |
 
 `SPEC.md` is the specification, `CONTRACT.md` the interface between the parts, and
 `PROGRESS.md` the current state and open items.
@@ -56,7 +64,7 @@ Open http://localhost:3000.
 With no model configured, the API runs in **sample data mode**: it serves the reports in
 `fixtures/expected/`, and every response and every screen that shows them is labelled
 "Sample data". This is the default on a fresh clone and needs no key. In this mode only
-the nine fixture listings can be checked; any other listing gets a message saying it was
+the fixture listings can be checked; any other listing gets a message saying it was
 not checked, never a sample report.
 
 For **live mode**, copy `.env.example` to `.env` in the repo root and set

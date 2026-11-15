@@ -2604,5 +2604,1061 @@
    ]
   },
   "error": null
+ },
+ {
+  "id": "pack_magnifier_lens_honest",
+  "source": "text",
+  "listing_text": "3X Handheld Magnifying Glass for Reading.\nSpecifications: Lens diameter 75 mm. Glass lens.\n",
+  "image_url": null,
+  "report": {
+   "schema_version": "1.0",
+   "pack": "magnifier_lens",
+   "claims": {
+    "magnification": {
+     "found_in": "title",
+     "quote": "3X",
+     "confidence": 1,
+     "value": 3
+    },
+    "lens_diameter_mm": {
+     "found_in": "spec table",
+     "quote": "75 mm",
+     "confidence": 1,
+     "value": 75
+    },
+    "lens_type": null
+   },
+   "checks": [
+    {
+     "check_id": "lens_diameter",
+     "title": "Lens diameter against claimed magnification",
+     "status": "pass",
+     "summary": "A 3× lens has a focal length of 83.33 mm, and a simple lens with that focal length can be at most 166.7 mm wide. The listed lens diameter of 75 mm is within that limit.",
+     "inputs": [
+      {
+       "name": "Claimed magnification",
+       "value": 3,
+       "unit": "×",
+       "origin": "claim",
+       "found_in": "title",
+       "confidence": 1
+      },
+      {
+       "name": "Lens diameter",
+       "value": 75,
+       "unit": "mm",
+       "origin": "claim",
+       "found_in": "spec table",
+       "confidence": 1
+      },
+      {
+       "name": "Near-point distance used to define magnifying power",
+       "value": 250,
+       "unit": "mm",
+       "origin": "constant",
+       "found_in": null,
+       "confidence": null
+      },
+      {
+       "name": "Refractive index of the lens material",
+       "value": 1.5,
+       "unit": "",
+       "origin": "assumption",
+       "found_in": null,
+       "confidence": null
+      },
+      {
+       "name": "Margin before a hard result",
+       "value": 2,
+       "unit": "×",
+       "origin": "assumption",
+       "found_in": null,
+       "confidence": null
+      }
+     ],
+     "formula": "D ≤ 2 × f, where f = 250 mm ÷ M",
+     "steps": [
+      {
+       "label": "Focal length implied by the claimed magnification",
+       "formula": "f = 250 mm ÷ M",
+       "substitution": "250 mm ÷ 3",
+       "result": 83.33333333333333,
+       "unit": "mm",
+       "text": "Focal length implied by the claimed magnification: 250 mm ÷ 3 = 83.33 mm"
+      },
+      {
+       "label": "Widest lens with that focal length",
+       "formula": "D_max = 2 × f",
+       "substitution": "2 × 83.33 mm",
+       "result": 166.66666666666666,
+       "unit": "mm",
+       "text": "Widest lens with that focal length: 2 × 83.33 mm = 166.7 mm"
+      },
+      {
+       "label": "Comparison",
+       "formula": "value ≤ limit",
+       "substitution": "75 mm ≤ 166.7 mm",
+       "result": 0.45,
+       "unit": "× the limit",
+       "text": "Comparison: 75 mm ≤ 166.7 mm (0.45× the limit)"
+      }
+     ],
+     "constants": [
+      {
+       "key": "near_point_distance_mm",
+       "value": 250,
+       "unit": "mm",
+       "description": "Near-point distance used to define magnifying power",
+       "source_title": "University Physics Volume 3, Section 2.7 The Simple Magnifier",
+       "source_publisher": "OpenStax, Rice University",
+       "source_url": "https://openstax.org/books/university-physics-volume-3/pages/2-7-the-simple-magnifier",
+       "locator": "Equation 2.32, M = 25 cm / f for an image at infinity, and the sentence after it",
+       "quote": "The resulting magnification is simply the ratio of the near-point distance to the focal length of the magnifying lens.",
+       "accessed": "2026-11-14",
+       "note": "The source writes it as 25 cm. Magnifying power M = 250 mm ÷ focal length.",
+       "hard_bound": true
+      }
+     ],
+     "assumptions": [
+      "The lens is taken to be a single lens with two equally curved faces, made of material with a refractive index of 1.5. For such a lens the focal length equals the radius of curvature (lens maker's equation, OpenStax University Physics Volume 3, Section 2.4, Equation 2.21: 1/f = (n − 1)(1/R1 − 1/R2)). The index is an assumption with no cited source.",
+      "A lens cannot be wider than the sphere its curved surface is part of, so its diameter cannot exceed twice the radius of curvature.",
+      "Magnifying power is taken as 250 mm ÷ focal length, the convention for an image at infinity.",
+      "A diameter up to 2× the limit is reported as a flag, not a hard result, to allow for denser glass and for the other convention for magnifying power. This margin is a team choice, not a physical constant.",
+      "The listing does not describe a Fresnel or flat sheet lens, so an ordinary curved lens is assumed."
+     ],
+     "notes": [],
+     "not_assessed_reason": null
+    }
+   ],
+   "verdict": "No red flags",
+   "verdict_reason": "The claims that could be tested are physically plausible (Lens diameter against claimed magnification). This does not confirm that the claims are true.",
+   "routing": "no action needed",
+   "routing_reason": "The claims that could be tested are plausible and were read with high confidence.",
+   "assumptions": [
+    "The lens is taken to be a single lens with two equally curved faces, made of material with a refractive index of 1.5. For such a lens the focal length equals the radius of curvature (lens maker's equation, OpenStax University Physics Volume 3, Section 2.4, Equation 2.21: 1/f = (n − 1)(1/R1 − 1/R2)). The index is an assumption with no cited source.",
+    "A lens cannot be wider than the sphere its curved surface is part of, so its diameter cannot exceed twice the radius of curvature.",
+    "Magnifying power is taken as 250 mm ÷ focal length, the convention for an image at infinity.",
+    "A diameter up to 2× the limit is reported as a flag, not a hard result, to allow for denser glass and for the other convention for magnifying power. This margin is a team choice, not a physical constant.",
+    "The listing does not describe a Fresnel or flat sheet lens, so an ordinary curved lens is assumed."
+   ],
+   "not_assessed": []
+  },
+  "error": null
+ },
+ {
+  "id": "pack_magnifier_lens_impossible",
+  "source": "text",
+  "listing_text": "30X Handheld Magnifying Glass for Reading.\nSpecifications: Lens diameter 75 mm. Glass lens.\n",
+  "image_url": null,
+  "report": {
+   "schema_version": "1.0",
+   "pack": "magnifier_lens",
+   "claims": {
+    "magnification": {
+     "found_in": "title",
+     "quote": "30X",
+     "confidence": 1,
+     "value": 30
+    },
+    "lens_diameter_mm": {
+     "found_in": "spec table",
+     "quote": "75 mm",
+     "confidence": 1,
+     "value": 75
+    },
+    "lens_type": null
+   },
+   "checks": [
+    {
+     "check_id": "lens_diameter",
+     "title": "Lens diameter against claimed magnification",
+     "status": "violated",
+     "summary": "A 30× lens has a focal length of 8.333 mm, and a simple lens with that focal length can be at most 16.67 mm wide. The listed lens diameter of 75 mm is 4.5× that limit, beyond the 2× margin allowed for other lens materials.",
+     "inputs": [
+      {
+       "name": "Claimed magnification",
+       "value": 30,
+       "unit": "×",
+       "origin": "claim",
+       "found_in": "title",
+       "confidence": 1
+      },
+      {
+       "name": "Lens diameter",
+       "value": 75,
+       "unit": "mm",
+       "origin": "claim",
+       "found_in": "spec table",
+       "confidence": 1
+      },
+      {
+       "name": "Near-point distance used to define magnifying power",
+       "value": 250,
+       "unit": "mm",
+       "origin": "constant",
+       "found_in": null,
+       "confidence": null
+      },
+      {
+       "name": "Refractive index of the lens material",
+       "value": 1.5,
+       "unit": "",
+       "origin": "assumption",
+       "found_in": null,
+       "confidence": null
+      },
+      {
+       "name": "Margin before a hard result",
+       "value": 2,
+       "unit": "×",
+       "origin": "assumption",
+       "found_in": null,
+       "confidence": null
+      }
+     ],
+     "formula": "D ≤ 2 × f, where f = 250 mm ÷ M",
+     "steps": [
+      {
+       "label": "Focal length implied by the claimed magnification",
+       "formula": "f = 250 mm ÷ M",
+       "substitution": "250 mm ÷ 30",
+       "result": 8.333333333333334,
+       "unit": "mm",
+       "text": "Focal length implied by the claimed magnification: 250 mm ÷ 30 = 8.333 mm"
+      },
+      {
+       "label": "Widest lens with that focal length",
+       "formula": "D_max = 2 × f",
+       "substitution": "2 × 8.333 mm",
+       "result": 16.666666666666668,
+       "unit": "mm",
+       "text": "Widest lens with that focal length: 2 × 8.333 mm = 16.67 mm"
+      },
+      {
+       "label": "Comparison",
+       "formula": "value ≤ limit",
+       "substitution": "75 mm > 16.67 mm",
+       "result": 4.5,
+       "unit": "× the limit",
+       "text": "Comparison: 75 mm > 16.67 mm (4.5× the limit)"
+      },
+      {
+       "label": "Diameter above which the result is hard",
+       "formula": "D_hard = margin × D_max",
+       "substitution": "2 × 16.67 mm",
+       "result": 33.333333333333336,
+       "unit": "mm",
+       "text": "Diameter above which the result is hard: 2 × 16.67 mm = 33.33 mm"
+      }
+     ],
+     "constants": [
+      {
+       "key": "near_point_distance_mm",
+       "value": 250,
+       "unit": "mm",
+       "description": "Near-point distance used to define magnifying power",
+       "source_title": "University Physics Volume 3, Section 2.7 The Simple Magnifier",
+       "source_publisher": "OpenStax, Rice University",
+       "source_url": "https://openstax.org/books/university-physics-volume-3/pages/2-7-the-simple-magnifier",
+       "locator": "Equation 2.32, M = 25 cm / f for an image at infinity, and the sentence after it",
+       "quote": "The resulting magnification is simply the ratio of the near-point distance to the focal length of the magnifying lens.",
+       "accessed": "2026-11-14",
+       "note": "The source writes it as 25 cm. Magnifying power M = 250 mm ÷ focal length.",
+       "hard_bound": true
+      }
+     ],
+     "assumptions": [
+      "The lens is taken to be a single lens with two equally curved faces, made of material with a refractive index of 1.5. For such a lens the focal length equals the radius of curvature (lens maker's equation, OpenStax University Physics Volume 3, Section 2.4, Equation 2.21: 1/f = (n − 1)(1/R1 − 1/R2)). The index is an assumption with no cited source.",
+      "A lens cannot be wider than the sphere its curved surface is part of, so its diameter cannot exceed twice the radius of curvature.",
+      "Magnifying power is taken as 250 mm ÷ focal length, the convention for an image at infinity.",
+      "A diameter up to 2× the limit is reported as a flag, not a hard result, to allow for denser glass and for the other convention for magnifying power. This margin is a team choice, not a physical constant.",
+      "The listing does not describe a Fresnel or flat sheet lens, so an ordinary curved lens is assumed."
+     ],
+     "notes": [],
+     "not_assessed_reason": null
+    }
+   ],
+   "verdict": "Impossible",
+   "verdict_reason": "A 30× lens has a focal length of 8.333 mm, and a simple lens with that focal length can be at most 16.67 mm wide. The listed lens diameter of 75 mm is 4.5× that limit, beyond the 2× margin allowed for other lens materials.",
+   "routing": "auto-resolvable",
+   "routing_reason": "A hard physical bound is violated and the calculation is reproducible.",
+   "assumptions": [
+    "The lens is taken to be a single lens with two equally curved faces, made of material with a refractive index of 1.5. For such a lens the focal length equals the radius of curvature (lens maker's equation, OpenStax University Physics Volume 3, Section 2.4, Equation 2.21: 1/f = (n − 1)(1/R1 − 1/R2)). The index is an assumption with no cited source.",
+    "A lens cannot be wider than the sphere its curved surface is part of, so its diameter cannot exceed twice the radius of curvature.",
+    "Magnifying power is taken as 250 mm ÷ focal length, the convention for an image at infinity.",
+    "A diameter up to 2× the limit is reported as a flag, not a hard result, to allow for denser glass and for the other convention for magnifying power. This margin is a team choice, not a physical constant.",
+    "The listing does not describe a Fresnel or flat sheet lens, so an ordinary curved lens is assumed."
+   ],
+   "not_assessed": []
+  },
+  "error": null
+ },
+ {
+  "id": "pack_magnifier_lens_missing",
+  "source": "text",
+  "listing_text": "30X Handheld Magnifying Glass for Reading. Lightweight handle.\n",
+  "image_url": null,
+  "report": {
+   "schema_version": "1.0",
+   "pack": "magnifier_lens",
+   "claims": {
+    "magnification": {
+     "found_in": "title",
+     "quote": "30X",
+     "confidence": 1,
+     "value": 30
+    },
+    "lens_diameter_mm": null,
+    "lens_type": null
+   },
+   "checks": [
+    {
+     "check_id": "lens_diameter",
+     "title": "Lens diameter against claimed magnification",
+     "status": "not_assessed",
+     "summary": "Not assessed. The listing does not state the diameter of the lens.",
+     "inputs": [
+      {
+       "name": "Claimed magnification",
+       "value": 30,
+       "unit": "×",
+       "origin": "claim",
+       "found_in": "title",
+       "confidence": 1
+      }
+     ],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "The listing does not state the diameter of the lens."
+    }
+   ],
+   "verdict": "No checkable claim",
+   "verdict_reason": "The listing states nothing numeric or testable, so no check could run.",
+   "routing": "needs human review",
+   "routing_reason": "The listing states a numeric claim, but the data needed to test it is missing or unusable.",
+   "assumptions": [],
+   "not_assessed": [
+    "Lens diameter against claimed magnification: The listing does not state the diameter of the lens."
+   ]
+  },
+  "error": null
+ },
+ {
+  "id": "pack_monocular_optics_flag",
+  "source": "text",
+  "listing_text": "80x100 High Power Monocular Telescope.\nSpecifications: Product dimensions 180 x 75 x 75 mm. Actual magnification 12x.\n",
+  "image_url": null,
+  "report": {
+   "schema_version": "1.0",
+   "pack": "monocular_optics",
+   "claims": {
+    "magnification": {
+     "found_in": "title",
+     "quote": "80x100",
+     "confidence": 1,
+     "value": 80
+    },
+    "objective_mm": {
+     "found_in": "title",
+     "quote": "80x100",
+     "confidence": 1,
+     "value": 100
+    },
+    "body_dimensions": {
+     "found_in": "spec table",
+     "quote": "180 x 75 x 75 mm",
+     "confidence": 1,
+     "length_mm": 180,
+     "width_mm": 75,
+     "height_mm": 75,
+     "kind": "product"
+    },
+    "fine_print_magnification": {
+     "found_in": "spec table",
+     "quote": "12x",
+     "confidence": 1,
+     "value": 12
+    },
+    "fine_print_objective_mm": null
+   },
+   "checks": [
+    {
+     "check_id": "objective_fits_body",
+     "title": "Objective lens against body width",
+     "status": "flag",
+     "summary": "The listing claims a 100 mm objective lens, and gives body dimensions of 180 × 75 × 75 mm. The lens sits across the body, whose width is at most 75 mm. The claimed lens is 1.333× that width, so the two figures cannot both be right. Listed dimensions are often inexact, so this is reported as a flag for a person to check.",
+     "inputs": [
+      {
+       "name": "Claimed objective diameter",
+       "value": 100,
+       "unit": "mm",
+       "origin": "claim",
+       "found_in": "title",
+       "confidence": 1
+      },
+      {
+       "name": "Listed dimensions",
+       "value": "180 × 75 × 75 mm",
+       "unit": "",
+       "origin": "claim",
+       "found_in": "spec table",
+       "confidence": 1
+      },
+      {
+       "name": "Rounding tolerance",
+       "value": 3,
+       "unit": "%",
+       "origin": "assumption",
+       "found_in": null,
+       "confidence": null
+      }
+     ],
+     "formula": "D_objective ≤ body width × (1 + rounding tolerance)",
+     "steps": [
+      {
+       "label": "Body width available to the lens",
+       "formula": "W",
+       "substitution": "the second-longest listed side",
+       "result": 75,
+       "unit": "mm",
+       "text": "Body width available to the lens: 75 mm (the second-longest listed side)"
+      },
+      {
+       "label": "Body width with the rounding tolerance",
+       "formula": "W_max = W × (1 + tolerance)",
+       "substitution": "75 mm × 1.03",
+       "result": 77.25,
+       "unit": "mm",
+       "text": "Body width with the rounding tolerance: 75 mm × 1.03 = 77.25 mm"
+      },
+      {
+       "label": "Comparison",
+       "formula": "value ≤ limit",
+       "substitution": "100 mm > 77.25 mm",
+       "result": 1.2944983818770226,
+       "unit": "× the limit",
+       "text": "Comparison: 100 mm > 77.25 mm (1.294× the limit)"
+      }
+     ],
+     "constants": [],
+     "assumptions": [
+      "The objective lens faces along the longest side of the body, so it has to fit within the other two sides. The second-longest listed side is used as the width, which is the most lenient.",
+      "Listed dimensions are treated as rounded: a lens up to 3% wider than the listed width passes. This tolerance is a team choice, not a physical constant.",
+      "The listed dimensions are taken to describe the monocular itself, as the listing states. Because listed dimensions can be wrong, exceeding this bound is reported as a flag, not a hard result."
+     ],
+     "notes": [],
+     "not_assessed_reason": null
+    },
+    {
+     "check_id": "fine_print_consistency",
+     "title": "Headline figures against the fine print",
+     "status": "flag",
+     "summary": "The listing gives two different figures for the same property: magnification 80 × in the headline and 12 × in the fine print (6.667×). The listing contradicts itself, which is reported as a flag.",
+     "inputs": [
+      {
+       "name": "Headline magnification",
+       "value": 80,
+       "unit": "×",
+       "origin": "claim",
+       "found_in": "title",
+       "confidence": 1
+      },
+      {
+       "name": "Fine-print magnification",
+       "value": 12,
+       "unit": "×",
+       "origin": "claim",
+       "found_in": "spec table",
+       "confidence": 1
+      },
+      {
+       "name": "Rounding tolerance",
+       "value": 3,
+       "unit": "%",
+       "origin": "assumption",
+       "found_in": null,
+       "confidence": null
+      }
+     ],
+     "formula": "ratio = headline value ÷ fine-print value; the two agree when the ratio is within the tolerance of 1",
+     "steps": [
+      {
+       "label": "Headline magnification divided by the fine-print value",
+       "formula": "ratio = headline ÷ fine print",
+       "substitution": "80 ÷ 12",
+       "result": 6.666666666666667,
+       "unit": "×",
+       "text": "Headline magnification divided by the fine-print value: 80 ÷ 12 = 6.667 ×"
+      }
+     ],
+     "constants": [],
+     "assumptions": [
+      "Two figures within 3% of each other are treated as equal. This tolerance is a team choice, not a physical constant."
+     ],
+     "notes": [],
+     "not_assessed_reason": null
+    }
+   ],
+   "verdict": "Flag",
+   "verdict_reason": "The listing claims a 100 mm objective lens, and gives body dimensions of 180 × 75 × 75 mm. The lens sits across the body, whose width is at most 75 mm. The claimed lens is 1.333× that width, so the two figures cannot both be right. Listed dimensions are often inexact, so this is reported as a flag for a person to check. The listing gives two different figures for the same property: magnification 80 × in the headline and 12 × in the fine print (6.667×). The listing contradicts itself, which is reported as a flag.",
+   "routing": "needs human review",
+   "routing_reason": "A contradiction or unusual claim needs a person's judgment.",
+   "assumptions": [
+    "The objective lens faces along the longest side of the body, so it has to fit within the other two sides. The second-longest listed side is used as the width, which is the most lenient.",
+    "Listed dimensions are treated as rounded: a lens up to 3% wider than the listed width passes. This tolerance is a team choice, not a physical constant.",
+    "The listed dimensions are taken to describe the monocular itself, as the listing states. Because listed dimensions can be wrong, exceeding this bound is reported as a flag, not a hard result.",
+    "Two figures within 3% of each other are treated as equal. This tolerance is a team choice, not a physical constant."
+   ],
+   "not_assessed": []
+  },
+  "error": null
+ },
+ {
+  "id": "pack_monocular_optics_honest",
+  "source": "text",
+  "listing_text": "12x50 Monocular Telescope.\nSpecifications: Product dimensions 150 x 60 x 55 mm.\n",
+  "image_url": null,
+  "report": {
+   "schema_version": "1.0",
+   "pack": "monocular_optics",
+   "claims": {
+    "magnification": {
+     "found_in": "title",
+     "quote": "12x50",
+     "confidence": 1,
+     "value": 12
+    },
+    "objective_mm": {
+     "found_in": "title",
+     "quote": "12x50",
+     "confidence": 1,
+     "value": 50
+    },
+    "body_dimensions": {
+     "found_in": "spec table",
+     "quote": "150 x 60 x 55 mm",
+     "confidence": 1,
+     "length_mm": 150,
+     "width_mm": 60,
+     "height_mm": 55,
+     "kind": "product"
+    },
+    "fine_print_magnification": null,
+    "fine_print_objective_mm": null
+   },
+   "checks": [
+    {
+     "check_id": "objective_fits_body",
+     "title": "Objective lens against body width",
+     "status": "pass",
+     "summary": "The claimed 50 mm objective lens fits within the listed body width of 60 mm.",
+     "inputs": [
+      {
+       "name": "Claimed objective diameter",
+       "value": 50,
+       "unit": "mm",
+       "origin": "claim",
+       "found_in": "title",
+       "confidence": 1
+      },
+      {
+       "name": "Listed dimensions",
+       "value": "150 × 60 × 55 mm",
+       "unit": "",
+       "origin": "claim",
+       "found_in": "spec table",
+       "confidence": 1
+      },
+      {
+       "name": "Rounding tolerance",
+       "value": 3,
+       "unit": "%",
+       "origin": "assumption",
+       "found_in": null,
+       "confidence": null
+      }
+     ],
+     "formula": "D_objective ≤ body width × (1 + rounding tolerance)",
+     "steps": [
+      {
+       "label": "Body width available to the lens",
+       "formula": "W",
+       "substitution": "the second-longest listed side",
+       "result": 60,
+       "unit": "mm",
+       "text": "Body width available to the lens: 60 mm (the second-longest listed side)"
+      },
+      {
+       "label": "Body width with the rounding tolerance",
+       "formula": "W_max = W × (1 + tolerance)",
+       "substitution": "60 mm × 1.03",
+       "result": 61.800000000000004,
+       "unit": "mm",
+       "text": "Body width with the rounding tolerance: 60 mm × 1.03 = 61.8 mm"
+      },
+      {
+       "label": "Comparison",
+       "formula": "value ≤ limit",
+       "substitution": "50 mm ≤ 61.8 mm",
+       "result": 0.8090614886731391,
+       "unit": "× the limit",
+       "text": "Comparison: 50 mm ≤ 61.8 mm (0.8091× the limit)"
+      }
+     ],
+     "constants": [],
+     "assumptions": [
+      "The objective lens faces along the longest side of the body, so it has to fit within the other two sides. The second-longest listed side is used as the width, which is the most lenient.",
+      "Listed dimensions are treated as rounded: a lens up to 3% wider than the listed width passes. This tolerance is a team choice, not a physical constant.",
+      "The listed dimensions are taken to describe the monocular itself, as the listing states. Because listed dimensions can be wrong, exceeding this bound is reported as a flag, not a hard result."
+     ],
+     "notes": [],
+     "not_assessed_reason": null
+    },
+    {
+     "check_id": "fine_print_consistency",
+     "title": "Headline figures against the fine print",
+     "status": "not_assessed",
+     "summary": "Not assessed. The listing states no separate 'actual' magnification or objective size to compare with the headline.",
+     "inputs": [],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "The listing states no separate 'actual' magnification or objective size to compare with the headline."
+    }
+   ],
+   "verdict": "No red flags",
+   "verdict_reason": "The claims that could be tested are physically plausible (Objective lens against body width). This does not confirm that the claims are true.",
+   "routing": "no action needed",
+   "routing_reason": "The claims that could be tested are plausible and were read with high confidence.",
+   "assumptions": [
+    "The objective lens faces along the longest side of the body, so it has to fit within the other two sides. The second-longest listed side is used as the width, which is the most lenient.",
+    "Listed dimensions are treated as rounded: a lens up to 3% wider than the listed width passes. This tolerance is a team choice, not a physical constant.",
+    "The listed dimensions are taken to describe the monocular itself, as the listing states. Because listed dimensions can be wrong, exceeding this bound is reported as a flag, not a hard result."
+   ],
+   "not_assessed": [
+    "Headline figures against the fine print: The listing states no separate 'actual' magnification or objective size to compare with the headline."
+   ]
+  },
+  "error": null
+ },
+ {
+  "id": "pack_monocular_optics_missing",
+  "source": "text",
+  "listing_text": "80x100 High Power Monocular Telescope. Waterproof, with phone holder.\n",
+  "image_url": null,
+  "report": {
+   "schema_version": "1.0",
+   "pack": "monocular_optics",
+   "claims": {
+    "magnification": {
+     "found_in": "title",
+     "quote": "80x100",
+     "confidence": 1,
+     "value": 80
+    },
+    "objective_mm": {
+     "found_in": "title",
+     "quote": "80x100",
+     "confidence": 1,
+     "value": 100
+    },
+    "body_dimensions": null,
+    "fine_print_magnification": null,
+    "fine_print_objective_mm": null
+   },
+   "checks": [
+    {
+     "check_id": "objective_fits_body",
+     "title": "Objective lens against body width",
+     "status": "not_assessed",
+     "summary": "Not assessed. The listing does not state the dimensions of the monocular.",
+     "inputs": [
+      {
+       "name": "Claimed objective diameter",
+       "value": 100,
+       "unit": "mm",
+       "origin": "claim",
+       "found_in": "title",
+       "confidence": 1
+      }
+     ],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "The listing does not state the dimensions of the monocular."
+    },
+    {
+     "check_id": "fine_print_consistency",
+     "title": "Headline figures against the fine print",
+     "status": "not_assessed",
+     "summary": "Not assessed. The listing states no separate 'actual' magnification or objective size to compare with the headline.",
+     "inputs": [],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "The listing states no separate 'actual' magnification or objective size to compare with the headline."
+    }
+   ],
+   "verdict": "No checkable claim",
+   "verdict_reason": "The listing states nothing numeric or testable, so no check could run.",
+   "routing": "needs human review",
+   "routing_reason": "The listing states a numeric claim, but the data needed to test it is missing or unusable.",
+   "assumptions": [],
+   "not_assessed": [
+    "Objective lens against body width: The listing does not state the dimensions of the monocular.",
+    "Headline figures against the fine print: The listing states no separate 'actual' magnification or objective size to compare with the headline."
+   ]
+  },
+  "error": null
+ },
+ {
+  "id": "pack_projector_resolution_flag",
+  "source": "text",
+  "listing_text": "4K Home Theater Projector, Portable Movie Projector.\nSpecifications: Native resolution 1280 x 720. Supports 4K input.\n",
+  "image_url": null,
+  "report": {
+   "schema_version": "1.0",
+   "pack": "projector_resolution",
+   "claims": {
+    "claimed_resolution": {
+     "found_in": "title",
+     "quote": "4K",
+     "confidence": 1,
+     "value": "4k"
+    },
+    "native_pixels": {
+     "found_in": "spec table",
+     "quote": "1280 x 720",
+     "confidence": 1,
+     "width_px": 1280,
+     "height_px": 720
+    },
+    "native_name": null
+   },
+   "checks": [
+    {
+     "check_id": "native_resolution",
+     "title": "Headline resolution against native resolution",
+     "status": "flag",
+     "summary": "The headline names 4K (8,294,400 pixels) and the listing gives a native resolution of 1,280 × 720 (921,600 pixels). The headline figure is 9× the native pixel count. A projector can accept an input signal at a higher resolution than it displays, so this is reported as a flag rather than a hard result.",
+     "inputs": [
+      {
+       "name": "Headline resolution",
+       "value": "4K",
+       "unit": "",
+       "origin": "claim",
+       "found_in": "title",
+       "confidence": 1
+      },
+      {
+       "name": "Width of 4K in pixels",
+       "value": 3840,
+       "unit": "px",
+       "origin": "constant",
+       "found_in": null,
+       "confidence": null
+      },
+      {
+       "name": "Height of 4K in pixels",
+       "value": 2160,
+       "unit": "px",
+       "origin": "constant",
+       "found_in": null,
+       "confidence": null
+      },
+      {
+       "name": "Native width",
+       "value": 1280,
+       "unit": "px",
+       "origin": "claim",
+       "found_in": "spec table",
+       "confidence": 1
+      },
+      {
+       "name": "Native height",
+       "value": 720,
+       "unit": "px",
+       "origin": "claim",
+       "found_in": "spec table",
+       "confidence": 1
+      }
+     ],
+     "formula": "ratio = headline pixels ÷ native pixels, where pixels = width × height",
+     "steps": [
+      {
+       "label": "Pixels in the headline resolution",
+       "formula": "P_headline = width × height",
+       "substitution": "3,840 × 2,160",
+       "result": 8294400,
+       "unit": "pixels",
+       "text": "Pixels in the headline resolution: 3,840 × 2,160 = 8,294,400 pixels"
+      },
+      {
+       "label": "Pixels in the native resolution",
+       "formula": "P_native = width × height",
+       "substitution": "1,280 × 720",
+       "result": 921600,
+       "unit": "pixels",
+       "text": "Pixels in the native resolution: 1,280 × 720 = 921,600 pixels"
+      },
+      {
+       "label": "Headline pixels divided by native pixels",
+       "formula": "ratio = P_headline ÷ P_native",
+       "substitution": "8,294,400 ÷ 921,600",
+       "result": 9,
+       "unit": "(> 1)",
+       "text": "Headline pixels divided by native pixels: 8,294,400 ÷ 921,600 = 9 (> 1)"
+      }
+     ],
+     "constants": [
+      {
+       "key": "resolution_4k_width_px",
+       "value": 3840,
+       "unit": "px",
+       "description": "Width of 4K in pixels",
+       "source_title": "Ultra-high-definition television",
+       "source_publisher": "Wikipedia (revision 1384353681)",
+       "source_url": "https://en.wikipedia.org/wiki/Ultra-high-definition_television",
+       "locator": "Technical details, Resolution section",
+       "quote": "UHDTV-1 is 3840 pixels wide by 2160 pixels tall (8.3 megapixels)",
+       "accessed": "2026-11-14",
+       "note": "A definition of the name, not a physical ceiling.",
+       "hard_bound": false
+      },
+      {
+       "key": "resolution_4k_height_px",
+       "value": 2160,
+       "unit": "px",
+       "description": "Height of 4K in pixels",
+       "source_title": "Ultra-high-definition television",
+       "source_publisher": "Wikipedia (revision 1384353681)",
+       "source_url": "https://en.wikipedia.org/wiki/Ultra-high-definition_television",
+       "locator": "Technical details, Resolution section",
+       "quote": "UHDTV-1 is 3840 pixels wide by 2160 pixels tall (8.3 megapixels)",
+       "accessed": "2026-11-14",
+       "note": "A definition of the name, not a physical ceiling.",
+       "hard_bound": false
+      }
+     ],
+     "assumptions": [],
+     "notes": [
+      "A projector can accept an input signal at a higher resolution than it displays, so this is reported as a flag rather than a hard result."
+     ],
+     "not_assessed_reason": null
+    }
+   ],
+   "verdict": "Flag",
+   "verdict_reason": "The headline names 4K (8,294,400 pixels) and the listing gives a native resolution of 1,280 × 720 (921,600 pixels). The headline figure is 9× the native pixel count. A projector can accept an input signal at a higher resolution than it displays, so this is reported as a flag rather than a hard result.",
+   "routing": "needs human review",
+   "routing_reason": "A contradiction or unusual claim needs a person's judgment.",
+   "assumptions": [],
+   "not_assessed": []
+  },
+  "error": null
+ },
+ {
+  "id": "pack_projector_resolution_honest",
+  "source": "text",
+  "listing_text": "1080p Home Theater Projector.\nSpecifications: Native resolution 1920 x 1080.\n",
+  "image_url": null,
+  "report": {
+   "schema_version": "1.0",
+   "pack": "projector_resolution",
+   "claims": {
+    "claimed_resolution": {
+     "found_in": "title",
+     "quote": "1080P",
+     "confidence": 1,
+     "value": "1080p"
+    },
+    "native_pixels": {
+     "found_in": "spec table",
+     "quote": "1920 x 1080",
+     "confidence": 1,
+     "width_px": 1920,
+     "height_px": 1080
+    },
+    "native_name": null
+   },
+   "checks": [
+    {
+     "check_id": "native_resolution",
+     "title": "Headline resolution against native resolution",
+     "status": "pass",
+     "summary": "The headline names 1080p (2,073,600 pixels), which is not above the stated native resolution of 1,920 × 1,080 (2,073,600 pixels).",
+     "inputs": [
+      {
+       "name": "Headline resolution",
+       "value": "1080p",
+       "unit": "",
+       "origin": "claim",
+       "found_in": "title",
+       "confidence": 1
+      },
+      {
+       "name": "Width of 1080p in pixels",
+       "value": 1920,
+       "unit": "px",
+       "origin": "constant",
+       "found_in": null,
+       "confidence": null
+      },
+      {
+       "name": "Height of 1080p in pixels",
+       "value": 1080,
+       "unit": "px",
+       "origin": "constant",
+       "found_in": null,
+       "confidence": null
+      },
+      {
+       "name": "Native width",
+       "value": 1920,
+       "unit": "px",
+       "origin": "claim",
+       "found_in": "spec table",
+       "confidence": 1
+      },
+      {
+       "name": "Native height",
+       "value": 1080,
+       "unit": "px",
+       "origin": "claim",
+       "found_in": "spec table",
+       "confidence": 1
+      }
+     ],
+     "formula": "ratio = headline pixels ÷ native pixels, where pixels = width × height",
+     "steps": [
+      {
+       "label": "Pixels in the headline resolution",
+       "formula": "P_headline = width × height",
+       "substitution": "1,920 × 1,080",
+       "result": 2073600,
+       "unit": "pixels",
+       "text": "Pixels in the headline resolution: 1,920 × 1,080 = 2,073,600 pixels"
+      },
+      {
+       "label": "Pixels in the native resolution",
+       "formula": "P_native = width × height",
+       "substitution": "1,920 × 1,080",
+       "result": 2073600,
+       "unit": "pixels",
+       "text": "Pixels in the native resolution: 1,920 × 1,080 = 2,073,600 pixels"
+      },
+      {
+       "label": "Headline pixels divided by native pixels",
+       "formula": "ratio = P_headline ÷ P_native",
+       "substitution": "2,073,600 ÷ 2,073,600",
+       "result": 1,
+       "unit": "(≤ 1)",
+       "text": "Headline pixels divided by native pixels: 2,073,600 ÷ 2,073,600 = 1 (≤ 1)"
+      }
+     ],
+     "constants": [
+      {
+       "key": "resolution_1080p_width_px",
+       "value": 1920,
+       "unit": "px",
+       "description": "Width of 1080p in pixels",
+       "source_title": "1080p",
+       "source_publisher": "Wikipedia (revision 1356574563)",
+       "source_url": "https://en.wikipedia.org/wiki/1080p",
+       "locator": "Lead section",
+       "quote": "characterized by 1,920 pixels displayed across the screen horizontally and 1,080 pixels down the screen vertically",
+       "accessed": "2026-11-14",
+       "note": "A definition of the name, not a physical ceiling.",
+       "hard_bound": false
+      },
+      {
+       "key": "resolution_1080p_height_px",
+       "value": 1080,
+       "unit": "px",
+       "description": "Height of 1080p in pixels",
+       "source_title": "1080p",
+       "source_publisher": "Wikipedia (revision 1356574563)",
+       "source_url": "https://en.wikipedia.org/wiki/1080p",
+       "locator": "Lead section",
+       "quote": "characterized by 1,920 pixels displayed across the screen horizontally and 1,080 pixels down the screen vertically",
+       "accessed": "2026-11-14",
+       "note": "A definition of the name, not a physical ceiling.",
+       "hard_bound": false
+      }
+     ],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": null
+    }
+   ],
+   "verdict": "No red flags",
+   "verdict_reason": "The claims that could be tested are physically plausible (Headline resolution against native resolution). This does not confirm that the claims are true.",
+   "routing": "no action needed",
+   "routing_reason": "The claims that could be tested are plausible and were read with high confidence.",
+   "assumptions": [],
+   "not_assessed": []
+  },
+  "error": null
+ },
+ {
+  "id": "pack_projector_resolution_missing",
+  "source": "text",
+  "listing_text": "4K Home Theater Projector, Portable Movie Projector. Bright picture, built-in speaker.\n",
+  "image_url": null,
+  "report": {
+   "schema_version": "1.0",
+   "pack": "projector_resolution",
+   "claims": {
+    "claimed_resolution": {
+     "found_in": "title",
+     "quote": "4K",
+     "confidence": 1,
+     "value": "4k"
+    },
+    "native_pixels": null,
+    "native_name": null
+   },
+   "checks": [
+    {
+     "check_id": "native_resolution",
+     "title": "Headline resolution against native resolution",
+     "status": "not_assessed",
+     "summary": "Not assessed. The listing does not state a native resolution.",
+     "inputs": [
+      {
+       "name": "Headline resolution",
+       "value": "4K",
+       "unit": "",
+       "origin": "claim",
+       "found_in": "title",
+       "confidence": 1
+      }
+     ],
+     "formula": null,
+     "steps": [],
+     "constants": [],
+     "assumptions": [],
+     "notes": [],
+     "not_assessed_reason": "The listing does not state a native resolution."
+    }
+   ],
+   "verdict": "No checkable claim",
+   "verdict_reason": "The listing states nothing numeric or testable, so no check could run.",
+   "routing": "needs human review",
+   "routing_reason": "The listing states a numeric claim, but the data needed to test it is missing or unusable.",
+   "assumptions": [],
+   "not_assessed": [
+    "Headline resolution against native resolution: The listing does not state a native resolution."
+   ]
+  },
+  "error": null
  }
 ]

@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Download, LoaderCircle } from "lucide-react";
-import { describeProduct } from "@/lib/describe";
+import { describeReport } from "@/lib/describe";
 import type { EvidenceReport, Listing } from "@/lib/types";
 import { RoutingLabel, VerdictBadge } from "./VerdictBadge";
 
@@ -54,7 +54,7 @@ export function VerdictCard({ listing }: { listing: Listing }) {
         >
           {report ? (
             <>
-              <p className="text-sm text-muted">{describeProduct(report.claims)}</p>
+              <p className="text-sm text-muted">{describeReport(report)}</p>
               <div>
                 <VerdictBadge verdict={report.verdict} size="lg" />
               </div>

@@ -4,6 +4,14 @@
     fixtures/fixture_NN.png | .jpg | .jpeg | .webp   a listing screenshot, seller names blurred
     fixtures/expected/fixture_NN.json           the report the checks give for it
 
+The nine fixture_NN listings are batteries. Listings for the check packs (projector,
+magnifying glass, monocular) use the same layout under another name:
+
+    fixtures/pack_<pack>_<case>.txt             a listing as pasted text
+    fixtures/expected/pack_<pack>_<case>.json   the pack's report for it
+
+Only packs in packs.registry are listed.
+
 A listing captured in two screenshots is saved as fixture_NNa.png and fixture_NNb.png.
 The two are one listing: they are stitched top to bottom into one image before the
 run, because run_listing takes one image.
@@ -21,12 +29,13 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
-from claimcheck.models import EvidenceReport
+from claimcheck.models import AnyReport, EvidenceReport, PackEvidenceReport
+from packs.registry import PACKS
 
 FIXTURES_ENV = "CARNOT_FIXTURES_DIR"
 IMAGE_SUFFIXES = (".png", ".jpg", ".jpeg", ".webp")
 MEDIA_TYPES = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp"}
-_ID = re.compile(r"^fixture_\d{2}$")
+_ID = re.compile(r"^(?:fixture_\d{2}|pack_(?:" + "|".join(map(re.escape, PACKS)) + r")_[a-z0-9]+)$")
 _PART = re.compile(r"^(fixture_\d{2})[a-z]$")
 # run_listing refuses images over 3.5 MB; a stitched image above this is re-encoded.
 _MAX_STITCHED_BYTES = 3_400_000
@@ -85,10 +94,13 @@ class Fixture:
     def text(self) -> str | None:
         return self.text_path.read_text(encoding="utf-8") if self.text_path else None
 
-    def expected_report(self) -> EvidenceReport | None:
+    def expected_report(self) -> AnyReport | None:
+        """The stored report: a pack's report when the file names a pack, otherwise a battery report."""
         if self.expected_path is None:
             return None
-        return EvidenceReport.model_validate(json.loads(self.expected_path.read_text(encoding="utf-8")))
+        data = json.loads(self.expected_path.read_text(encoding="utf-8"))
+        model = PackEvidenceReport if isinstance(data, dict) and "pack" in data else EvidenceReport
+        return model.model_validate(data)
 
 
 def is_fixture_id(value: str) -> bool:
@@ -111,7 +123,7 @@ def list_fixtures() -> list[Fixture]:
                 ids.add(part.group(1))
         expected = root / "expected"
         if expected.is_dir():
-            ids.update(p.stem for p in expected.glob("fixture_*.json") if is_fixture_id(p.stem))
+            ids.update(p.stem for p in expected.glob("*.json") if is_fixture_id(p.stem))
     return [get_fixture(fixture_id) for fixture_id in sorted(ids)]
 
 

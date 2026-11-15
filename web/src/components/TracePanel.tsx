@@ -45,8 +45,20 @@ const KIND_STYLE: Record<string, string> = {
   error: "bg-impossible/15 text-impossible",
 };
 
-// The contract's six check ids in their fixed order, used only to sort the chips.
-const CHECK_ORDER = ["label_consistency", "form_factor_bound", "dimension_bound", "weight_bound", "label_contradiction", "chemistry_mismatch"];
+// The contract's six battery check ids in their fixed order, then the check packs'
+// (projector, magnifying glass, monocular). Used only to sort the chips.
+const CHECK_ORDER = [
+  "label_consistency",
+  "form_factor_bound",
+  "dimension_bound",
+  "weight_bound",
+  "label_contradiction",
+  "chemistry_mismatch",
+  "native_resolution",
+  "lens_diameter",
+  "objective_fits_body",
+  "fine_print_consistency",
+];
 
 const STATUS_LABEL: Record<CheckStatus, string> = {
   pass: "Pass",

@@ -2,7 +2,7 @@
 
 import { LoaderCircle, Play } from "lucide-react";
 import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { describeProduct } from "@/lib/describe";
+import { describeReport } from "@/lib/describe";
 import { ROUTINGS, type BatchItem, type Counts, type Routing } from "@/lib/types";
 import { RoutingLabel, VerdictBadge } from "./VerdictBadge";
 
@@ -142,7 +142,7 @@ export function BatchView({
                   <tr key={item.id} data-testid="batch-row" className="border-b border-line-soft last:border-b-0">
                     <td className="px-4 py-2.5">
                       <button type="button" onClick={() => onOpen(item.id)} className="text-left text-text hover:text-accent">
-                        {item.report ? describeProduct(item.report.claims) : "Listing not checked"}
+                        {item.report ? describeReport(item.report) : "Listing not checked"}
                       </button>
                     </td>
                     <td className="px-4 py-2.5">

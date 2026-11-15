@@ -2,7 +2,8 @@ import type { BatchItem } from "@/lib/types";
 import bundled from "./samples.json";
 
 /**
- * The nine fixture listings with their expected reports, copied from ../fixtures by
+ * The nine battery fixtures and the nine check-pack fixtures (projector, magnifying
+ * glass, monocular) with their expected reports, copied from ../fixtures by
  * `npm run sync-samples`. Shown, labelled as sample data, when the API is unreachable.
  */
 export const SAMPLES = bundled as unknown as BatchItem[];

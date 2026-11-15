@@ -71,13 +71,13 @@ describe("Console with the API unreachable", () => {
     }));
     render(<Console />);
 
-    await waitFor(() => expect(screen.getAllByTestId("feed-item")).toHaveLength(9));
+    await waitFor(() => expect(screen.getAllByTestId("feed-item")).toHaveLength(SAMPLES.length));
     expect(screen.getByTestId("source-pill")).toHaveTextContent("Sample data: the API is offline");
     expect(screen.getByTestId("sample-label")).toHaveTextContent("Sample data, API offline");
-    expect(metric("listings_checked")).toHaveTextContent("9");
-    expect(metric("impossible_claims")).toHaveTextContent("1");
-    expect(metric("routed_to_human_review")).toHaveTextContent("2");
-    expect(metric("no_action_needed")).toHaveTextContent("6");
+    expect(metric("listings_checked")).toHaveTextContent("18");
+    expect(metric("impossible_claims")).toHaveTextContent("2");
+    expect(metric("routed_to_human_review")).toHaveTextContent("7");
+    expect(metric("no_action_needed")).toHaveTextContent("9");
 
     // the first sample is open: verdict card and math
     expect(within(screen.getByTestId("verdict-card")).getByTestId("verdict-badge")).toHaveTextContent("Impossible");
@@ -85,12 +85,12 @@ describe("Console with the API unreachable", () => {
     expect(screen.getAllByTestId("check")).toHaveLength(6);
   });
 
-  it("renders each of the nine fixtures when it is picked from the feed", async () => {
+  it("renders each of the bundled fixtures when it is picked from the feed", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => {
       throw new TypeError("Failed to fetch");
     }));
     render(<Console />);
-    await waitFor(() => expect(screen.getAllByTestId("feed-item")).toHaveLength(9));
+    await waitFor(() => expect(screen.getAllByTestId("feed-item")).toHaveLength(SAMPLES.length));
 
     for (const [index, sample] of SAMPLES.entries()) {
       fireEvent.click(screen.getAllByTestId("feed-item")[index]);
@@ -98,9 +98,10 @@ describe("Console with the API unreachable", () => {
       expect(within(card).getByTestId("verdict-badge")).toHaveTextContent(new RegExp(`^${sample.report!.verdict}$`));
       expect(within(card).getByTestId("routing-label")).toHaveTextContent(sample.report!.routing);
       expect(within(card).getByTestId("listing-text")).toHaveTextContent(sample.listing_text!.split("\n")[0]);
-      expect(screen.getAllByTestId("check")).toHaveLength(6);
+      // six for a battery listing, one or two for a projector, magnifying glass or monocular
+      expect(screen.getAllByTestId("check")).toHaveLength(sample.report!.checks.length);
       const notAssessed = sample.report!.checks.filter((c) => c.status === "not_assessed").length;
-      expect(screen.getAllByText("Not assessed", { selector: "[data-testid=check-status]" })).toHaveLength(notAssessed);
+      expect(screen.queryAllByText("Not assessed", { selector: "[data-testid=check-status]" })).toHaveLength(notAssessed);
     }
   });
 
@@ -109,7 +110,7 @@ describe("Console with the API unreachable", () => {
       throw new TypeError("Failed to fetch");
     }));
     render(<Console />);
-    await waitFor(() => expect(screen.getAllByTestId("feed-item")).toHaveLength(9));
+    await waitFor(() => expect(screen.getAllByTestId("feed-item")).toHaveLength(SAMPLES.length));
 
     fireEvent.change(screen.getByLabelText(/Paste the listing text/), { target: { value: "Some other battery 99999mAh" } });
     fireEvent.click(screen.getByRole("button", { name: /Check listing/ }));
@@ -133,16 +134,16 @@ describe("Console in sample-data mode", () => {
     expect(screen.getByTestId("sample-label")).toHaveTextContent(/^Sample data$/);
     expect(screen.getByTestId("source-pill")).toHaveTextContent("Sample data: no model is configured");
     expect(calls).toEqual(["GET /api/dashboard-stats", "POST /api/batch", "GET /api/dashboard-stats"]);
-    expect(screen.getAllByTestId("feed-item")).toHaveLength(9);
+    expect(screen.getAllByTestId("feed-item")).toHaveLength(SAMPLES.length);
   });
 
   it("shows the batch summary table", async () => {
     fakeApi("replay", statsFromCounts(countItems(SAMPLES), "replay", null));
     render(<Console />);
-    await waitFor(() => expect(screen.getAllByTestId("feed-item")).toHaveLength(9));
+    await waitFor(() => expect(screen.getAllByTestId("feed-item")).toHaveLength(SAMPLES.length));
 
     fireEvent.click(screen.getByRole("tab", { name: "Batch" }));
-    expect(screen.getAllByTestId("batch-row")).toHaveLength(9);
+    expect(screen.getAllByTestId("batch-row")).toHaveLength(SAMPLES.length);
     expect(screen.getByTestId("batch-sample-label")).toHaveTextContent("Sample data");
   });
 });
@@ -215,9 +216,9 @@ describe("Console with a live model", () => {
     const calls = fakeApi("live", stats, undefined, true);
     render(<Console />);
 
-    await waitFor(() => expect(screen.getAllByTestId("feed-item")).toHaveLength(9));
+    await waitFor(() => expect(screen.getAllByTestId("feed-item")).toHaveLength(SAMPLES.length));
     expect(calls).toEqual(["GET /api/dashboard-stats", "GET /api/batch"]); // nothing was run
-    expect(metric("listings_checked")).toHaveTextContent("9");
+    expect(metric("listings_checked")).toHaveTextContent("18");
     expect(screen.getByTestId("prerun-label")).toHaveTextContent("Pre-run");
     expect(screen.getByTestId("metrics-caption")).toHaveTextContent("Counted from a pre-run batch");
     expect(screen.queryByTestId("sample-label")).toBeNull();
@@ -226,7 +227,7 @@ describe("Console with a live model", () => {
     const label = screen.getByTestId("batch-run-label");
     expect(label).toHaveTextContent("Pre-run batch");
     expect(label).toHaveTextContent(new Date("2026-11-14T12:00:00+00:00").toLocaleString());
-    expect(screen.getAllByTestId("batch-row")).toHaveLength(9);
+    expect(screen.getAllByTestId("batch-row")).toHaveLength(SAMPLES.length);
 
     // running it again replaces the pre-run label
     fireEvent.click(screen.getByRole("button", { name: "Run batch" }));
@@ -241,8 +242,8 @@ describe("Console with a live model", () => {
 
     fireEvent.click(screen.getByRole("tab", { name: "Batch" }));
     fireEvent.click(screen.getByRole("button", { name: "Run batch" }));
-    await waitFor(() => expect(screen.getAllByTestId("batch-row")).toHaveLength(9));
-    expect(metric("listings_checked")).toHaveTextContent("9");
+    await waitFor(() => expect(screen.getAllByTestId("batch-row")).toHaveLength(SAMPLES.length));
+    expect(metric("listings_checked")).toHaveTextContent("18");
     expect(screen.queryByTestId("batch-sample-label")).toBeNull();
   });
 });

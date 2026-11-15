@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0",
+  "pack": "magnifier_lens",
+  "claims": {
+    "magnification": {
+      "found_in": "title",
+      "quote": "30X",
+      "confidence": 1.0,
+      "value": 30.0
+    },
+    "lens_diameter_mm": null,
+    "lens_type": null
+  },
+  "checks": [
+    {
+      "check_id": "lens_diameter",
+      "title": "Lens diameter against claimed magnification",
+      "status": "not_assessed",
+      "summary": "Not assessed. The listing does not state the diameter of the lens.",
+      "inputs": [
+        {
+          "name": "Claimed magnification",
+          "value": 30.0,
+          "unit": "×",
+          "origin": "claim",
+          "found_in": "title",
+          "confidence": 1.0
+        }
+      ],
+      "formula": null,
+      "steps": [],
+      "constants": [],
+      "assumptions": [],
+      "notes": [],
+      "not_assessed_reason": "The listing does not state the diameter of the lens."
+    }
+  ],
+  "verdict": "No checkable claim",
+  "verdict_reason": "The listing states nothing numeric or testable, so no check could run.",
+  "routing": "needs human review",
+  "routing_reason": "The listing states a numeric claim, but the data needed to test it is missing or unusable.",
+  "assumptions": [],
+  "not_assessed": [
+    "Lens diameter against claimed magnification: The listing does not state the diameter of the lens."
+  ]
+}

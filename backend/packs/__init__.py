@@ -12,5 +12,7 @@ Each pack is a folder with the same three files:
 common.py holds what the packs share: result helpers, PackReport, and the verdict and
 routing rules, which follow claimcheck/verdict.py.
 
-Packs: power_budget.
+registry.py lists the packs that are wired into the agent, the API and the console.
+
+Packs: power_budget, projector_resolution, magnifier_lens, monocular_optics.
 """

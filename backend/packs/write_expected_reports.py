@@ -1,4 +1,4 @@
-"""Regenerate fixtures/expected/pack_<id>.json from the pack code.
+"""Regenerate fixtures/expected/pack_<id>.json and fixtures/pack_<id>.txt from the pack code.
 
 Run from the backend folder:  python packs/write_expected_reports.py
 The pack tests fail if these files drift from what the code produces.
@@ -28,6 +28,8 @@ def main() -> None:
         report = json.loads(fixture.evaluate(fixture.claims).model_dump_json())
         text = json.dumps(report, indent=2, ensure_ascii=False) + "\n"
         expected_path(fixture.id).write_text(text, encoding="utf-8", newline="\n")
+        listing = EXPECTED_DIR.parent / f"pack_{fixture.id}.txt"
+        listing.write_text(fixture.listing_text + "\n", encoding="utf-8", newline="\n")
         print(f"{expected_path(fixture.id).name}: {report['verdict']} | {report['routing']}")
 
 
