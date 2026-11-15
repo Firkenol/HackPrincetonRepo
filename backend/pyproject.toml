@@ -1,10 +1,10 @@
 [project]
-name = "claimcheck"
+name = "offspec"
 version = "0.1.0"
 description = "Checks whether a battery listing's own claims are physically possible and shows the math."
 requires-python = ">=3.11"
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
-testpaths = ["tests", "agent/tests", "api/tests"]
+testpaths = ["tests", "agent/tests", "api/tests", "packs"]
 markers = ["live: calls a real model; skipped unless MODEL_PROVIDER and MODEL_ID are set"]

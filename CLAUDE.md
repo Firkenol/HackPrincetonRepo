@@ -1,4 +1,4 @@
-# ClaimCheck: instructions for Claude
+# OffSpec: instructions for Claude
 
 ## Every session
 

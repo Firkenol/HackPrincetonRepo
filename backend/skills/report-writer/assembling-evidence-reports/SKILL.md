@@ -7,7 +7,8 @@ description: Use when asked to assemble the evidence report after the checks hav
 
 Call `assemble_report` once. It takes no arguments. It builds the whole report in
 Python from the recorded claims and the check results: the claims and where each was
-found, all six checks with their working, the verdict, the routing, the assumptions
+found, every check for the listing's category with its working (six for a battery
+listing, one or two for a projector, magnifying glass or monocular), the verdict, the routing, the assumptions
 and the list of checks that were not assessed.
 
 You add nothing to the report. Every number in it comes from a tool.

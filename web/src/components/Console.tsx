@@ -1,6 +1,6 @@
 "use client";
 
-import { MotionConfig } from "framer-motion";
+import { MotionConfig, motion } from "framer-motion";
 import { FlaskConical, Radio, WifiOff } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -14,6 +14,8 @@ import {
   type ListingInput,
 } from "@/lib/api";
 import { countItems, statsFromCounts } from "@/lib/counts";
+import { SETTLE } from "@/lib/motion";
+import { scrollToElement } from "@/lib/scroll";
 import type { BatchItem, Counts, DashboardStats, DataSource, Listing } from "@/lib/types";
 import { SAMPLES, matchSample } from "@/samples";
 import { AuditFeed } from "./AuditFeed";
@@ -22,6 +24,7 @@ import { Intake } from "./Intake";
 import { MathModule } from "./MathModule";
 import { MetricsBar, formatRanAt, sampleLabel } from "./MetricsBar";
 import { TracePanel } from "./TracePanel";
+import { FeedSkeleton, MathSkeleton, MetricsSkeleton } from "./states/Skeletons";
 import { VerdictCard } from "./VerdictCard";
 
 const MSG_OFFLINE_CHECK =
@@ -57,6 +60,13 @@ export function Console() {
   // When the batch on screen ran, and whether that was before this page was opened.
   const [batchRun, setBatchRun] = useState<{ ranAt: string | null; preRun: boolean } | null>(null);
   const checkNumber = useRef(0);
+  const cardAnchor = useRef<HTMLDivElement>(null);
+
+  /** After the next paint, bring the verdict card to the top of the window. */
+  const showCard = useCallback((onlyIfAway: boolean) => {
+    if (typeof requestAnimationFrame !== "function") return;
+    requestAnimationFrame(() => scrollToElement(cardAnchor.current, onlyIfAway));
+  }, []);
 
   /** Replace the batch rows in the feed, keeping listings the person checked themselves on top. */
   const showBatch = useCallback((items: BatchItem[], counts: Counts, sample: boolean) => {
@@ -128,6 +138,8 @@ export function Console() {
       setListings((current) => [fresh, ...current]);
       setSelectedKey(key);
       setView("listings");
+      // The card and the trace under it are where the run plays out, so go there.
+      showCard(false);
 
       const onFrame = (frame: Frame) => {
         if (frame.kind === "meta") {
@@ -159,7 +171,7 @@ export function Console() {
         update(key, (l) => ({ ...l, running: false }));
       }
     },
-    [update],
+    [update, showCard],
   );
 
   const selected = listings.find((l) => l.key === selectedKey) ?? null;
@@ -170,9 +182,10 @@ export function Console() {
   return (
     <MotionConfig reducedMotion="user">
       <div className="flex min-h-screen flex-col">
-        <header className="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-panel px-5 py-3">
+        <header className="relative flex flex-wrap items-center justify-between gap-3 border-b border-line bg-panel/80 px-6 py-4 backdrop-blur">
+          <span aria-hidden className="pointer-events-none absolute inset-x-0 -bottom-px h-px bg-gradient-to-r from-accent/70 via-accent/10 to-transparent" />
           <div className="flex items-baseline gap-3">
-            <h1 className="text-xl font-semibold tracking-tight text-text">Carnot</h1>
+            <h1 className="text-xl font-semibold tracking-tight text-text">OffSpec</h1>
             <p className="text-sm text-muted">Checks product claims against physics and shows the math</p>
           </div>
           {pill ? (
@@ -184,24 +197,33 @@ export function Console() {
           )}
         </header>
 
-        <MetricsBar stats={stats} source={source ?? "live"} preRun={Boolean(batchRun?.preRun)} />
+        {stats === null && source === null ? (
+          <MetricsSkeleton />
+        ) : (
+          <MetricsBar stats={stats} source={source ?? "live"} preRun={Boolean(batchRun?.preRun)} />
+        )}
 
         <div className="grid flex-1 lg:grid-cols-[19rem_1fr]">
-          <aside className="max-h-72 border-b border-line bg-panel lg:sticky lg:top-0 lg:h-screen lg:max-h-screen lg:self-start lg:border-b-0 lg:border-r">
+          <aside className="max-h-72 border-b border-line bg-panel/80 backdrop-blur lg:sticky lg:top-0 lg:h-screen lg:max-h-screen lg:self-start lg:border-b-0 lg:border-r">
             <div className="flex h-full max-h-72 flex-col lg:max-h-screen">
-              <AuditFeed
-                listings={listings}
-                selectedKey={selectedKey}
-                onSelect={(key) => {
-                  setSelectedKey(key);
-                  setView("listings");
-                }}
-              />
+              {listings.length === 0 && (busy || batchRunning) ? (
+                <FeedSkeleton />
+              ) : (
+                <AuditFeed
+                  listings={listings}
+                  selectedKey={selectedKey}
+                  onSelect={(key) => {
+                    setSelectedKey(key);
+                    setView("listings");
+                    showCard(true);
+                  }}
+                />
+              )}
             </div>
           </aside>
 
-          <main className="min-w-0 space-y-5 p-5">
-            <div role="tablist" aria-label="View" className="inline-flex rounded-md border border-line bg-panel p-0.5 text-sm">
+          <main className="min-w-0 space-y-6 p-5 lg:p-6">
+            <div role="tablist" aria-label="View" className="inline-flex rounded-lg border border-line bg-panel p-0.5 text-sm shadow-[inset_0_1px_2px_rgb(0_0_0/0.35)]">
               {(["listings", "batch"] as const).map((tab) => (
                 <button
                   key={tab}
@@ -209,9 +231,18 @@ export function Console() {
                   role="tab"
                   aria-selected={view === tab}
                   onClick={() => setView(tab)}
-                  className={`rounded px-3 py-1 ${view === tab ? "bg-raised text-text" : "text-muted hover:text-text"}`}
+                  className={`relative rounded-md px-3.5 py-1 transition-colors ${view === tab ? "text-text" : "text-muted hover:text-text"}`}
                 >
-                  {tab === "listings" ? "Listing" : "Batch"}
+                  {/* One pill for both tabs: it slides to the one that is picked. */}
+                  {view === tab && (
+                    <motion.span
+                      layoutId="view-tab"
+                      aria-hidden
+                      transition={SETTLE}
+                      className="absolute inset-0 rounded-md bg-raised shadow-[inset_0_1px_0_rgb(255_255_255/0.07),0_1px_2px_rgb(0_0_0/0.4)]"
+                    />
+                  )}
+                  <span className="relative">{tab === "listings" ? "Listing" : "Batch"}</span>
                 </button>
               ))}
             </div>
@@ -234,6 +265,7 @@ export function Console() {
                 onOpen={(id) => {
                   setSelectedKey(id);
                   setView("listings");
+                  showCard(true);
                 }}
               />
             ) : (
@@ -246,20 +278,23 @@ export function Console() {
 
                 {selected ? (
                   <>
-                    <VerdictCard listing={selected} />
-                    <div className="grid items-start gap-5 xl:grid-cols-[1fr_24rem]">
-                      {selected.report ? (
-                        <MathModule key={selected.key} report={selected.report} />
-                      ) : (
-                        <p className="rounded-lg border border-line bg-panel px-4 py-6 text-sm text-muted">
-                          The math appears here once the checks have run.
-                        </p>
-                      )}
-                      <TracePanel events={selected.events} running={selected.running} />
+                    <div ref={cardAnchor} className="scroll-mt-4">
+                      <VerdictCard listing={selected} />
                     </div>
+                    {/* The live trace is a core part of the view: full width, directly under the verdict. */}
+                    <TracePanel events={selected.events} running={selected.running} />
+                    {selected.report ? (
+                      <MathModule key={selected.key} report={selected.report} />
+                    ) : selected.running ? (
+                      <MathSkeleton />
+                    ) : (
+                      <p className="surface px-4 py-6 text-sm text-muted">
+                        The math appears here once the checks have run.
+                      </p>
+                    )}
                   </>
                 ) : (
-                  <p className="rounded-lg border border-line bg-panel px-4 py-8 text-sm leading-6 text-muted">
+                  <p className="surface px-4 py-8 text-sm leading-6 text-muted">
                     Paste a listing or upload a screenshot to check it. Checked listings appear in the audit feed.
                   </p>
                 )}

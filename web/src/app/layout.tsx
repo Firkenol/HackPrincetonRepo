@@ -15,7 +15,7 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Carnot",
+  title: "OffSpec",
   description: "A trust and safety console that checks product claims against physics and shows the math.",
 };
 

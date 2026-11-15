@@ -8,8 +8,8 @@ Read this first. Update it before stopping. Phases are the build order in SPEC.m
 - [x] **2. deepagents agent with tools, text input from the command line.** Merged to main on 2026-11-14 (branch `phase-2-agent`). Passes with a scripted fake model; the live run on a real model is still open (see below).
 - [ ] **3. Image input.** Built and tested with the scripted model on branch `phase-3-image` (not merged). Open: live extraction from real screenshots (see below).
 - [ ] **4. Subagents, skills, evidence report.** Built and tested with the scripted model on branch `phase-4-subagents` (not merged). Open: a live run, and LangSmith showing the subagent and tool calls.
-- [ ] **5. Web UI and batch mode.** Built on branch `console` (not merged) as the Carnot console: FastAPI in `backend/api/`, Next.js in `web/`. Tested in sample data mode and with the scripted model. Open: a live run, screenshots in `fixtures/`.
-- [ ] **6. README and demo script.** `README.md` is written (setup, both servers, modes, limits). `DEMO.md` is not written.
+- [ ] **5. Web UI and batch mode.** Built on branch `console` (not merged) as the OffSpec console: FastAPI in `backend/api/`, Next.js in `web/`. Tested in sample data mode and with the scripted model. Open: a live run, screenshots in `fixtures/`.
+- [ ] **6. README and demo script.** `README.md` and `DEMO.md` are written. Open: a clean-clone run from the README alone, and step 6 of the demo needs a configured model.
 
 ## Phase 2 status (2026-11-14)
 
@@ -73,12 +73,12 @@ Open:
 
 ## Console status (2026-11-14, branch `console`, created from `phase-4-subagents`)
 
-The product is now called Carnot. The engine (`claimcheck`, `agent`, `skills`) is unchanged on this branch: no check, rule or constant was added or altered.
+The product is now called OffSpec. The engine (`claimcheck`, `agent`, `skills`) is unchanged on this branch: no check, rule or constant was added or altered.
 
 Done:
 
 - **API** (`backend/api/`): `POST /api/verify-listing` (image, text or sample id; streams the contract's events), `POST /api/batch` (every listing in `fixtures/`, reports and counts), `GET /api/dashboard-stats` (counts from the latest batch run, null before one), plus `/api/samples`, `/api/fixtures/{name}`, `/api/health`.
-- **Replay mode** when `MODEL_PROVIDER` or `MODEL_ID` is empty, or `CARNOT_REPLAY=1`: serves the reports in `fixtures/expected/`, and every response is marked (`mode`, `sample_data`, the `X-Carnot-Mode` header, a `meta` frame at the start of a stream).
+- **Replay mode** when `MODEL_PROVIDER` or `MODEL_ID` is empty, or `OFFSPEC_REPLAY=1`: serves the reports in `fixtures/expected/`, and every response is marked (`mode`, `sample_data`, the `X-OffSpec-Mode` header, a `meta` frame at the start of a stream).
 - **Fixture listing texts are files**: `fixtures/fixture_01.txt` to `fixture_09.txt`, the same text the agent tests use (a test compares them).
 - **Web console** (`web/`): metrics bar, audit feed, verdict card with the listing beside the verdict badge and routing label, "Show the math" (inputs, formula, steps, constants with sources, not-assessed reasons), paste and upload with drag and drop, live trace, JSON download, batch view with a summary table and a routing chart. Falls back to bundled sample reports when the API is unreachable, labelled.
 - Both servers were started and the console was checked in a browser in sample data mode: the nine fixtures, a pasted fixture streaming its trace, and the batch view.
@@ -94,6 +94,50 @@ Open:
 6. `readme.txt` at the repo root is the original placeholder and was left alone; `README.md` is the real one.
 7. `npm audit` reports 7 moderate advisories in the Next.js toolchain as scaffolded. Not changed, to keep the versions the scaffold chose.
 8. On Windows, `npm test` must be started from a path with an upper-case drive letter (see README).
+
+## Check packs status (2026-11-14, branch `console`, with `packs-docs` merged in, not committed)
+
+Three categories beyond batteries, approved by the owner (see the last amendment in SPEC.md and the top row of "Contract changes" in CONTRACT.md).
+
+Done:
+
+- **`packs-docs` is merged into the working tree of `console`.** The merge is not committed: the one conflict (`backend/pyproject.toml` `testpaths`) is resolved in the file, and `git status` still shows the merge in progress.
+- **Three packs** in `backend/packs/`, each with `models.py`, `constants.py`, `checks.py`: `projector_resolution` (flag at most), `magnifier_lens` (flag between 1x and 2x the limit, hard above), `monocular_optics` (objective against body width, and headline against fine print; both flags). `packs/registry.py` lists them.
+- **Contract change** (additive): `PackEvidenceReport` in `claimcheck/models.py`; `final_report.report` and `run_listing` can carry either report; `replay_pack_claims` in `pipeline.py`. The battery models, the six checks and their expected reports are unchanged.
+- **Agent**: the listing reader has one record tool per pack beside `record_claims`, and the tool it calls decides the category. The physics checker has `list_checks`, which names the checks for the recorded category, and the four pack check tools. `assemble_report` builds the pack's report. New skill `reading-optics-listings`; the checker and writer skills are updated.
+- **API**: pack fixtures (`fixtures/pack_<pack>_<case>.txt` and `expected/…json`) are listed, replayed and batched beside the nine battery fixtures.
+- **Web**: a report may carry `pack`; product descriptions for the three categories; the bundled samples are the nine battery fixtures plus nine pack fixtures.
+- **Fixtures**: three per pack (trips the rule, honest, missing data), as hand-entered claims in `packs/fixtures_data.py`, with listing text and expected reports.
+- Tests: backend 601 passed without the live tests (was 423 on this branch before the merge and the packs). Web 133 passed; `tsc`, `eslint` and `next build` are clean.
+- One live run from the command line: the projector fixture went through `record_projector_claims`, `list_checks` and `check_native_resolution` on the configured model and gave Flag, needs human review.
+
+Open, for the physics teammate:
+
+1. **Magnifier: the refractive index of 1.5 has no citation.** It is shown in every report as an assumption, not as a constant. The only source found (OpenStax) works its example with 1.55. See the TODO in `packs/magnifier_lens/constants.py`.
+2. **Magnifier: the 2x margin before a hard result is a team choice.** It covers glass up to index 2.0. Confirm it also covers the M = 250/f + 1 convention and thick lenses.
+3. **Magnifier: the "no wider than 2 x f" rule is a derivation** (lens maker's equation plus geometry), not a cited value. Confirm it.
+4. **Projector: the resolution definitions cite Wikipedia at fixed revisions.** The primary documents (ITU-R BT.2020, BT.709, SMPTE ST 296) were not read. Replace the citations, and read the quotes against the pages: they were fetched by a tool, not by a person.
+5. **Monocular: the 3% rounding tolerance is a team choice**, copied from the battery label check. The check uses no physical constant.
+6. ~~Monocular hard result from listed dimensions~~ Decided by the owner on 2026-11-14: a flag, because listed dimensions can be wrong.
+
+Open, other:
+
+7. `power_budget` (from `packs-docs`) has checks and tests but is not in the registry, so the agent, API and console do not use it.
+8. The local `.env` now has a model configured, so plain `pytest` runs the live tests against it. Use `pytest -m "not live"` to skip them.
+9. No screenshots exist for the pack fixtures; they are text only.
+10. CLAUDE.md still describes the project as batteries only and was not edited.
+
+## Console motion and styling pass (2026-11-14, branch `console`, not committed)
+
+Web only; no engine, API or contract file was touched.
+
+- Shared motion settings in `web/src/lib/motion.ts` (springs that settle without bouncing) and scroll helpers in `web/src/lib/scroll.ts`.
+- **Scrolling**: starting a check, or picking a listing from the feed or batch table while scrolled away, brings the verdict card to the top smoothly. "See the math" on the card scrolls to the checks. Scrolling panes (trace, feed, listing) fade at an edge while more content lies past it. Reduced-motion settings turn all of this off.
+- **Results**: the verdict badge lands with a line and a soft light in the verdict colour; the card's text follows in order. While a check runs, a light sweeps the listing and the verdict side shows placeholder bars.
+- **Math**: each step is on a numbered rail with its label, working, result and the step's symbolic formula as a margin note, revealed in order when scrolled into view. A check that has a comparison step shows a gauge against its limit. The step pieces are slices of `step.text` and the gauge length is the ratio in `step.result`; the browser still shows no number it worked out itself (`stepParts` and the gauge are tested).
+- Feed and tab selection markers slide between items; metric counts roll in when they change; batch rows arrive in order; buttons, panels and inputs share one depth style in `globals.css`.
+- The test setup gained an `IntersectionObserver` stub (jsdom has none). Web: 99 passed; `eslint` and `next build` clean.
+- Checked in a headless browser against the offline samples and against the API in sample data mode (a pasted fixture streaming its trace). Open: sample data mode streams at once, so the running state (sweep, placeholder bars, pipeline pulse) has only been seen in code, not on a slow live run.
 
 ## Decisions made while unattended
 
@@ -131,6 +175,45 @@ Decided and fixed:
 2. (Fixed 2026-11-14) `test_lookup_form_factor_reads_the_constants_file` failed about half
    the time: it unpacked two parallel tool results in a fixed order. It now matches them by
    the `known` field.
+
+## Merge and rename to OffSpec (2026-11-14, branch `offspec-demo`)
+
+`console` (julianlichen's new UI, Firkenol's check packs, the live trace) and `main` (the
+fixtures from real screenshots) are merged on branch `offspec-demo`, opened as a pull request
+to `main`.
+
+- Git reported no textual conflicts. The real conflict: the console's bundled samples and
+  tests assumed 9 battery + 9 pack fixtures, and `main` added battery fixtures 10 to 20.
+  `web/src/samples/samples.json` was regenerated (29 samples) and the sample, audit feed,
+  batch and console tests now use the counts the fixtures give: 2 Impossible, 4 Flag,
+  13 No red flags, 10 No checkable claim; 2 auto-resolvable, 10 needs human review,
+  17 no action needed.
+- The product name is OffSpec everywhere a person or a client sees it: UI, page title, icon,
+  API title, `X-OffSpec-Mode`, `OFFSPEC_REPLAY`, `OFFSPEC_FIXTURES_DIR`, docs. The old
+  `CARNOT_REPLAY` and `CARNOT_FIXTURES_DIR` are still read as fallbacks.
+- **Not renamed, on purpose:** the Python package `backend/claimcheck/` and its imports. It
+  is named in the frozen contract and in every teammate branch; renaming it needs the
+  owner's go-ahead (CLAUDE.md rule 4).
+- Checked: backend 844 passed; web 179 passed, eslint, tsc and `next build` clean; API and
+  web started locally in sample data mode, 29 listings served, a headless-browser
+  screenshot of the console looked right.
+- Not included: branch `web-extras` (How it works page, printable report). Its report page
+  assumes battery reports and needs work for the check packs first.
+- README has a Deploy section. It has not been tried against a hosting provider.
+
+## Demo and deployment (2026-11-15, branch `offspec-demo`)
+
+- **Hosted console:** https://benmorxles.github.io/offspec-demo/ (GitHub Pages, repo
+  `benmorxles/offspec-demo`, static files only). No API behind it: it shows the bundled samples
+  and says so. `web/next.config.ts` has an opt-in `STATIC_EXPORT=1` mode for this; the
+  normal build is unchanged.
+- **The API is not deployed.** No hosting account is logged in on the machine this was done
+  from. README "Deploy" has the settings; once it is up, rebuild the static console with
+  `NEXT_PUBLIC_API_URL` set to it.
+- **Walkthrough video:** `demo/offspec-walkthrough.mp4` (70 s, captioned), recorded by
+  `demo/record.mjs` from the real console against a local API in sample data mode. Not
+  committed (git-ignored).
+- `DEMO.md` has the six-step script and what is live versus staged.
 
 ## Environment notes
 

@@ -9,7 +9,7 @@ from typing import Annotated, Any, Literal, Union
 
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
 
-from claimcheck.models import EvidenceReport
+from claimcheck.models import EvidenceReport, PackEvidenceReport
 
 AgentName = Literal["orchestrator", "listing-reader", "physics-checker", "report-writer"]
 
@@ -53,7 +53,9 @@ class FinalReportEvent(_Event):
     """Last event of a successful run."""
 
     type: Literal["final_report"] = "final_report"
-    report: EvidenceReport
+    # A battery listing ends with an EvidenceReport, a listing in a pack's category with
+    # a PackEvidenceReport. The pack report is tried first: only it has `pack`.
+    report: PackEvidenceReport | EvidenceReport = Field(union_mode="left_to_right")
 
 
 class ErrorEvent(_Event):

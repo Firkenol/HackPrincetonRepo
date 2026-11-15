@@ -21,6 +21,8 @@ from agent.tests.listings import LISTING_TEXT
 from claimcheck.checks import parse_iec_code
 from claimcheck.policy import MIN_CONFIDENCE
 from claimcheck.verdict import claim_confidences
+from packs.fixtures_data import FIXTURES as PACK_FIXTURES
+from packs.registry import PACKS
 from tests.fixtures_data import BY_ID, FIXTURES
 
 load_dotenv()
@@ -81,3 +83,15 @@ def test_live_fixture_3_reads_the_codes_printed_on_the_cells():
     systems = {parsed[1] for code in report.claims.printed_codes if (parsed := parse_iec_code(code.value))}
     assert "zinc-carbon" in systems
     assert all(code.found_in for code in report.claims.printed_codes)
+
+
+LIVE_PACK_FIXTURES = [f for f in PACK_FIXTURES if f.pack in PACKS]
+
+
+@pytest.mark.parametrize("fixture", LIVE_PACK_FIXTURES, ids=[f.id for f in LIVE_PACK_FIXTURES])
+def test_live_pack_text_fixture(fixture):
+    """A projector, magnifying glass or monocular listing is recorded in its own category."""
+    report = final_report(fixture.listing_text)
+    assert getattr(report, "pack", None) == fixture.pack
+    assert report.verdict is fixture.verdict
+    assert report.routing is fixture.routing

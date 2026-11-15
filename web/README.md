@@ -1,4 +1,4 @@
-# Carnot web console
+# OffSpec web console
 
 The Next.js front end. Setup and run instructions are in the README at the repo root.
 

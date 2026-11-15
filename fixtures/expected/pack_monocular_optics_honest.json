@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0",
+  "pack": "monocular_optics",
+  "claims": {
+    "magnification": {
+      "found_in": "title",
+      "quote": "12x50",
+      "confidence": 1.0,
+      "value": 12.0
+    },
+    "objective_mm": {
+      "found_in": "title",
+      "quote": "12x50",
+      "confidence": 1.0,
+      "value": 50.0
+    },
+    "body_dimensions": {
+      "found_in": "spec table",
+      "quote": "150 x 60 x 55 mm",
+      "confidence": 1.0,
+      "length_mm": 150.0,
+      "width_mm": 60.0,
+      "height_mm": 55.0,
+      "kind": "product"
+    },
+    "fine_print_magnification": null,
+    "fine_print_objective_mm": null
+  },
+  "checks": [
+    {
+      "check_id": "objective_fits_body",
+      "title": "Objective lens against body width",
+      "status": "pass",
+      "summary": "The claimed 50 mm objective lens fits within the listed body width of 60 mm.",
+      "inputs": [
+        {
+          "name": "Claimed objective diameter",
+          "value": 50.0,
+          "unit": "mm",
+          "origin": "claim",
+          "found_in": "title",
+          "confidence": 1.0
+        },
+        {
+          "name": "Listed dimensions",
+          "value": "150 × 60 × 55 mm",
+          "unit": "",
+          "origin": "claim",
+          "found_in": "spec table",
+          "confidence": 1.0
+        },
+        {
+          "name": "Rounding tolerance",
+          "value": 3.0,
+          "unit": "%",
+          "origin": "assumption",
+          "found_in": null,
+          "confidence": null
+        }
+      ],
+      "formula": "D_objective ≤ body width × (1 + rounding tolerance)",
+      "steps": [
+        {
+          "label": "Body width available to the lens",
+          "formula": "W",
+          "substitution": "the second-longest listed side",
+          "result": 60.0,
+          "unit": "mm",
+          "text": "Body width available to the lens: 60 mm (the second-longest listed side)"
+        },
+        {
+          "label": "Body width with the rounding tolerance",
+          "formula": "W_max = W × (1 + tolerance)",
+          "substitution": "60 mm × 1.03",
+          "result": 61.800000000000004,
+          "unit": "mm",
+          "text": "Body width with the rounding tolerance: 60 mm × 1.03 = 61.8 mm"
+        },
+        {
+          "label": "Comparison",
+          "formula": "value ≤ limit",
+          "substitution": "50 mm ≤ 61.8 mm",
+          "result": 0.8090614886731391,
+          "unit": "× the limit",
+          "text": "Comparison: 50 mm ≤ 61.8 mm (0.8091× the limit)"
+        }
+      ],
+      "constants": [],
+      "assumptions": [
+        "The objective lens faces along the longest side of the body, so it has to fit within the other two sides. The second-longest listed side is used as the width, which is the most lenient.",
+        "Listed dimensions are treated as rounded: a lens up to 3% wider than the listed width passes. This tolerance is a team choice, not a physical constant.",
+        "The listed dimensions are taken to describe the monocular itself, as the listing states. Because listed dimensions can be wrong, exceeding this bound is reported as a flag, not a hard result."
+      ],
+      "notes": [],
+      "not_assessed_reason": null
+    },
+    {
+      "check_id": "fine_print_consistency",
+      "title": "Headline figures against the fine print",
+      "status": "not_assessed",
+      "summary": "Not assessed. The listing states no separate 'actual' magnification or objective size to compare with the headline.",
+      "inputs": [],
+      "formula": null,
+      "steps": [],
+      "constants": [],
+      "assumptions": [],
+      "notes": [],
+      "not_assessed_reason": "The listing states no separate 'actual' magnification or objective size to compare with the headline."
+    }
+  ],
+  "verdict": "No red flags",
+  "verdict_reason": "The claims that could be tested are physically plausible (Objective lens against body width). This does not confirm that the claims are true.",
+  "routing": "no action needed",
+  "routing_reason": "The claims that could be tested are plausible and were read with high confidence.",
+  "assumptions": [
+    "The objective lens faces along the longest side of the body, so it has to fit within the other two sides. The second-longest listed side is used as the width, which is the most lenient.",
+    "Listed dimensions are treated as rounded: a lens up to 3% wider than the listed width passes. This tolerance is a team choice, not a physical constant.",
+    "The listed dimensions are taken to describe the monocular itself, as the listing states. Because listed dimensions can be wrong, exceeding this bound is reported as a flag, not a hard result."
+  ],
+  "not_assessed": [
+    "Headline figures against the fine print: The listing states no separate 'actual' magnification or objective size to compare with the headline."
+  ]
+}

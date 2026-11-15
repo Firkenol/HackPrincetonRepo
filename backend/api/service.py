@@ -20,11 +20,12 @@ from datetime import datetime, timezone
 from typing import Any
 
 from api.fixtures import Fixture, list_fixtures, match_image, match_text
-from claimcheck import replay_claims, run_listing
+from claimcheck import replay_claims, replay_pack_claims, run_listing
 from claimcheck.events import ErrorEvent, StreamEvent
-from claimcheck.models import EvidenceReport, Routing, Verdict
+from claimcheck.models import AnyReport, PackEvidenceReport, Routing, Verdict
 
-REPLAY_ENV = "CARNOT_REPLAY"
+REPLAY_ENV = "OFFSPEC_REPLAY"
+LEGACY_REPLAY_ENV = "CARNOT_REPLAY"  # the name before the rename; still honoured
 LIVE, REPLAY = "live", "replay"
 
 MSG_REPLAY_ONLY = (
@@ -39,8 +40,9 @@ Runner = Callable[[Any], Iterator[StreamEvent]]
 
 
 def current_mode() -> str:
-    """replay when no model is configured, or when CARNOT_REPLAY asks for it."""
-    forced = os.environ.get(REPLAY_ENV, "").strip().lower() in ("1", "true", "yes", "on")
+    """replay when no model is configured, or when OFFSPEC_REPLAY asks for it."""
+    asked = os.environ.get(REPLAY_ENV, "").strip() or os.environ.get(LEGACY_REPLAY_ENV, "").strip()
+    forced = asked.lower() in ("1", "true", "yes", "on")
     configured = bool(os.environ.get("MODEL_PROVIDER", "").strip() and os.environ.get("MODEL_ID", "").strip())
     return REPLAY if forced or not configured else LIVE
 
@@ -62,12 +64,14 @@ def _fixture_input(fixture: Fixture) -> Any:
 
 
 def replay_fixture(fixture: Fixture | None) -> Iterator[StreamEvent]:
-    """The stream for a fixture in replay mode: the six checks on the claims of its expected report."""
+    """The stream for a fixture in replay mode: the checks for its category on the claims of its expected report."""
     if fixture is None:
         return _error(MSG_REPLAY_ONLY)
     expected = fixture.expected_report()
     if expected is None:
         return _error(MSG_NO_EXPECTED)
+    if isinstance(expected, PackEvidenceReport):
+        return replay_pack_claims(expected.pack, expected.claims)
     return replay_claims(expected.claims)
 
 
@@ -91,7 +95,7 @@ def stream_listing(
 # ------------------------------------------------------------------------ batch
 
 
-def _drain(events: Iterator[StreamEvent]) -> tuple[EvidenceReport | None, str | None]:
+def _drain(events: Iterator[StreamEvent]) -> tuple[AnyReport | None, str | None]:
     report, error = None, None
     for event in events:
         if event.type == "final_report":
@@ -101,7 +105,7 @@ def _drain(events: Iterator[StreamEvent]) -> tuple[EvidenceReport | None, str | 
     return report, error
 
 
-def count_reports(reports: list[EvidenceReport], errors: int = 0) -> dict[str, Any]:
+def count_reports(reports: list[AnyReport], errors: int = 0) -> dict[str, Any]:
     """Counts per verdict and per routing value. Every key is always present."""
     by_verdict = {verdict.value: 0 for verdict in Verdict}
     by_routing = {routing.value: 0 for routing in Routing}
@@ -117,7 +121,7 @@ class BatchItem:
     source: str
     listing_text: str | None
     image_url: str | None
-    report: EvidenceReport | None
+    report: AnyReport | None
     error: str | None
 
     def as_json(self) -> dict[str, Any]:

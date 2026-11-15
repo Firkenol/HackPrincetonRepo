@@ -8,7 +8,7 @@ store or brand name anywhere in these models.
 from __future__ import annotations
 
 from enum import Enum
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -213,3 +213,28 @@ class EvidenceReport(BaseModel):
     routing_reason: str
     assumptions: list[str] = Field(default_factory=list)
     not_assessed: list[str] = Field(default_factory=list)
+
+
+class PackEvidenceReport(BaseModel):
+    """The report for a listing outside batteries, checked by a pack in backend/packs/.
+
+    The same fields as EvidenceReport, plus `pack`, which names the pack. `claims` holds
+    that pack's own claims as JSON: each pack defines what a listing in its category
+    can state (see packs/<pack>/models.py). `checks` holds the pack's checks, not the
+    six battery checks.
+    """
+
+    schema_version: Literal["1.0"] = "1.0"
+    pack: str
+    claims: dict[str, Any]
+    checks: list[CheckResult]
+    verdict: Verdict
+    verdict_reason: str
+    routing: Routing
+    routing_reason: str
+    assumptions: list[str] = Field(default_factory=list)
+    not_assessed: list[str] = Field(default_factory=list)
+
+
+# What a run can end with. A pack report is tried first: it is the one with `pack`.
+AnyReport = PackEvidenceReport | EvidenceReport

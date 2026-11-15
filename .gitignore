@@ -19,3 +19,7 @@ out/
 # OS / editor
 .DS_Store
 Thumbs.db
+
+# Recorded walkthroughs are large; keep them out of git
+demo/*.mp4
+web/out/

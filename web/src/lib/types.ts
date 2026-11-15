@@ -93,9 +93,18 @@ export interface CheckResult {
   not_assessed_reason: string | null;
 }
 
+/** A check pack's own claims (projector, magnifying glass, monocular). Each pack has its own fields. */
+export type PackClaims = Record<string, unknown>;
+
+/**
+ * The report for one listing. A battery listing has no `pack` and battery `Claims`.
+ * A listing checked by a pack names the pack and carries that pack's claims
+ * (PackEvidenceReport in CONTRACT.md). Everything else is the same.
+ */
 export interface EvidenceReport {
   schema_version: string;
-  claims: Claims;
+  pack?: string;
+  claims: Claims | PackClaims;
   checks: CheckResult[];
   verdict: Verdict;
   verdict_reason: string;

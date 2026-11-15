@@ -1,8 +1,10 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { LoaderCircle, Play } from "lucide-react";
 import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { describeProduct } from "@/lib/describe";
+import { describeReport } from "@/lib/describe";
+import { RISE, stagger } from "@/lib/motion";
 import { ROUTINGS, type BatchItem, type Counts, type Routing } from "@/lib/types";
 import { RoutingLabel, VerdictBadge } from "./VerdictBadge";
 
@@ -89,7 +91,7 @@ export function BatchView({
             type="button"
             onClick={onRun}
             disabled={running || !canRun}
-            className="inline-flex items-center gap-2 rounded-md bg-accent px-3.5 py-1.5 text-sm font-medium text-ink disabled:cursor-not-allowed disabled:opacity-40"
+            className="btn btn-primary"
           >
             {running ? <LoaderCircle size={14} className="animate-spin" aria-hidden /> : <Play size={14} aria-hidden />}
             {running ? "Running batch" : "Run batch"}
@@ -99,65 +101,70 @@ export function BatchView({
 
       {counts && items.length > 0 ? (
         <>
-          <div className="grid gap-4 rounded-lg border border-line bg-panel p-4 lg:grid-cols-[18rem_1fr]">
+          <motion.div variants={RISE} initial="hidden" animate="show" className="surface grid gap-4 p-5 lg:grid-cols-[18rem_1fr]">
             <dl className="grid grid-cols-2 content-start gap-x-6 gap-y-3">
               <div>
                 <dt className="text-xs text-muted">Settled by the calculation</dt>
-                <dd data-testid="batch-auto" className="font-mono text-2xl text-impossible">
+                <dd data-testid="batch-auto" className="font-mono text-3xl font-medium tabular-nums text-impossible">
                   {counts.by_routing["auto-resolvable"]}
                 </dd>
               </div>
               <div>
                 <dt className="text-xs text-muted">Routed to a person</dt>
-                <dd data-testid="batch-human" className="font-mono text-2xl text-flag">
+                <dd data-testid="batch-human" className="font-mono text-3xl font-medium tabular-nums text-flag">
                   {counts.by_routing["needs human review"]}
                 </dd>
               </div>
               <div>
                 <dt className="text-xs text-muted">No action needed</dt>
-                <dd data-testid="batch-none" className="font-mono text-2xl text-clear">
+                <dd data-testid="batch-none" className="font-mono text-3xl font-medium tabular-nums text-clear">
                   {counts.by_routing["no action needed"]}
                 </dd>
               </div>
               <div>
                 <dt className="text-xs text-muted">Could not be checked</dt>
-                <dd className="font-mono text-2xl text-muted">{counts.errors}</dd>
+                <dd className="font-mono text-3xl font-medium tabular-nums text-muted">{counts.errors}</dd>
               </div>
             </dl>
             <RoutingChart counts={counts} />
-          </div>
+          </motion.div>
 
-          <div className="overflow-x-auto rounded-lg border border-line bg-panel">
+          <div className="surface overflow-x-auto">
             <table className="w-full min-w-[40rem] text-sm">
               <thead>
-                <tr className="border-b border-line text-left text-xs text-muted">
+                <tr className="border-b border-line text-left text-[11px] uppercase tracking-[0.08em] text-faint">
                   <th scope="col" className="px-4 py-2.5 font-medium">Product</th>
                   <th scope="col" className="px-4 py-2.5 font-medium">Verdict</th>
                   <th scope="col" className="px-4 py-2.5 font-medium">Routing</th>
                   <th scope="col" className="px-4 py-2.5 font-medium">Checks not assessed</th>
                 </tr>
               </thead>
-              <tbody>
+              <motion.tbody variants={stagger(0.035, 0.05)} initial="hidden" animate="show">
                 {items.map((item) => (
-                  <tr key={item.id} data-testid="batch-row" className="border-b border-line-soft last:border-b-0">
+                  <motion.tr
+                    key={item.id}
+                    variants={RISE}
+                    data-testid="batch-row"
+                    className="border-b border-line-soft transition-colors last:border-b-0 hover:bg-raised/40"
+                  >
                     <td className="px-4 py-2.5">
-                      <button type="button" onClick={() => onOpen(item.id)} className="text-left text-text hover:text-accent">
-                        {item.report ? describeProduct(item.report.claims) : "Listing not checked"}
+                      <button type="button" onClick={() => onOpen(item.id)} className="text-left text-text underline-offset-4 transition-colors hover:text-accent hover:underline">
+                        {item.report ? describeReport(item.report) : "Listing not checked"}
                       </button>
                     </td>
                     <td className="px-4 py-2.5">
                       {item.report ? <VerdictBadge verdict={item.report.verdict} size="sm" /> : <span className="text-muted">{item.error}</span>}
                     </td>
                     <td className="px-4 py-2.5">{item.report && <RoutingLabel routing={item.report.routing} />}</td>
-                    <td className="px-4 py-2.5 font-mono text-muted">{item.report ? item.report.not_assessed.length : ""}</td>
-                  </tr>
+                    <td className="px-4 py-2.5 font-mono tabular-nums text-muted">{item.report ? item.report.not_assessed.length : ""}</td>
+                  </motion.tr>
                 ))}
-              </tbody>
+              </motion.tbody>
             </table>
           </div>
         </>
       ) : (
-        <p className="rounded-lg border border-line bg-panel px-4 py-6 text-sm leading-6 text-muted">
+        <p className="surface px-4 py-6 text-sm leading-6 text-muted">
           {running
             ? "Running every listing. With a live model this takes a while."
             : canRun

@@ -1,4 +1,4 @@
-# ClaimCheck specification
+# OffSpec specification
 
 This file holds the original build prompt, word for word, followed by the decisions made since. Where a decision in the "Amendments" section differs from the original text, the amendment wins.
 
@@ -101,3 +101,35 @@ Resulting routing for the nine fixtures: fixture 1 is auto-resolvable; fixtures 
 
 - **High extraction confidence** means every extracted claim has confidence of at least 0.8 (`MIN_CONFIDENCE` in `backend/claimcheck/policy.py`).
 - **Missing data** means the listing states a capacity, energy or shelf-life claim but no check could test it, for example because only package weight is given or no ceiling is on file for the chemistry. A check that did not run because the listing simply says nothing about that property does not count as missing data.
+
+### 2026-11-14, categories beyond batteries
+
+Approved by the project owner. This replaces "any category beyond batteries" in the
+original "Out of scope" list for the three categories below. Everything else in the
+original text still applies to them: arithmetic in Python, cited constants, the four
+verdicts, the three routings, no seller names, package dimensions set aside.
+
+1. **Three categories are added as check packs** in `backend/packs/`, each with its own
+   claims model, constants and checks, wired into the agent, the API and the console.
+2. **Projectors.** Pixel count of the resolution named in the headline, divided by the
+   native pixel count the listing states. Above 1 is a "Flag", never "Impossible": a
+   projector can accept a 4K input signal and show it at a lower native resolution.
+3. **Magnifying glasses.** Focal length f = 250 mm / claimed power. A simple lens cannot
+   be wider than 2 x f (symmetric lens, index 1.5). A listed diameter above 2 x f but
+   within twice that limit is a "Flag"; beyond it, "Impossible". The factor of two is a
+   team margin for denser glass and for the other convention for magnifying power. A
+   Fresnel or sheet lens is not assessed.
+4. **Monoculars.** The objective diameter of an "AxB" figure cannot exceed the listed
+   body width (the second-longest side), with a 3% rounding tolerance. The owner
+   decided this is a "Flag", not "Impossible": listed dimensions are often wrong, and
+   a wrong figure feeding a hard result would be worse than a person's look. A
+   headline figure that differs from an "actual" figure in the fine print is also a
+   "Flag", as for a battery label that contradicts itself.
+5. **Missing data.** A stated claim that cannot be tested gives "No checkable claim"
+   routed to "needs human review", as amendment 1 already defines.
+6. **The contract change** is recorded in CONTRACT.md: `PackEvidenceReport` is added and
+   a run can end with either report type.
+
+### 2026-11-14, name
+
+The product is called **OffSpec**. The original build prompt above says "ClaimCheck (rename freely)" and is kept word for word; an earlier console branch used "Carnot". Display names, API metadata, the `OFFSPEC_REPLAY` and `OFFSPEC_FIXTURES_DIR` variables and the `X-OffSpec-Mode` header use the new name (the old `CARNOT_*` variable names are still honoured). The Python import package stays `claimcheck`: it is named in the frozen contract, and renaming it is the project owner's call.

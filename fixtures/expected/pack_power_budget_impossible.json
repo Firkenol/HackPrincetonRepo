@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0",
+  "pack": "power_budget",
+  "claims": {
+    "output_power_w": {
+      "found_in": "title",
+      "quote": "5000W",
+      "confidence": 1.0,
+      "value": 5000.0,
+      "kind": "rated"
+    },
+    "input_source": {
+      "found_in": "bullet points",
+      "quote": "standard 120V wall outlet",
+      "confidence": 1.0,
+      "value": "us_household_outlet"
+    },
+    "energy_storage": {
+      "found_in": "description",
+      "quote": "corded",
+      "confidence": 1.0,
+      "value": "none"
+    }
+  },
+  "checks": [
+    {
+      "check_id": "power_budget",
+      "title": "Power budget (output ≤ input)",
+      "status": "violated",
+      "summary": "The listing claims 5,000 W from a standard US household outlet, which can supply at most 2,500 W. The claim is 2× that limit.",
+      "inputs": [
+        {
+          "name": "Output power",
+          "value": 5000.0,
+          "unit": "W",
+          "origin": "claim",
+          "found_in": "title",
+          "confidence": 1.0
+        },
+        {
+          "name": "Stated input",
+          "value": "a standard US household outlet",
+          "unit": "",
+          "origin": "claim",
+          "found_in": "bullet points",
+          "confidence": 1.0
+        },
+        {
+          "name": "Energy storage",
+          "value": "none",
+          "unit": "",
+          "origin": "claim",
+          "found_in": "description",
+          "confidence": 1.0
+        },
+        {
+          "name": "Voltage rating of standard US 15 A and 20 A receptacles",
+          "value": 125.0,
+          "unit": "V",
+          "origin": "constant",
+          "found_in": null,
+          "confidence": null
+        },
+        {
+          "name": "Highest receptacle rating on a standard US 15 A or 20 A branch circuit",
+          "value": 20.0,
+          "unit": "A",
+          "origin": "constant",
+          "found_in": null,
+          "confidence": null
+        }
+      ],
+      "formula": "P_out ≤ P_max of the input",
+      "steps": [
+        {
+          "label": "Most power the outlet can supply",
+          "formula": "P_max = V × I",
+          "substitution": "125 V × 20 A",
+          "result": 2500.0,
+          "unit": "W",
+          "text": "Most power the outlet can supply: 125 V × 20 A = 2,500 W"
+        },
+        {
+          "label": "Comparison",
+          "formula": "value ≤ limit",
+          "substitution": "5,000 W > 2,500 W",
+          "result": 2.0,
+          "unit": "× the limit",
+          "text": "Comparison: 5,000 W > 2,500 W (2× the limit)"
+        }
+      ],
+      "constants": [
+        {
+          "key": "us_outlet_rated_voltage_v",
+          "value": 125.0,
+          "unit": "V",
+          "description": "Voltage rating of standard US 15 A and 20 A receptacles",
+          "source_title": "29 CFR 1910.304, Wiring design and protection",
+          "source_publisher": "U.S. Occupational Safety and Health Administration, Code of Federal Regulations (eCFR)",
+          "source_url": "https://www.ecfr.gov/current/title-29/section-1910.304",
+          "locator": "Paragraph (b)(3)(i)",
+          "quote": "All 125-volt, single-phase, 15- and 20-ampere receptacles installed in bathrooms or on rooftops shall have ground-fault circuit-interrupter protection for personnel.",
+          "accessed": "2026-11-14",
+          "note": "The rating is above the 120 V nominal supply, which makes the limit lenient.",
+          "hard_bound": true
+        },
+        {
+          "key": "us_outlet_max_rated_current_a",
+          "value": 20.0,
+          "unit": "A",
+          "description": "Highest receptacle rating on a standard US 15 A or 20 A branch circuit",
+          "source_title": "29 CFR 1910.304, Wiring design and protection",
+          "source_publisher": "U.S. Occupational Safety and Health Administration, Code of Federal Regulations (eCFR)",
+          "source_url": "https://www.ecfr.gov/current/title-29/section-1910.304",
+          "locator": "Paragraph (b)(4)(ii), Table S-5 'Receptacle Ratings for Various Size Circuits'",
+          "quote": "Circuit rating (amperes) 20: Receptacle rating (amperes) 15 or 20.",
+          "accessed": "2026-11-14",
+          "note": "Table S-4 of the same section limits the cord-and-plug load on a 20 A receptacle to 16 A, so the full 20 A rating is lenient.",
+          "hard_bound": true
+        }
+      ],
+      "assumptions": [
+        "The receptacle rating is not stated; the 20 A rating is used, which is the most lenient."
+      ],
+      "notes": [
+        "Losses inside the product only lower the output further, which makes this bound lenient."
+      ],
+      "not_assessed_reason": null
+    }
+  ],
+  "verdict": "Impossible",
+  "verdict_reason": "The listing claims 5,000 W from a standard US household outlet, which can supply at most 2,500 W. The claim is 2× that limit.",
+  "routing": "auto-resolvable",
+  "routing_reason": "A hard physical bound is violated and the calculation is reproducible.",
+  "assumptions": [
+    "The receptacle rating is not stated; the 20 A rating is used, which is the most lenient."
+  ],
+  "not_assessed": []
+}
