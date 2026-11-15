@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { LoaderCircle } from "lucide-react";
 import { useEffect, useRef } from "react";
-import { describeProduct } from "@/lib/describe";
+import { describeReport } from "@/lib/describe";
 import { SETTLE } from "@/lib/motion";
 import { markScrollEdges } from "@/lib/scroll";
 import type { Listing } from "@/lib/types";
@@ -13,7 +13,7 @@ import { VerdictBadge } from "./VerdictBadge";
 // claims. It never shows the listing's title or any seller or store name.
 
 export function feedTitle(listing: Listing): string {
-  if (listing.report) return describeProduct(listing.report.claims);
+  if (listing.report) return describeReport(listing.report);
   if (listing.running) return "Checking a listing";
   return "Listing not checked";
 }

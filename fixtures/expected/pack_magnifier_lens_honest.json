@@ -1,0 +1,133 @@
+{
+  "schema_version": "1.0",
+  "pack": "magnifier_lens",
+  "claims": {
+    "magnification": {
+      "found_in": "title",
+      "quote": "3X",
+      "confidence": 1.0,
+      "value": 3.0
+    },
+    "lens_diameter_mm": {
+      "found_in": "spec table",
+      "quote": "75 mm",
+      "confidence": 1.0,
+      "value": 75.0
+    },
+    "lens_type": null
+  },
+  "checks": [
+    {
+      "check_id": "lens_diameter",
+      "title": "Lens diameter against claimed magnification",
+      "status": "pass",
+      "summary": "A 3× lens has a focal length of 83.33 mm, and a simple lens with that focal length can be at most 166.7 mm wide. The listed lens diameter of 75 mm is within that limit.",
+      "inputs": [
+        {
+          "name": "Claimed magnification",
+          "value": 3.0,
+          "unit": "×",
+          "origin": "claim",
+          "found_in": "title",
+          "confidence": 1.0
+        },
+        {
+          "name": "Lens diameter",
+          "value": 75.0,
+          "unit": "mm",
+          "origin": "claim",
+          "found_in": "spec table",
+          "confidence": 1.0
+        },
+        {
+          "name": "Near-point distance used to define magnifying power",
+          "value": 250.0,
+          "unit": "mm",
+          "origin": "constant",
+          "found_in": null,
+          "confidence": null
+        },
+        {
+          "name": "Refractive index of the lens material",
+          "value": 1.5,
+          "unit": "",
+          "origin": "assumption",
+          "found_in": null,
+          "confidence": null
+        },
+        {
+          "name": "Margin before a hard result",
+          "value": 2.0,
+          "unit": "×",
+          "origin": "assumption",
+          "found_in": null,
+          "confidence": null
+        }
+      ],
+      "formula": "D ≤ 2 × f, where f = 250 mm ÷ M",
+      "steps": [
+        {
+          "label": "Focal length implied by the claimed magnification",
+          "formula": "f = 250 mm ÷ M",
+          "substitution": "250 mm ÷ 3",
+          "result": 83.33333333333333,
+          "unit": "mm",
+          "text": "Focal length implied by the claimed magnification: 250 mm ÷ 3 = 83.33 mm"
+        },
+        {
+          "label": "Widest lens with that focal length",
+          "formula": "D_max = 2 × f",
+          "substitution": "2 × 83.33 mm",
+          "result": 166.66666666666666,
+          "unit": "mm",
+          "text": "Widest lens with that focal length: 2 × 83.33 mm = 166.7 mm"
+        },
+        {
+          "label": "Comparison",
+          "formula": "value ≤ limit",
+          "substitution": "75 mm ≤ 166.7 mm",
+          "result": 0.45,
+          "unit": "× the limit",
+          "text": "Comparison: 75 mm ≤ 166.7 mm (0.45× the limit)"
+        }
+      ],
+      "constants": [
+        {
+          "key": "near_point_distance_mm",
+          "value": 250.0,
+          "unit": "mm",
+          "description": "Near-point distance used to define magnifying power",
+          "source_title": "University Physics Volume 3, Section 2.7 The Simple Magnifier",
+          "source_publisher": "OpenStax, Rice University",
+          "source_url": "https://openstax.org/books/university-physics-volume-3/pages/2-7-the-simple-magnifier",
+          "locator": "Equation 2.32, M = 25 cm / f for an image at infinity, and the sentence after it",
+          "quote": "The resulting magnification is simply the ratio of the near-point distance to the focal length of the magnifying lens.",
+          "accessed": "2026-11-14",
+          "note": "The source writes it as 25 cm. Magnifying power M = 250 mm ÷ focal length.",
+          "hard_bound": true
+        }
+      ],
+      "assumptions": [
+        "The lens is taken to be a single lens with two equally curved faces, made of material with a refractive index of 1.5. For such a lens the focal length equals the radius of curvature (lens maker's equation, OpenStax University Physics Volume 3, Section 2.4, Equation 2.21: 1/f = (n − 1)(1/R1 − 1/R2)). The index is an assumption with no cited source.",
+        "A lens cannot be wider than the sphere its curved surface is part of, so its diameter cannot exceed twice the radius of curvature.",
+        "Magnifying power is taken as 250 mm ÷ focal length, the convention for an image at infinity.",
+        "A diameter up to 2× the limit is reported as a flag, not a hard result, to allow for denser glass and for the other convention for magnifying power. This margin is a team choice, not a physical constant.",
+        "The listing does not describe a Fresnel or flat sheet lens, so an ordinary curved lens is assumed."
+      ],
+      "notes": [],
+      "not_assessed_reason": null
+    }
+  ],
+  "verdict": "No red flags",
+  "verdict_reason": "The claims that could be tested are physically plausible (Lens diameter against claimed magnification). This does not confirm that the claims are true.",
+  "routing": "no action needed",
+  "routing_reason": "The claims that could be tested are plausible and were read with high confidence.",
+  "assumptions": [
+    "The lens is taken to be a single lens with two equally curved faces, made of material with a refractive index of 1.5. For such a lens the focal length equals the radius of curvature (lens maker's equation, OpenStax University Physics Volume 3, Section 2.4, Equation 2.21: 1/f = (n − 1)(1/R1 − 1/R2)). The index is an assumption with no cited source.",
+    "A lens cannot be wider than the sphere its curved surface is part of, so its diameter cannot exceed twice the radius of curvature.",
+    "Magnifying power is taken as 250 mm ÷ focal length, the convention for an image at infinity.",
+    "A diameter up to 2× the limit is reported as a flag, not a hard result, to allow for denser glass and for the other convention for magnifying power. This margin is a team choice, not a physical constant.",
+    "The listing does not describe a Fresnel or flat sheet lens, so an ordinary curved lens is assumed."
+  ],
+  "not_assessed": []
+}

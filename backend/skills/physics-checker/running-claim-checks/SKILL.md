@@ -1,13 +1,20 @@
 ---
 name: running-claim-checks
-description: Use when running the six check tools on the recorded claims. Explains what each check tests, what the statuses mean, what lookup_form_factor is for, and what not to do with the results.
+description: Use when running the check tools on the recorded claims, for a battery listing or a projector, magnifying glass or monocular listing. Explains which checks apply to which category, what each check tests, what the statuses mean, what lookup_form_factor is for, and what not to do with the results.
 ---
 
 # Running the checks
 
-All six check tools take no arguments. They read the claims the listing reader
-recorded and return the full working: inputs, formula, each arithmetic step, the
-constant used and its source. Call all six every time, in one turn if you can.
+Call `list_checks` first. It takes no arguments and returns the category of the
+recorded listing and the names of the check tools for that category. Then call every
+check it names, in one turn if you can. Do not call a check it does not name: a check
+for another category returns an error.
+
+Every check tool takes no arguments. It reads the claims the listing reader recorded
+and returns the full working: inputs, formula, each arithmetic step, the constant used
+and its source.
+
+## Battery listings: all six, every time
 
 | Tool | Tests | Worst outcome |
 |---|---|---|
@@ -18,7 +25,16 @@ constant used and its source. Call all six every time, in one turn if you can.
 | `check_label_contradiction` | Stated chemistry against codes and wording printed on the product | flag |
 | `check_chemistry_mismatch` | A claim that is unusual for the stated chemistry | flag |
 
-`lookup_form_factor` is optional. Given a size code such as 18650 or AA, it returns the
+## Projector, magnifying glass and monocular listings
+
+| Category | Tool | Tests | Worst outcome |
+|---|---|---|---|
+| projector | `check_native_resolution` | Pixel count of the headline resolution against the stated native resolution | flag |
+| magnifying glass | `check_lens_diameter` | Listed lens diameter against the widest lens the claimed power allows | violated |
+| monocular | `check_objective_fits_body` | Claimed objective lens diameter against the listed body width | flag |
+| monocular | `check_fine_print_consistency` | Headline magnification and objective against any "actual" figure in the fine print | flag |
+
+`lookup_form_factor` is for battery listings and is optional. Given a size code such as 18650 or AA, it returns the
 standard dimensions on file and their source. The checks already use these, so call it
 only to see what a size code means.
 

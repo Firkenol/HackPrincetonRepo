@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildSamples } from "../../scripts/sync-samples.mjs";
-import { describeProduct } from "@/lib/describe";
+import { describeProduct, describeReport } from "@/lib/describe";
 import { countItems } from "@/lib/counts";
 import { ROUTINGS, VERDICTS } from "@/lib/types";
 import { SAMPLES, matchSample } from "./index";
@@ -10,12 +10,26 @@ describe("bundled samples", () => {
     expect(SAMPLES).toEqual(buildSamples());
   });
 
-  it("are the nine fixtures, each with a report and its listing text", () => {
-    expect(SAMPLES.map((s) => s.id)).toEqual(Array.from({ length: 9 }, (_, i) => `fixture_0${i + 1}`));
+  it("are the nine battery fixtures and nine pack fixtures, each with a report and its listing text", () => {
+    expect(SAMPLES.map((s) => s.id)).toEqual([
+      ...Array.from({ length: 9 }, (_, i) => `fixture_0${i + 1}`),
+      "pack_magnifier_lens_honest",
+      "pack_magnifier_lens_impossible",
+      "pack_magnifier_lens_missing",
+      "pack_monocular_optics_flag",
+      "pack_monocular_optics_honest",
+      "pack_monocular_optics_missing",
+      "pack_projector_resolution_flag",
+      "pack_projector_resolution_honest",
+      "pack_projector_resolution_missing",
+    ]);
+    const checksPerPack: Record<string, number> = { magnifier_lens: 1, monocular_optics: 2, projector_resolution: 1 };
     for (const sample of SAMPLES) {
       expect(sample.report).not.toBeNull();
       expect(sample.listing_text).toBeTruthy();
-      expect(sample.report!.checks).toHaveLength(6);
+      const pack = sample.report!.pack;
+      expect(sample.id.startsWith("pack_")).toBe(pack !== undefined);
+      expect(sample.report!.checks).toHaveLength(pack ? checksPerPack[pack] : 6);
     }
   });
 
@@ -34,15 +48,27 @@ describe("bundled samples", () => {
       ["No red flags", "no action needed"],
       ["No red flags", "no action needed"],
       ["No red flags", "no action needed"],
+      // magnifying glass: honest, trips the rule, missing data
+      ["No red flags", "no action needed"],
+      ["Impossible", "auto-resolvable"],
+      ["No checkable claim", "needs human review"],
+      // monocular: both its rules give a flag (listed dimensions can be wrong)
+      ["Flag", "needs human review"],
+      ["No red flags", "no action needed"],
+      ["No checkable claim", "needs human review"],
+      // projector: its rule gives a flag, never a hard result
+      ["Flag", "needs human review"],
+      ["No red flags", "no action needed"],
+      ["No checkable claim", "needs human review"],
     ]);
   });
 
   it("count to the totals the fixtures give", () => {
     const counts = countItems(SAMPLES);
-    expect(counts.total).toBe(9);
+    expect(counts.total).toBe(18);
     expect(counts.errors).toBe(0);
-    expect(counts.by_verdict).toEqual({ Impossible: 1, Flag: 2, "No red flags": 5, "No checkable claim": 1 });
-    expect(counts.by_routing).toEqual({ "auto-resolvable": 1, "needs human review": 2, "no action needed": 6 });
+    expect(counts.by_verdict).toEqual({ Impossible: 2, Flag: 4, "No red flags": 8, "No checkable claim": 4 });
+    expect(counts.by_routing).toEqual({ "auto-resolvable": 2, "needs human review": 7, "no action needed": 9 });
   });
 
   it("are found again from their pasted text, whatever the whitespace", () => {
@@ -54,9 +80,9 @@ describe("bundled samples", () => {
   });
 });
 
-describe("describeProduct", () => {
+describe("describeReport", () => {
   it("describes each fixture from its claims", () => {
-    expect(SAMPLES.map((s) => describeProduct(s.report!.claims))).toEqual([
+    expect(SAMPLES.map((s) => describeReport(s.report))).toEqual([
       "18650 lithium-ion battery, 12,000 mAh, 3.7 V",
       "AA Ni-MH battery, 700 mAh, 1.2 V",
       "AA/AAA alkaline battery, heavy duty",
@@ -66,12 +92,21 @@ describe("describeProduct", () => {
       "Lithium-ion battery, 2,200 mAh, 11.1 V, 24.42 Wh",
       "Lithium-ion battery, 5,200 mAh, 7.4 V, 38.48 Wh",
       "Lithium-ion battery, 5,200 mAh, 7.4 V, 38.48 Wh",
+      "Magnifying glass, 3×, 75 mm lens",
+      "Magnifying glass, 30×, 75 mm lens",
+      "Magnifying glass, 30×",
+      "Monocular, 80×100",
+      "Monocular, 12×50",
+      "Monocular, 80×100",
+      "Projector, 4K headline, native 1,280 × 720",
+      "Projector, 1080p headline, native 1,920 × 1,080",
+      "Projector, 4K headline",
     ]);
   });
 
   it("never uses the listing's own title, where a seller name could sit", () => {
     for (const sample of SAMPLES) {
-      const description = describeProduct(sample.report!.claims);
+      const description = describeReport(sample.report);
       const title = sample.listing_text!.split("\n")[0];
       expect(description).not.toBe(title);
       expect(description).not.toMatch(/RC |Truck|Quadcopter|Count|Pack for/);
@@ -80,5 +115,7 @@ describe("describeProduct", () => {
 
   it("has a fallback when nothing was extracted", () => {
     expect(describeProduct(null)).toBe("Battery listing");
+    expect(describeReport(null)).toBe("Listing");
+    expect(describeReport({ ...SAMPLES[9].report!, pack: "some_new_pack" })).toBe("Listing");
   });
 });

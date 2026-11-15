@@ -64,7 +64,7 @@ describe.each(CASES)("%s", (_id, index) => {
     expect(screen.getByRole("button", { name: /Download report JSON/ })).toBeInTheDocument();
   });
 
-  it("shows the math for all six checks, taken from the report", () => {
+  it("shows the math for every check, taken from the report", () => {
     render(<MathModule report={report} />);
     const rows = screen.getAllByTestId("check");
     expect(rows.map((row) => row.getAttribute("data-check-id"))).toEqual(report.checks.map((c) => c.check_id));
@@ -108,7 +108,8 @@ describe.each(CASES)("%s", (_id, index) => {
         <MathModule report={report} />
       </>,
     );
-    screen.getAllByRole("button", { expanded: false }).forEach((button) => fireEvent.click(button));
+    // a pack report can have its only check already open, so there may be nothing to expand
+    screen.queryAllByRole("button", { expanded: false }).forEach((button) => fireEvent.click(button));
     expect(container.textContent!.toLowerCase()).not.toContain("verif");
   });
 });
@@ -118,7 +119,8 @@ describe("AuditFeed", () => {
     const listings = SAMPLES.map((_, i) => listingOf(i));
     render(<AuditFeed listings={listings} selectedKey="fixture_01" onSelect={() => {}} />);
     const items = screen.getAllByTestId("feed-item");
-    expect(items).toHaveLength(9);
+    expect(items).toHaveLength(18);
+    expect(items[9]).toHaveTextContent("Magnifying glass, 3×, 75 mm lens");
     expect(items[0]).toHaveTextContent("18650 lithium-ion battery, 12,000 mAh, 3.7 V");
     expect(items[0]).toHaveAttribute("aria-current", "true");
     items.forEach((item, i) => {
@@ -149,10 +151,10 @@ describe("BatchView", () => {
         onOpen={(id) => opened.push(id)}
       />,
     );
-    expect(screen.getAllByTestId("batch-row")).toHaveLength(9);
-    expect(screen.getByTestId("batch-auto")).toHaveTextContent("1");
-    expect(screen.getByTestId("batch-human")).toHaveTextContent("2");
-    expect(screen.getByTestId("batch-none")).toHaveTextContent("6");
+    expect(screen.getAllByTestId("batch-row")).toHaveLength(18);
+    expect(screen.getByTestId("batch-auto")).toHaveTextContent("2");
+    expect(screen.getByTestId("batch-human")).toHaveTextContent("7");
+    expect(screen.getByTestId("batch-none")).toHaveTextContent("9");
     expect(screen.getByTestId("batch-sample-label")).toHaveTextContent("Sample data");
 
     fireEvent.click(screen.getByRole("button", { name: "AA Ni-MH battery, 700 mAh, 1.2 V" }));

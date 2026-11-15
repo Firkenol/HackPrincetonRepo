@@ -21,7 +21,7 @@ export const AGENT_ORDER: AgentName[] = ["orchestrator", "listing-reader", "phys
 export const AGENTS: Record<AgentName, AgentStyle> = {
   orchestrator: { name: "orchestrator", label: "Orchestrator", role: "hands the work between the three agents", hex: "#7cc4ff", icon: Brain },
   "listing-reader": { name: "listing-reader", label: "Listing reader", role: "reads the listing into claims", hex: "#c99bff", icon: ScanText },
-  "physics-checker": { name: "physics-checker", label: "Physics checker", role: "runs the six checks as tools", hex: "#5fd6cf", icon: Calculator },
+  "physics-checker": { name: "physics-checker", label: "Physics checker", role: "runs the checks as tools", hex: "#5fd6cf", icon: Calculator },
   "report-writer": { name: "report-writer", label: "Report writer", role: "assembles the evidence report", hex: "#ffb27a", icon: FileCheck },
 };
 

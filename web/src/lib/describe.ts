@@ -1,4 +1,4 @@
-import type { Claims, Quantity } from "./types";
+import type { Claims, EvidenceReport, PackClaims, Quantity } from "./types";
 
 // A product description built only from the extracted claims. The claims have no
 // field for a seller, store or brand, so a description made this way cannot carry one.
@@ -48,4 +48,65 @@ export function describeProduct(claims: Claims | null | undefined): string {
   const name = head.join(" ");
   const text = facts.length ? `${name}, ${facts.join(", ")}` : name;
   return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+// ---- check packs: projector, magnifying glass, monocular
+
+const RESOLUTION: Record<string, string> = { "720p": "720p", "1080p": "1080p", "4k": "4K", "8k": "8K" };
+
+function field(claims: PackClaims, name: string): Record<string, unknown> | null {
+  const value = claims[name];
+  return value && typeof value === "object" ? (value as Record<string, unknown>) : null;
+}
+
+function num(claims: PackClaims, name: string, key = "value"): number | null {
+  const value = field(claims, name)?.[key];
+  return typeof value === "number" ? value : null;
+}
+
+function text(claims: PackClaims, name: string): string | null {
+  const value = field(claims, name)?.value;
+  return typeof value === "string" ? value : null;
+}
+
+const PACK_DESCRIBERS: Record<string, (claims: PackClaims) => string> = {
+  projector_resolution: (claims) => {
+    const facts: string[] = [];
+    const headline = text(claims, "claimed_resolution");
+    if (headline) facts.push(`${RESOLUTION[headline] ?? headline} headline`);
+    const width = num(claims, "native_pixels", "width_px");
+    const height = num(claims, "native_pixels", "height_px");
+    const nativeName = text(claims, "native_name");
+    if (width !== null && height !== null) facts.push(`native ${formatNumber(width)} × ${formatNumber(height)}`);
+    else if (nativeName) facts.push(`native ${RESOLUTION[nativeName] ?? nativeName}`);
+    return ["Projector", ...facts].join(", ");
+  },
+  magnifier_lens: (claims) => {
+    const facts: string[] = [];
+    const power = num(claims, "magnification");
+    const diameter = num(claims, "lens_diameter_mm");
+    if (power !== null) facts.push(`${formatNumber(power)}×`);
+    if (diameter !== null) facts.push(`${formatNumber(diameter)} mm lens`);
+    return ["Magnifying glass", ...facts].join(", ");
+  },
+  monocular_optics: (claims) => {
+    const power = num(claims, "magnification");
+    const objective = num(claims, "objective_mm");
+    const facts: string[] = [];
+    if (power !== null && objective !== null) facts.push(`${formatNumber(power)}×${formatNumber(objective)}`);
+    else if (power !== null) facts.push(`${formatNumber(power)}×`);
+    else if (objective !== null) facts.push(`${formatNumber(objective)} mm objective`);
+    return ["Monocular", ...facts].join(", ");
+  },
+};
+
+/**
+ * A description of the product a report is about, built only from its extracted
+ * claims: the battery description, or the pack's own for a projector, magnifying
+ * glass or monocular.
+ */
+export function describeReport(report: EvidenceReport | null | undefined): string {
+  if (!report) return "Listing";
+  if (report.pack) return PACK_DESCRIBERS[report.pack]?.(report.claims as PackClaims) ?? "Listing";
+  return describeProduct(report.claims as Claims);
 }

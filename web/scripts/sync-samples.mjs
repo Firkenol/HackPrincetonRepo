@@ -12,9 +12,13 @@ import { fileURLToPath } from "node:url";
 const here = dirname(fileURLToPath(import.meta.url));
 const fixtures = join(here, "..", "..", "fixtures");
 
+// The nine battery fixtures, then the fixtures of the check packs the console knows:
+// the same set and order as the API's sample list (backend/api/fixtures.py).
+const SAMPLE_FILE = /^(fixture_\d{2}|pack_(projector_resolution|magnifier_lens|monocular_optics)_[a-z0-9]+)\.json$/;
+
 export function buildSamples() {
   return readdirSync(join(fixtures, "expected"))
-    .filter((name) => /^fixture_\d{2}\.json$/.test(name))
+    .filter((name) => SAMPLE_FILE.test(name))
     .sort()
     .map((name) => {
       const id = name.replace(".json", "");

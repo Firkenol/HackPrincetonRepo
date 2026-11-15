@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowDown, Download } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { VERDICT_HEX } from "@/lib/agents";
-import { describeProduct } from "@/lib/describe";
+import { describeReport } from "@/lib/describe";
 import { RISE, SETTLE, SNAP, stagger } from "@/lib/motion";
 import { markScrollEdges, scrollToElement } from "@/lib/scroll";
 import type { EvidenceReport, Listing } from "@/lib/types";
@@ -123,7 +123,7 @@ export function VerdictCard({ listing }: { listing: Listing }) {
             {report ? (
               <>
                 <motion.p variants={RISE} className="text-sm text-muted">
-                  {describeProduct(report.claims)}
+                  {describeReport(report)}
                 </motion.p>
                 {/* The badge lands with a little weight: slightly large, then settles. */}
                 <motion.div
